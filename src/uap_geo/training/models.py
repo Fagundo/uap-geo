@@ -18,6 +18,18 @@ import statsmodels.api as sm
 log = logging.getLogger(__name__)
 
 
+class FitError(RuntimeError):
+    pass
+
+
+def pool_small_groups(values: pd.Series, min_size: int) -> pd.Series:
+    """Merge categories with fewer than `min_size` rows into one '_pooled' level.
+    A one-county 'state' (e.g. DC) would otherwise get its own perfectly fitting dummy."""
+    counts = values.value_counts()
+    small = counts.index[counts < min_size]
+    return values.where(~values.isin(small), "_pooled")
+
+
 @dataclass(frozen=True)
 class ModelSpec:
     name: str
@@ -74,10 +86,11 @@ class NegBinRateModel:
         z = (data[cols] - data[cols].mean()) / data[cols].std(ddof=0)
         exog = sm.add_constant(z, has_constant="add")
         if fe:
-            dummies = pd.get_dummies(data[fe].astype(str), prefix=fe, drop_first=True, dtype=float)
+            groups = data[fe].astype(str).apply(lambda col: pool_small_groups(col, self.MIN_GROUP_SIZE))
+            dummies = pd.get_dummies(groups, prefix=fe, drop_first=True, dtype=float)
             exog = exog.join(dummies)
-        model = sm.NegativeBinomial(data["report_count"], exog, offset=np.log(data["population"]))
-        result = model.fit(disp=0, maxiter=1000, method="newton")
+        offset = np.log(data["population"].to_numpy(dtype=float))
+        result = self._robust_fit(data["report_count"], exog, offset)
         params = result.params
         conf = result.conf_int()
         alpha = float(params["alpha"])
@@ -98,6 +111,29 @@ class NegBinRateModel:
             log.info("%s: n=%d AIC=%.1f alpha=%.3f converged=%s", spec.name, len(data), result.aic, alpha,
                      result.mle_retvals.get("converged"))
         return FitResult(spec, coefficients, float(result.aic), alpha, len(data), residuals, data.index)
+
+    MIN_GROUP_SIZE = 5
+
+    @staticmethod
+    def _robust_fit(y: pd.Series, exog: pd.DataFrame, offset: np.ndarray):
+        """Newton from a Poisson warm start, then BFGS if that fails; never returns non-finite estimates.
+
+        Newton from zeros overflows on this data (large counts, many dummies), so the Poisson
+        GLM solution plus a moderate alpha is used as the starting point.
+        """
+        poisson = sm.GLM(y, exog, family=sm.families.Poisson(), offset=offset).fit()
+        start = np.append(poisson.params.to_numpy(), 0.5)
+        model = sm.NegativeBinomial(y, exog, offset=offset)
+        last_error: Exception | None = None
+        for method, maxiter in (("newton", 100), ("bfgs", 2000), ("nm", 20000)):
+            try:
+                with np.errstate(all="ignore"):
+                    result = model.fit(start_params=start, method=method, maxiter=maxiter, disp=0)
+                if np.all(np.isfinite(result.params)) and np.isfinite(result.llf) and np.all(np.isfinite(result.bse)):
+                    return result
+            except Exception as exc:  # numerical failure in one optimizer: try the next
+                last_error = exc
+        raise FitError(f"Negative binomial fit did not converge to finite estimates ({last_error})")
 
     def _quiet_available(self, table: pd.DataFrame) -> ModelSpec:
         kept = tuple(c for c in self.spec.covariates if c in table.columns and table[c].nunique(dropna=True) >= 2)
