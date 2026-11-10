@@ -13,8 +13,8 @@ from uap_geo.common.download import filename_from_url
 from uap_geo.common.geo import WGS84
 
 
-class RiverSource(DataSource):
-    """Natural Earth 1:10m river centerlines; every configured URL is a separate layer to merge."""
+class NaturalEarthSource(DataSource):
+    """Natural Earth 1:10m layers (rivers, lakes, coastline); every configured URL is a layer to merge."""
 
     def load(self) -> gpd.GeoDataFrame:
         layers = []
@@ -55,3 +55,18 @@ class RasterSource(DataSource):
         if not tifs:
             raise FileNotFoundError(f"No .tif inside {path}")
         return tifs[0]
+
+
+class ReservoirSource(DataSource):
+    """Dams from the National Inventory of Dams that impound at least `min_storage_acre_ft`."""
+
+    def __init__(self, config, downloader, min_storage_acre_ft: float) -> None:
+        super().__init__(config, downloader)
+        self.min_storage_acre_ft = min_storage_acre_ft
+
+    def load(self) -> gpd.GeoDataFrame:
+        from uap_geo.data.scraping.parsers import parse_nid
+
+        path = self.downloader.fetch(self.config, "nid_nation.csv")
+        dams = parse_nid(path.read_bytes(), self.min_storage_acre_ft)
+        return gpd.GeoDataFrame(dams, geometry=gpd.points_from_xy(dams["lon"], dams["lat"]), crs=WGS84)

@@ -12,7 +12,7 @@ from uap_geo.data.scraping.census import (
     PopulationSource,
 )
 from uap_geo.data.scraping.nuforc import JsonNuforcSource, TidyTuesdayNuforcSource
-from uap_geo.data.scraping.other import AirportSource, RasterSource, RiverSource
+from uap_geo.data.scraping.other import AirportSource, NaturalEarthSource, RasterSource, ReservoirSource
 from uap_geo.data.scraping.usgs import EarthquakeSource, QuaternaryFaultSource
 
 RASTER_SOURCES = ("light_pollution", "cloud_cover", "tree_canopy", "magnetic_anomaly")
@@ -70,8 +70,17 @@ class SourceRegistry:
             self._config.source("earthquakes"), self._dl, study.start_year, study.end_year, study.min_quake_magnitude
         )
 
-    def rivers(self) -> RiverSource:
-        return RiverSource(self._config.source("rivers"), self._dl)
+    def rivers(self) -> NaturalEarthSource:
+        return NaturalEarthSource(self._config.source("rivers"), self._dl)
+
+    def lakes(self) -> NaturalEarthSource:
+        return NaturalEarthSource(self._config.source("lakes"), self._dl)
+
+    def coastline(self) -> NaturalEarthSource:
+        return NaturalEarthSource(self._config.source("coastline"), self._dl)
+
+    def reservoirs(self) -> ReservoirSource:
+        return ReservoirSource(self._config.source("reservoirs"), self._dl, self._config.study.min_reservoir_acre_ft)
 
     def raster(self, name: str) -> RasterSource:
         return RasterSource(self._config.source(name), self._dl)

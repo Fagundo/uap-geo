@@ -19,8 +19,11 @@ and adds geologic covariates to the same model.
    - Negative binomial models with a log(population) offset, covariates z-scored:
      **A** = observer covariates, **B** = A + geology. Both fit on the same counties; compare AIC.
    - Moran's I on model B residuals: if residuals still cluster, move to a spatial (BYM2) model.
-   - Fault-shift permutation: rotate and shift the whole fault network many times, refit, and compare
-     the real fault coefficient against the shifted ones. Guards against "faults ≈ the West".
+   - Models A → E add, in turn: observer controls, geology, state fixed effects, settlement density,
+     and other water plus terrain.
+   - Shift tests: rotate and shift a whole layer (rivers, lakes, reservoirs) many times, refit, and compare
+     the real coefficient against the shifted ones (Benjamini–Hochberg adjusted across layers).
+   - Report-level test: within each county, are Census places with reports closer to water than places without?
 
 ## Covariates
 
@@ -32,9 +35,14 @@ and adds geologic covariates to the same model.
 | `log_pop_density` | 2020 Census population / county area | on (light-pollution stand-in) |
 | `light_pollution` | Falchi et al. World Atlas (GFZ) | **off** — set a direct GeoTIFF URL in `configs/v1.yaml` |
 | `tree_canopy` | NLCD/USFS Tree Canopy Cover | **off** — multi-GB; set URL to enable |
-| `fault_length_per_km2`, `dist_to_fault_km` | USGS Quaternary Fault and Fold Database | on |
+| `fault_length_per_km2` | USGS Quaternary Fault and Fold Database | on |
 | `log_quake_count`, `log_seismic_moment` | USGS ComCat, M ≥ 2.5, 2001–2020 | on |
 | `river_length_per_km2` | Natural Earth 1:10m rivers (coarse) | on |
+| `lake_area_share`, `dist_to_lake_km` | Natural Earth 1:10m lakes + North America supplement | on |
+| `reservoirs_per_km2` | USACE National Inventory of Dams (normal storage ≥ 1,000 acre-ft) | on |
+| `dist_to_coast_km` | Natural Earth 1:10m coastline | on |
+| `elevation_relief_m` | EarthEnv 1 km GMTED2010 elevation, max − min per county | on |
+| `places_per_km2` | Census Gazetteer places (settlement density) | on |
 | `magnetic_anomaly` | USGS / NAMAG magnetic grid | **off** — set URL to enable |
 
 A source that fails to download is logged and its columns are dropped; the run continues.

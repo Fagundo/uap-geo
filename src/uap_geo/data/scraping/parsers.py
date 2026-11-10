@@ -26,3 +26,37 @@ def parse_population(content: bytes) -> pd.DataFrame:
         frame["population"] = pd.to_numeric(frame[column], errors="coerce")
         return frame[[COUNTY_ID, "population"]]
     raise ValueError(f"Unrecognised population payload: {text[:200]!r}")
+
+
+def parse_nid(content: bytes, min_storage_acre_ft: float) -> pd.DataFrame:
+    """National Inventory of Dams CSV -> lat, lon, storage for dams that impound a real reservoir.
+
+    The export may start with a title line ("Last updated ...") and has used both camelCase
+    (`latitude`, `nidStorage`) and display names (`Latitude`, `NID Storage (Acre-Ft)`), so the
+    header row and columns are located by name rather than position.
+    """
+    text = content.decode("utf-8-sig", errors="replace")
+    lines = text.splitlines()
+    header_at = next((i for i, line in enumerate(lines[:20]) if "latitude" in line.lower()), None)
+    if header_at is None:
+        raise ValueError(f"No latitude header in NID payload: {text[:200]!r}")
+    frame = pd.read_csv(io.StringIO("\n".join(lines[header_at:])), low_memory=False)
+    lower = {c.lower().replace(" ", ""): c for c in frame.columns}
+
+    def pick(*candidates: str) -> str:
+        for cand in candidates:
+            for key, col in lower.items():
+                if cand in key:
+                    return col
+        raise KeyError(f"None of {candidates} in NID columns {list(frame.columns)[:40]}")
+
+    lat, lon = pick("latitude"), pick("longitude")
+    storage = pick("normalstorage", "nidstorage", "maxstorage")
+    out = pd.DataFrame(
+        {
+            "lat": pd.to_numeric(frame[lat], errors="coerce"),
+            "lon": pd.to_numeric(frame[lon], errors="coerce"),
+            "storage_acre_ft": pd.to_numeric(frame[storage], errors="coerce"),
+        }
+    ).dropna()
+    return out.loc[out["storage_acre_ft"] >= min_storage_acre_ft].reset_index(drop=True)

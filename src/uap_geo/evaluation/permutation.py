@@ -23,6 +23,7 @@ from shapely.geometry.base import BaseGeometry
 
 from uap_geo.common.base import ProjectedCovariate
 from uap_geo.common.geo import COUNTY_ID, M_PER_KM
+from uap_geo.evaluation.stats_utils import benjamini_hochberg
 from uap_geo.training.models import ModelSpec, NegBinRateModel
 
 log = logging.getLogger(__name__)
@@ -58,11 +59,18 @@ class PermutationResult:
             null = null.dropna().to_numpy()
             exceed = int(np.sum(np.abs(null) >= abs(observed)))
             rows.append({"model": model, "column": column, "p_shift": (1 + exceed) / (1 + len(null)), "n": len(null)})
-        return pd.DataFrame(rows)
+        table = pd.DataFrame(rows)
+        if table.empty:
+            return table
+        # Several layers are tested per model, so adjust within each model for false discoveries.
+        table["p_bh"] = table.groupby("model", group_keys=False)["p_shift"].apply(benjamini_hochberg)
+        return table
 
-    def p_value(self, model: str, column: str) -> float | None:
+    def p_value(self, model: str, column: str, adjusted: bool = False) -> float | None:
         table = self.p_values()
-        match = table.loc[(table["model"] == model) & (table["column"] == column), "p_shift"]
+        if table.empty:
+            return None
+        match = table.loc[(table["model"] == model) & (table["column"] == column), "p_bh" if adjusted else "p_shift"]
         return float(match.iloc[0]) if len(match) else None
 
 

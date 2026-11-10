@@ -17,9 +17,17 @@ from uap_geo.data.preprocessing.reports import ReportCleaner
 from uap_geo.data.scraping.registry import SourceRegistry
 from uap_geo.evaluation.permutation import PermutationResult, ShiftLayer, ShiftPermutation
 from uap_geo.evaluation.report import ReportWriter
+from uap_geo.evaluation.place_level import PlaceLevelResult, PlaceLevelTest
 from uap_geo.evaluation.spatial import HotspotAnalyzer, ResidualAutocorrelation
+from uap_geo.evaluation.stats_utils import variance_inflation
 from uap_geo.features.county_table import CountyTableAssembler, prepare_counties
-from uap_geo.features.covariates import DistanceToLinesBuilder, EarthquakeBuilder, LineDensityBuilder
+from uap_geo.features.covariates import (
+    AreaShareBuilder,
+    DistanceToLinesBuilder,
+    EarthquakeBuilder,
+    LineDensityBuilder,
+    PointDensityBuilder,
+)
 from uap_geo.features.registry import CovariateRegistry
 from uap_geo.training.models import ModelSpec, NegBinRateModel
 
@@ -79,42 +87,87 @@ class V1Pipeline:
         spec_d = ModelSpec(
             "D_within_region_plus_settlements", spec_c.covariates + models.settlement_controls, models.region_effects
         ).available_in(table)
-        specs = [spec_a, spec_b, spec_c] + ([spec_d] if spec_d.covariates != spec_c.covariates else [])
+        spec_e = ModelSpec(
+            "E_plus_water_and_terrain", spec_d.covariates + models.water_terrain, models.region_effects
+        ).available_in(table)
+        specs = _distinct([spec_a, spec_b, spec_c, spec_d, spec_e])
         # Fit every model on the same counties so their AICs are comparable.
-        needed = ["report_count", "population", *spec_d.covariates, *spec_c.fixed_effects]
+        needed = ["report_count", "population", *specs[-1].covariates, *spec_c.fixed_effects]
         complete = table.dropna(subset=needed)
         complete = complete.loc[complete["population"] > 0]
+        log.info("Counties with every covariate: %d of %d", len(complete), len(table))
         fits = [NegBinRateModel(spec).fit(complete) for spec in specs]
         for fit in fits:
             self.writer.save_fit(fit)
+        vif = variance_inflation(complete[list(specs[-1].covariates)])
 
         autocorrelation = ResidualAutocorrelation(study.knn_k, study.gi_permutations, study.seed)
         morans = {fit.spec.name: autocorrelation.run(complete, fit.pearson_residuals) for fit in fits[1:]}
-        permutation = self._shift_tests(complete, fits[1:])
+        # Shift tests on the two most controlled models (earlier runs covered B and C).
+        permutation = self._shift_tests(complete, fits[-2:])
+        place_level = self._place_level_test(complete)
 
         cleaning_path = self.config.paths.interim / "cleaning.json"
         cleaning = json.loads(cleaning_path.read_text()) if cleaning_path.exists() else {}
-        summary = self.writer.summary(fits, morans, permutation, hotspots, cleaning)
+        summary = self.writer.summary(fits, morans, permutation, hotspots, cleaning, vif, place_level)
         log.info("Summary written to %s", summary)
 
     def _shift_layers(self, crs: str) -> list[ShiftLayer]:
-        layers: list[ShiftLayer] = []
-        if self.sources.is_active("faults"):
-            faults = self.sources.faults().load().to_crs(crs)
-            layers.append(
-                ShiftLayer(
-                    "faults",
-                    faults,
-                    (LineDensityBuilder("fault_length_per_km2", faults), DistanceToLinesBuilder("dist_to_fault_km", faults)),
-                )
+        """Layers whose exact placement is tested. Each factory builds the projected layer and its builders."""
+
+        def faults() -> ShiftLayer:
+            data = self.sources.faults().load().to_crs(crs)
+            return ShiftLayer("faults", data, (LineDensityBuilder("fault_length_per_km2", data),))
+
+        def earthquakes() -> ShiftLayer:
+            data = self.sources.earthquakes().load().to_crs(crs)
+            return ShiftLayer("earthquakes", data, (EarthquakeBuilder(data),))
+
+        def rivers() -> ShiftLayer:
+            data = self.sources.rivers().load().to_crs(crs)
+            return ShiftLayer("rivers", data, (LineDensityBuilder("river_length_per_km2", data),))
+
+        def lakes() -> ShiftLayer:
+            data = self.sources.lakes().load().to_crs(crs)
+            return ShiftLayer(
+                "lakes", data, (AreaShareBuilder("lake_area_share", data), DistanceToLinesBuilder("dist_to_lake_km", data))
             )
-        if self.sources.is_active("earthquakes"):
-            quakes = self.sources.earthquakes().load().to_crs(crs)
-            layers.append(ShiftLayer("earthquakes", quakes, (EarthquakeBuilder(quakes),)))
-        if self.sources.is_active("rivers"):
-            rivers = self.sources.rivers().load().to_crs(crs)
-            layers.append(ShiftLayer("rivers", rivers, (LineDensityBuilder("river_length_per_km2", rivers),)))
+
+        def reservoirs() -> ShiftLayer:
+            data = self.sources.reservoirs().load().to_crs(crs)
+            return ShiftLayer("reservoirs", data, (PointDensityBuilder("reservoirs_per_km2", data),))
+
+        factories = {"faults": faults, "earthquakes": earthquakes, "rivers": rivers, "lakes": lakes,
+                     "reservoirs": reservoirs}
+        layers: list[ShiftLayer] = []
+        for name in self.config.study.shift_layers:
+            if name not in factories or not self.sources.is_active(name):
+                log.warning("Shift layer '%s' unknown or not configured; skipped", name)
+                continue
+            try:
+                layers.append(factories[name]())
+            except Exception:
+                log.exception("Could not load shift layer '%s'", name)
         return layers
+
+    def _place_level_test(self, table) -> PlaceLevelResult | None:
+        """Within-county test: do Census places that produced reports sit closer to water?"""
+        if not self.interim.exists("reports"):
+            return None
+        try:
+            crs = str(table.crs)
+            water = {}
+            for name, loader in (("river", self.sources.rivers), ("lake", self.sources.lakes),
+                                 ("coast", self.sources.coastline)):
+                if self.sources.is_active({"river": "rivers", "lake": "lakes", "coast": "coastline"}[name]):
+                    water[name] = loader().load().to_crs(crs)
+            test = PlaceLevelTest(self.config.study.place_match_km)
+            result = test.run(self.sources.place_points(), self.interim.load("reports"), table, water)
+            result.coefficients.to_csv(self.config.paths.outputs / "place_level_coefficients.csv")
+            return result
+        except Exception:
+            log.exception("Place-level test failed")
+            return None
 
     def _shift_tests(self, table, fits) -> PermutationResult | None:
         study = self.config.study
@@ -129,3 +182,14 @@ class V1Pipeline:
         result.null.to_csv(self.config.paths.outputs / "shift_test_null.csv", index=False)
         result.p_values().to_csv(self.config.paths.outputs / "shift_test_p_values.csv", index=False)
         return result
+
+
+def _distinct(specs: list[ModelSpec]) -> list[ModelSpec]:
+    """Drop a model that adds nothing over the previous one (e.g. all its new sources failed)."""
+    out: list[ModelSpec] = []
+    for spec in specs:
+        if out and spec.covariates == out[-1].covariates and spec.fixed_effects == out[-1].fixed_effects:
+            log.warning("%s adds nothing over %s; skipped", spec.name, out[-1].name)
+            continue
+        out.append(spec)
+    return out

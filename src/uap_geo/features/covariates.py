@@ -25,7 +25,7 @@ def _empty(counties: gpd.GeoDataFrame, columns: tuple[str, ...], fill: float = 0
 
 
 class PointDensityBuilder(CovariateBuilder):
-    """Number of points per km² (e.g. airports)."""
+    """Number of points per km² (e.g. airports, reservoirs)."""
 
     def __init__(self, column: str, points: gpd.GeoDataFrame) -> None:
         self._column = column
@@ -36,7 +36,9 @@ class PointDensityBuilder(CovariateBuilder):
         return (self._column,)
 
     def build(self, counties: gpd.GeoDataFrame) -> pd.DataFrame:
-        points = self._points.to_crs(counties.crs)
+        return self.build_from_projected(counties, self._points.to_crs(counties.crs))
+
+    def build_from_projected(self, counties: gpd.GeoDataFrame, points: gpd.GeoDataFrame) -> pd.DataFrame:
         joined = gpd.sjoin(points[["geometry"]], counties[[COUNTY_ID, "geometry"]], predicate="within")
         counts = joined.groupby(COUNTY_ID).size()
         out = _empty(counties, self.columns)
@@ -139,7 +141,10 @@ class AreaShareBuilder(CovariateBuilder):
         return (self._column,)
 
     def build(self, counties: gpd.GeoDataFrame) -> pd.DataFrame:
-        polygons = self._polygons.to_crs(counties.crs)
+        return self.build_from_projected(counties, self._polygons.to_crs(counties.crs))
+
+    def build_from_projected(self, counties: gpd.GeoDataFrame, polygons: gpd.GeoDataFrame) -> pd.DataFrame:
+        """Entry point for permutation tests, which pass already-projected, shifted polygons."""
         polygons = gpd.GeoDataFrame(geometry=[shapely.union_all(shapely.make_valid(polygons.geometry.values))],
                                     crs=counties.crs).explode(index_parts=False)
         overlap = gpd.overlay(counties[[COUNTY_ID, "geometry"]], polygons, how="intersection", keep_geom_type=True)
@@ -172,6 +177,31 @@ class RasterMeanBuilder(CovariateBuilder):
         stats = zonal_stats(zones.geometry, str(self._path), stats=["mean"], nodata=self._nodata, all_touched=True)
         out = _empty(counties, self.columns, fill=np.nan)
         out[self._column] = [s["mean"] for s in stats]
+        return out
+
+
+class RasterReliefBuilder(CovariateBuilder):
+    """Elevation relief (max − min, metres) within each county: a terrain / valley control."""
+
+    def __init__(self, column: str, raster_path: Path) -> None:
+        self._column = column
+        self._path = raster_path
+
+    @property
+    def columns(self) -> tuple[str, ...]:
+        return (self._column,)
+
+    def build(self, counties: gpd.GeoDataFrame) -> pd.DataFrame:
+        import rasterio
+
+        with rasterio.open(self._path) as src:
+            raster_crs, nodata = src.crs, src.nodata
+        zones = counties.to_crs(raster_crs)
+        stats = zonal_stats(zones.geometry, str(self._path), stats=["min", "max"], nodata=nodata, all_touched=True)
+        out = _empty(counties, self.columns, fill=np.nan)
+        out[self._column] = [
+            (s["max"] - s["min"]) if s["max"] is not None and s["min"] is not None else np.nan for s in stats
+        ]
         return out
 
 

@@ -17,6 +17,7 @@ from uap_geo.features.covariates import (
     PointDensityBuilder,
     PopulationDensityBuilder,
     RasterMeanBuilder,
+    RasterReliefBuilder,
 )
 
 log = logging.getLogger(__name__)
@@ -34,6 +35,10 @@ class CovariateRegistry:
             "faults": self._fault_builders,
             "earthquakes": lambda: [EarthquakeBuilder(self._sources.earthquakes().load())],
             "rivers": lambda: [LineDensityBuilder("river_length_per_km2", self._sources.rivers().load())],
+            "lakes": lambda: self._polygon_water_builders("lake", self._sources.lakes().load()),
+            "coastline": lambda: [DistanceToLinesBuilder("dist_to_coast_km", self._sources.coastline().load())],
+            "reservoirs": lambda: [PointDensityBuilder("reservoirs_per_km2", self._sources.reservoirs().load())],
+            "elevation": lambda: [RasterReliefBuilder("elevation_relief_m", self._sources.raster("elevation").load())],
             # Settlement density: reports are placed at town points, and towns cluster on rivers.
             "gazetteer_places": lambda: [PointDensityBuilder("places_per_km2", self._sources.place_points())],
         }
@@ -50,6 +55,13 @@ class CovariateRegistry:
             except Exception:
                 log.exception("Could not load source '%s'; skipping its covariates", name)
         return builders
+
+    @staticmethod
+    def _polygon_water_builders(prefix: str, polygons) -> list[CovariateBuilder]:
+        return [
+            AreaShareBuilder(f"{prefix}_area_share", polygons),
+            DistanceToLinesBuilder(f"dist_to_{prefix}_km", polygons),
+        ]
 
     def _fault_builders(self) -> list[CovariateBuilder]:
         faults = self._sources.faults().load()

@@ -35,6 +35,9 @@ class StudyConfig:
     max_rotate_deg: float
     min_quake_magnitude: float
     seed: int
+    shift_layers: tuple[str, ...] = ()
+    min_reservoir_acre_ft: float = 1000.0
+    place_match_km: float = 5.0
 
 
 @dataclass(frozen=True)
@@ -55,6 +58,7 @@ class ModelsConfig:
     geology: tuple[str, ...]
     region_effects: tuple[str, ...] = ()
     settlement_controls: tuple[str, ...] = ()
+    water_terrain: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -78,13 +82,14 @@ class Config:
             for name, spec in raw["sources"].items()
         }
         return cls(
-            study=StudyConfig(**raw["study"]),
+            study=StudyConfig(**{**raw["study"], "shift_layers": tuple(raw["study"].get("shift_layers") or ())}),
             paths=PathsConfig(**{k: base / v for k, v in raw["paths"].items()}),
             models=ModelsConfig(
                 observer=tuple(raw["models"]["observer"]),
                 geology=tuple(raw["models"]["geology"]),
                 region_effects=tuple(raw["models"].get("region_effects") or ()),
                 settlement_controls=tuple(raw["models"].get("settlement_controls") or ()),
+                water_terrain=tuple(raw["models"].get("water_terrain") or ()),
             ),
             sources=sources,
         )
