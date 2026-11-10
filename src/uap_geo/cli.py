@@ -17,7 +17,7 @@ def main(argv: list[str] | None = None) -> None:
     run = sub.add_parser("run", help="Run pipeline stages")
     run.add_argument("--config", type=Path, default=Path("configs/v1.yaml"))
     run.add_argument("--stage", nargs="+", choices=STAGES, default=list(STAGES))
-    run.add_argument("--permutations", type=int, default=None, help="Override fault_permutations")
+    run.add_argument("--permutations", type=int, default=None, help="Override shift_permutations")
     args = parser.parse_args(argv)
 
     configure()
@@ -25,7 +25,7 @@ def main(argv: list[str] | None = None) -> None:
     if args.permutations is not None:
         from dataclasses import replace
 
-        config = replace(config, study=replace(config.study, fault_permutations=args.permutations))
+        config = replace(config, study=replace(config.study, shift_permutations=args.permutations))
     V1Pipeline(config).run(tuple(args.stage))
 
 

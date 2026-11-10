@@ -56,7 +56,10 @@ class EarthquakeBuilder(CovariateBuilder):
         self._quakes = quakes
 
     def build(self, counties: gpd.GeoDataFrame) -> pd.DataFrame:
-        quakes = self._quakes.to_crs(counties.crs)
+        return self.build_from_projected(counties, self._quakes.to_crs(counties.crs))
+
+    def build_from_projected(self, counties: gpd.GeoDataFrame, quakes: gpd.GeoDataFrame) -> pd.DataFrame:
+        """Entry point for permutation tests, which pass already-projected, shifted events."""
         joined = gpd.sjoin(quakes[["mag", "geometry"]], counties[[COUNTY_ID, "geometry"]], predicate="within")
         joined["moment"] = 10 ** (1.5 * joined["mag"] + 9.1)
         grouped = joined.groupby(COUNTY_ID)

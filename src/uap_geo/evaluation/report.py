@@ -49,19 +49,18 @@ class ReportWriter:
 
     def summary(
         self,
-        model_a: FitResult,
-        model_b: FitResult,
-        moran: MoranResult,
+        fits: list[FitResult],
+        morans: dict[str, MoranResult],
         permutation: PermutationResult | None,
         hotspots: gpd.GeoDataFrame,
         cleaning: dict[str, int],
     ) -> Path:
-        perm_p = permutation.p_values() if permutation else {}
+        base = fits[0]
         lines = [
-            "# uap-geo v1 results",
+            "# uap-geo results",
             "",
             f"Reports kept after cleaning: {cleaning.get('kept', 'n/a')} (raw rows {cleaning.get('raw_rows', 'n/a')})",
-            f"Counties modelled: {model_b.n}",
+            f"Counties modelled: {base.n}",
             "",
             "## Hotspots (Gi*, reports per 10k people)",
             "",
@@ -69,33 +68,29 @@ class ReportWriter:
             "",
             "## Model comparison",
             "",
-            "| Model | Covariates | AIC | alpha |",
-            "| --- | --- | --- | --- |",
-            f"| A observer | {len(model_a.spec.covariates)} | {model_a.aic:.1f} | {model_a.alpha:.3f} |",
-            f"| B observer + geology | {len(model_b.spec.covariates)} | {model_b.aic:.1f} | {model_b.alpha:.3f} |",
-            "",
-            f"ΔAIC (B − A): {model_b.aic - model_a.aic:.1f} (negative favours geology)",
-            "",
-            "## Model B rate ratios (per +1 SD)",
-            "",
-            _markdown_table(model_b.coefficients, perm_p),
-            "",
-            "## Residual spatial autocorrelation (model B)",
-            "",
-            f"Moran's I = {moran.statistic:.3f}, permutation p = {moran.p_value:.3f}.",
-            "Residuals still cluster: upgrade to a spatial (BYM2) model before trusting p-values."
-            if moran.needs_spatial_model
-            else "No meaningful residual clustering: the non-spatial model is adequate for v1.",
+            "| Model | Terms | AIC | ΔAIC vs A | alpha | Moran's I (p) |",
+            "| --- | --- | --- | --- | --- | --- |",
         ]
+        for fit in fits:
+            moran = morans.get(fit.spec.name)
+            moran_text = f"{moran.statistic:.3f} ({moran.p_value:.3f})" if moran else ""
+            lines.append(
+                f"| {fit.spec.name} | {fit.spec.label} | {fit.aic:.1f} | {fit.aic - base.aic:+.1f} "
+                f"| {fit.alpha:.3f} | {moran_text} |"
+            )
+        lines += ["", "Rate ratios are per +1 SD. Shift p = share of randomly rotated/shifted copies of that",
+                  "layer with an effect at least as large; small = the effect is tied to the layer's real location."]
+        for fit in fits:
+            lines += ["", f"## {fit.spec.name} rate ratios", "", _markdown_table(fit, permutation)]
         text = "\n".join(lines) + "\n"
         path = self.folder / "summary.md"
         path.write_text(text)
         (self.folder / "results.json").write_text(
             json.dumps(
                 {
-                    "aic": {"A": model_a.aic, "B": model_b.aic},
-                    "moran": moran.__dict__,
-                    "fault_permutation_p": perm_p,
+                    "aic": {f.spec.name: f.aic for f in fits},
+                    "moran": {k: v.__dict__ for k, v in morans.items()},
+                    "shift_p": permutation.p_values().to_dict("records") if permutation else [],
                     "cleaning": cleaning,
                 },
                 indent=2,
@@ -109,10 +104,11 @@ class ReportWriter:
         return path
 
 
-def _markdown_table(coefficients: pd.DataFrame, perm_p: dict[str, float]) -> str:
-    rows = ["| Term | Rate ratio | 95% CI | p | fault-shift p |", "| --- | --- | --- | --- | --- |"]
-    for term, row in coefficients.iterrows():
-        shift = f"{perm_p[term]:.3f}" if term in perm_p else ""
+def _markdown_table(fit: FitResult, permutation: PermutationResult | None) -> str:
+    rows = ["| Term | Rate ratio | 95% CI | p | shift p |", "| --- | --- | --- | --- | --- |"]
+    for term, row in fit.coefficients.drop(index="const", errors="ignore").iterrows():
+        p_shift = permutation.p_value(fit.spec.name, str(term)) if permutation else None
+        shift = f"{p_shift:.3f}" if p_shift is not None else ""
         rows.append(
             f"| {term} | {row['rate_ratio']:.3f} | {row['ci_low']:.3f}–{row['ci_high']:.3f} "
             f"| {row['p_value']:.3g} | {shift} |"

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
 import pandas as pd
 
@@ -28,6 +28,15 @@ class DataSource(ABC):
     @abstractmethod
     def load(self) -> Any:
         """Download if needed, then return the parsed dataset."""
+
+
+class ProjectedCovariate(Protocol):
+    """A builder that can recompute its columns from an already-projected, possibly shifted layer."""
+
+    @property
+    def columns(self) -> tuple[str, ...]: ...
+
+    def build_from_projected(self, counties: gpd.GeoDataFrame, layer: gpd.GeoDataFrame) -> pd.DataFrame: ...
 
 
 class CovariateBuilder(ABC):

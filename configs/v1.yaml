@@ -7,7 +7,7 @@ study:
   crs: "EPSG:5070"            # CONUS Albers equal-area, metres
   knn_k: 8                    # neighbours for Gi* and Moran's I (as in the paper)
   gi_permutations: 999
-  fault_permutations: 100     # fault-shift null distribution; raise once the pipeline is stable
+  shift_permutations: 100     # shifted copies per geologic layer (faults, earthquakes)
   max_shift_km: 400
   max_rotate_deg: 20
   min_quake_magnitude: 2.5
@@ -33,6 +33,8 @@ models:
     - log_quake_count
     - river_length_per_km2
     - magnetic_anomaly
+  region_effects:             # model C = model B + these categorical fixed effects
+    - state_fips
 
 sources:
   nuforc:                     # TidyTuesday 2023-06-20 NUFORC extract (sightings, then places)
@@ -77,10 +79,10 @@ sources:
   cloud_cover:
     urls:
       - https://data.earthenv.org/cloud/MODCF_meanannual.tif
-  light_pollution:            # Falchi et al. (2016) World Atlas, GFZ Data Services; set a direct .tif URL to enable
-    enabled: false
-    urls: []
-  tree_canopy:                # NLCD/USFS Tree Canopy Cover CONUS (mrlc.gov); multi-GB, set a direct .tif URL to enable
+  light_pollution:            # Falchi et al. (2016) World Atlas of artificial sky brightness, GFZ (653 MB zip)
+    urls:
+      - https://datapub.gfz-potsdam.de/download/10.5880.GFZ.1.4.2016.001/World_Atlas_2015.zip
+  tree_canopy:                # NLCD/USFS Tree Canopy Cover CONUS; 30 m tiles are too large for a free runner
     enabled: false
     urls: []
   magnetic_anomaly:           # USGS / NAMAG magnetic anomaly grid; set a direct GeoTIFF URL to enable

@@ -15,10 +15,11 @@ from uap_geo.data.io.store import TableStore
 from uap_geo.data.preprocessing.geocode import GazetteerGeocoder
 from uap_geo.data.preprocessing.reports import ReportCleaner
 from uap_geo.data.scraping.registry import SourceRegistry
-from uap_geo.evaluation.permutation import FAULT_COLUMNS, FaultShiftPermutation, PermutationResult
+from uap_geo.evaluation.permutation import PermutationResult, ShiftLayer, ShiftPermutation
 from uap_geo.evaluation.report import ReportWriter
 from uap_geo.evaluation.spatial import HotspotAnalyzer, ResidualAutocorrelation
 from uap_geo.features.county_table import CountyTableAssembler, prepare_counties
+from uap_geo.features.covariates import DistanceToLinesBuilder, EarthquakeBuilder, LineDensityBuilder
 from uap_geo.features.registry import CovariateRegistry
 from uap_geo.training.models import ModelSpec, NegBinRateModel
 
@@ -71,37 +72,53 @@ class V1Pipeline:
         hotspots = HotspotAnalyzer(study.knn_k, study.gi_permutations, study.seed).run(table)
         self.writer.hotspot_map(hotspots)
 
-        spec_a = ModelSpec("A_observer", self.config.models.observer).available_in(table)
-        spec_b = ModelSpec("B_observer_geology", spec_a.covariates + self.config.models.geology).available_in(table)
-        # Fit both models on the same counties so their AICs are comparable.
-        complete = table.dropna(subset=["report_count", "population", *spec_b.covariates])
+        models = self.config.models
+        spec_a = ModelSpec("A_observer", models.observer).available_in(table)
+        spec_b = ModelSpec("B_observer_geology", spec_a.covariates + models.geology).available_in(table)
+        spec_c = ModelSpec("C_geology_within_region", spec_b.covariates, models.region_effects)
+        # Fit every model on the same counties so their AICs are comparable.
+        needed = ["report_count", "population", *spec_b.covariates, *spec_c.fixed_effects]
+        complete = table.dropna(subset=needed)
         complete = complete.loc[complete["population"] > 0]
-        fit_a = NegBinRateModel(spec_a).fit(complete)
-        fit_b = NegBinRateModel(spec_b).fit(complete)
-        for fit in (fit_a, fit_b):
+        fits = [NegBinRateModel(spec).fit(complete) for spec in (spec_a, spec_b, spec_c)]
+        for fit in fits:
             self.writer.save_fit(fit)
 
-        moran = ResidualAutocorrelation(study.knn_k, study.gi_permutations, study.seed).run(
-            complete, fit_b.pearson_residuals
-        )
-        permutation = self._fault_permutation(complete, spec_b, fit_b.coefficients["rate_ratio"].to_dict())
+        autocorrelation = ResidualAutocorrelation(study.knn_k, study.gi_permutations, study.seed)
+        morans = {fit.spec.name: autocorrelation.run(complete, fit.pearson_residuals) for fit in fits[1:]}
+        permutation = self._shift_tests(complete, fits[1:])
 
         cleaning_path = self.config.paths.interim / "cleaning.json"
         cleaning = json.loads(cleaning_path.read_text()) if cleaning_path.exists() else {}
-        summary = self.writer.summary(fit_a, fit_b, moran, permutation, hotspots, cleaning)
+        summary = self.writer.summary(fits, morans, permutation, hotspots, cleaning)
         log.info("Summary written to %s", summary)
 
-    def _fault_permutation(self, table, spec: ModelSpec, rate_ratios: dict[str, float]) -> PermutationResult | None:
-        observed = {c: rate_ratios[c] for c in FAULT_COLUMNS if c in rate_ratios}
-        n = self.config.study.fault_permutations
-        if not observed or n <= 0 or not self.sources.is_active("faults"):
-            log.info("Fault permutation skipped")
-            return None
+    def _shift_layers(self, crs: str) -> list[ShiftLayer]:
+        layers: list[ShiftLayer] = []
+        if self.sources.is_active("faults"):
+            faults = self.sources.faults().load().to_crs(crs)
+            layers.append(
+                ShiftLayer(
+                    "faults",
+                    faults,
+                    (LineDensityBuilder("fault_length_per_km2", faults), DistanceToLinesBuilder("dist_to_fault_km", faults)),
+                )
+            )
+        if self.sources.is_active("earthquakes"):
+            quakes = self.sources.earthquakes().load().to_crs(crs)
+            layers.append(ShiftLayer("earthquakes", quakes, (EarthquakeBuilder(quakes),)))
+        return layers
+
+    def _shift_tests(self, table, fits) -> PermutationResult | None:
         study = self.config.study
+        if study.shift_permutations <= 0:
+            log.info("Shift tests skipped")
+            return None
         counties = table[["geoid", "area_km2", "geometry"]]
-        faults = self.sources.faults().load()
-        test = FaultShiftPermutation(spec, n, study.max_shift_km, study.max_rotate_deg, study.seed)
-        result = test.run(table, counties, faults, observed)
-        result.null.to_csv(self.config.paths.outputs / "fault_permutation_null.csv", index=False)
-        log.info("Fault-shift p-values: %s", result.p_values())
+        layers = self._shift_layers(str(table.crs))
+        test = ShiftPermutation([f.spec for f in fits], study.shift_permutations, study.max_shift_km,
+                                study.max_rotate_deg, study.seed)
+        result = test.run(table, counties, layers, {f.spec.name: f.coefficients for f in fits})
+        result.null.to_csv(self.config.paths.outputs / "shift_test_null.csv", index=False)
+        result.p_values().to_csv(self.config.paths.outputs / "shift_test_p_values.csv", index=False)
         return result

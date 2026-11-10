@@ -61,7 +61,7 @@ jobs:
         if: always()
         run: |
           shopt -s nullglob
-          for f in outputs/summary.md outputs/coefficients_*.csv outputs/results.json; do
+          for f in outputs/summary.md outputs/shift_test_p_values.csv outputs/results.json; do
             echo "===== $f"; cat "$f"; echo
           done
 

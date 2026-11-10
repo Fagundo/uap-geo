@@ -30,7 +30,7 @@ class StudyConfig:
     crs: str
     knn_k: int
     gi_permutations: int
-    fault_permutations: int
+    shift_permutations: int
     max_shift_km: float
     max_rotate_deg: float
     min_quake_magnitude: float
@@ -53,6 +53,7 @@ class PathsConfig:
 class ModelsConfig:
     observer: tuple[str, ...]
     geology: tuple[str, ...]
+    region_effects: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -81,6 +82,7 @@ class Config:
             models=ModelsConfig(
                 observer=tuple(raw["models"]["observer"]),
                 geology=tuple(raw["models"]["geology"]),
+                region_effects=tuple(raw["models"].get("region_effects") or ()),
             ),
             sources=sources,
         )

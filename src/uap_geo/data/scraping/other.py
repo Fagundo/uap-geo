@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import zipfile
 from pathlib import Path
 
 import geopandas as gpd
@@ -40,7 +41,17 @@ class AirportSource(DataSource):
 
 
 class RasterSource(DataSource):
-    """A GeoTIFF covariate. Returns the local file path; zonal statistics happen in features/."""
+    """A GeoTIFF covariate, plain or inside a zip. Returns the local .tif path; zonal stats happen in features/."""
 
     def load(self) -> Path:
-        return self.downloader.fetch(self.config, filename_from_url(self.config.urls[0]))
+        path = self.downloader.fetch(self.config, filename_from_url(self.config.urls[0]))
+        if path.suffix.lower() != ".zip":
+            return path
+        folder = path.parent / "extracted"
+        if not folder.exists():
+            with zipfile.ZipFile(path) as zf:
+                zf.extractall(folder)
+        tifs = sorted(folder.rglob("*.tif"), key=lambda p: p.stat().st_size, reverse=True)
+        if not tifs:
+            raise FileNotFoundError(f"No .tif inside {path}")
+        return tifs[0]

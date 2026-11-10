@@ -12,7 +12,9 @@ def test_config_loads_and_marks_unconfigured_rasters_inactive():
     config = Config.from_yaml(ROOT / "configs" / "v1.yaml", root=ROOT)
     assert config.study.start_year == 2001
     assert config.source("faults").is_active
-    assert not config.source("light_pollution").is_active
+    assert config.source("light_pollution").is_active
+    assert not config.source("tree_canopy").is_active
+    assert config.models.region_effects == ("state_fips",)
     assert "fault_length_per_km2" in config.models.geology
 
 
