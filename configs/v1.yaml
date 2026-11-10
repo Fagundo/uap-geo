@@ -1,0 +1,83 @@
+# v1: replicate Medina, Brewer & Kirkpatrick (2023) at county level, then add geology.
+# A source with `enabled: false` or no `urls` is skipped and its covariate is dropped from the models.
+
+study:
+  start_year: 2001
+  end_year: 2020
+  crs: "EPSG:5070"            # CONUS Albers equal-area, metres
+  knn_k: 8                    # neighbours for Gi* and Moran's I (as in the paper)
+  gi_permutations: 999
+  fault_permutations: 100     # fault-shift null distribution; raise once the pipeline is stable
+  max_shift_km: 400
+  max_rotate_deg: 20
+  min_quake_magnitude: 2.5
+  seed: 42
+
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  outputs: outputs
+
+models:
+  observer:                   # model A: the paper's covariates (minus any that are unavailable)
+    - light_pollution
+    - cloud_cover
+    - tree_canopy
+    - airports_per_km2
+    - military_area_share
+    - log_pop_density         # stand-in for light pollution when that raster is not configured
+  geology:                    # model B adds these to model A
+    - fault_length_per_km2
+    - dist_to_fault_km
+    - log_quake_count
+    - river_length_per_km2
+    - magnetic_anomaly
+
+sources:
+  nuforc:
+    urls:
+      - https://huggingface.co/datasets/kcimc/NUFORC/resolve/main/nuforc.json
+  counties:
+    urls:
+      - https://www2.census.gov/geo/tiger/GENZ2020/shp/cb_2020_us_county_500k.zip
+  population:
+    urls:
+      - "https://api.census.gov/data/2020/dec/pl?get=P1_001N&for=county:*&in=state:*"
+  gazetteer_places:
+    urls:
+      - https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2020_Gazetteer/2020_Gaz_place_national.zip
+  gazetteer_cousubs:
+    urls:
+      - https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2020_Gazetteer/2020_Gaz_cousubs_national.zip
+  airports:
+    urls:
+      - https://davidmegginson.github.io/ourairports-data/airports.csv
+  military:
+    urls:
+      - https://www2.census.gov/geo/tiger/TIGER2019/MIL/tl_2019_us_mil.zip
+  faults:
+    urls:
+      - https://www.sciencebase.gov/catalog/file/get/589097b1e4b072a7ac0cae23?name=Qfaults_GIS.zip
+      - https://earthquake.usgs.gov/static/lfs/nshm/qfaults/Qfaults_GIS.zip
+  earthquakes:
+    urls:
+      - https://earthquake.usgs.gov/fdsnws/event/1/query
+    options:
+      bbox: [-125.0, 24.0, -66.5, 49.5]   # min lon, min lat, max lon, max lat
+  rivers:
+    urls:
+      - https://naciscdn.org/naturalearth/10m/physical/ne_10m_rivers_north_america.zip
+      - https://naciscdn.org/naturalearth/10m/physical/ne_10m_rivers_lake_centerlines.zip
+  cloud_cover:
+    urls:
+      - https://data.earthenv.org/cloud/MODCF_meanannual.tif
+  light_pollution:            # Falchi et al. (2016) World Atlas, GFZ Data Services; set a direct .tif URL to enable
+    enabled: false
+    urls: []
+  tree_canopy:                # NLCD/USFS Tree Canopy Cover CONUS (mrlc.gov); multi-GB, set a direct .tif URL to enable
+    enabled: false
+    urls: []
+  magnetic_anomaly:           # USGS / NAMAG magnetic anomaly grid; set a direct GeoTIFF URL to enable
+    enabled: false
+    urls: []

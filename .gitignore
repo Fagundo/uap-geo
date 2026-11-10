@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Data and outputs are rebuilt by the pipeline (and cached in CI)
+data/raw/*
+data/interim/*
+data/processed/*
+outputs/*
+!**/.gitkeep

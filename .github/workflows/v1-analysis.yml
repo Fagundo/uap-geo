@@ -1,0 +1,66 @@
+name: v1 analysis
+
+on:
+  push:
+    branches: [main]
+    paths: ["src/**", "tests/**", "configs/**", "pyproject.toml", ".github/workflows/**"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      stages:
+        description: "Stages to run (space-separated: ingest build analyze)"
+        default: "ingest build analyze"
+      permutations:
+        description: "Fault-shift permutations (0 to skip)"
+        default: "100"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --group dev
+      - run: uv run pytest -q
+      - name: Type check (advisory)
+        run: uv run pyright
+        continue-on-error: true
+
+  analyze:
+    if: github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync
+
+      # Raw downloads are cached between runs; bump the key suffix to force a fresh download.
+      - uses: actions/cache@v4
+        with:
+          path: data/raw
+          key: raw-${{ hashFiles('configs/v1.yaml') }}-v1
+          restore-keys: raw-
+
+      - name: Run pipeline
+        run: >
+          uv run uap-geo run --config configs/v1.yaml
+          --stage ${{ inputs.stages }}
+          --permutations ${{ inputs.permutations }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: uap-geo-v1-${{ github.run_number }}
+          path: |
+            outputs/
+            data/interim/cleaning.json
+            data/processed/county_table.parquet
+          if-no-files-found: warn
