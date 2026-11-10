@@ -34,6 +34,8 @@ class CovariateRegistry:
             "faults": self._fault_builders,
             "earthquakes": lambda: [EarthquakeBuilder(self._sources.earthquakes().load())],
             "rivers": lambda: [LineDensityBuilder("river_length_per_km2", self._sources.rivers().load())],
+            # Settlement density: reports are placed at town points, and towns cluster on rivers.
+            "gazetteer_places": lambda: [PointDensityBuilder("places_per_km2", self._sources.place_points())],
         }
         for name in RASTER_SOURCES:
             factories[name] = (lambda n=name: [RasterMeanBuilder(n, self._sources.raster(n).load())])

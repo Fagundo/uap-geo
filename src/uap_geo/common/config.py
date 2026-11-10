@@ -54,6 +54,7 @@ class ModelsConfig:
     observer: tuple[str, ...]
     geology: tuple[str, ...]
     region_effects: tuple[str, ...] = ()
+    settlement_controls: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -83,6 +84,7 @@ class Config:
                 observer=tuple(raw["models"]["observer"]),
                 geology=tuple(raw["models"]["geology"]),
                 region_effects=tuple(raw["models"].get("region_effects") or ()),
+                settlement_controls=tuple(raw["models"].get("settlement_controls") or ()),
             ),
             sources=sources,
         )

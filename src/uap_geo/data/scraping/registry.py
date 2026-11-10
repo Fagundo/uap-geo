@@ -46,6 +46,15 @@ class SourceRegistry:
             GazetteerSource(self._config.source("gazetteer_cousubs"), self._dl, "cousub"),
         ]
 
+    def place_points(self):
+        """Census places (cities, towns, CDPs) as points: the settlement-density control."""
+        import geopandas as gpd
+
+        from uap_geo.common.geo import WGS84
+
+        places = self.gazetteers()[0].load().dropna(subset=["lat", "lon"])
+        return gpd.GeoDataFrame(places, geometry=gpd.points_from_xy(places["lon"], places["lat"]), crs=WGS84)
+
     def airports(self) -> AirportSource:
         return AirportSource(self._config.source("airports"), self._dl)
 

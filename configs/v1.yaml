@@ -7,7 +7,7 @@ study:
   crs: "EPSG:5070"            # CONUS Albers equal-area, metres
   knn_k: 8                    # neighbours for Gi* and Moran's I (as in the paper)
   gi_permutations: 999
-  shift_permutations: 100     # shifted copies per geologic layer (faults, earthquakes)
+  shift_permutations: 100     # shifted copies per geologic layer (faults, earthquakes, rivers)
   max_shift_km: 400
   max_rotate_deg: 20
   min_quake_magnitude: 2.5
@@ -35,6 +35,8 @@ models:
     - magnetic_anomaly
   region_effects:             # model C = model B + these categorical fixed effects
     - state_fips
+  settlement_controls:        # model D = model C + these; reports sit at town points and towns sit on rivers
+    - places_per_km2
 
 sources:
   nuforc:                     # TidyTuesday 2023-06-20 NUFORC extract (sightings, then places)

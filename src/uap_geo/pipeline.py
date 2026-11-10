@@ -76,11 +76,15 @@ class V1Pipeline:
         spec_a = ModelSpec("A_observer", models.observer).available_in(table)
         spec_b = ModelSpec("B_observer_geology", spec_a.covariates + models.geology).available_in(table)
         spec_c = ModelSpec("C_geology_within_region", spec_b.covariates, models.region_effects)
+        spec_d = ModelSpec(
+            "D_within_region_plus_settlements", spec_c.covariates + models.settlement_controls, models.region_effects
+        ).available_in(table)
+        specs = [spec_a, spec_b, spec_c] + ([spec_d] if spec_d.covariates != spec_c.covariates else [])
         # Fit every model on the same counties so their AICs are comparable.
-        needed = ["report_count", "population", *spec_b.covariates, *spec_c.fixed_effects]
+        needed = ["report_count", "population", *spec_d.covariates, *spec_c.fixed_effects]
         complete = table.dropna(subset=needed)
         complete = complete.loc[complete["population"] > 0]
-        fits = [NegBinRateModel(spec).fit(complete) for spec in (spec_a, spec_b, spec_c)]
+        fits = [NegBinRateModel(spec).fit(complete) for spec in specs]
         for fit in fits:
             self.writer.save_fit(fit)
 
@@ -107,6 +111,9 @@ class V1Pipeline:
         if self.sources.is_active("earthquakes"):
             quakes = self.sources.earthquakes().load().to_crs(crs)
             layers.append(ShiftLayer("earthquakes", quakes, (EarthquakeBuilder(quakes),)))
+        if self.sources.is_active("rivers"):
+            rivers = self.sources.rivers().load().to_crs(crs)
+            layers.append(ShiftLayer("rivers", rivers, (LineDensityBuilder("river_length_per_km2", rivers),)))
         return layers
 
     def _shift_tests(self, table, fits) -> PermutationResult | None:
