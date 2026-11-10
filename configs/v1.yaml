@@ -44,8 +44,10 @@ sources:
   counties:
     urls:
       - https://www2.census.gov/geo/tiger/GENZ2020/shp/cb_2020_us_county_500k.zip
-  population:
+  population:                 # tried in order; format detected from content
     urls:
+      - https://www2.census.gov/programs-surveys/popest/datasets/2020-2023/counties/totals/co-est2023-alldata.csv
+      - https://www2.census.gov/programs-surveys/popest/datasets/2020-2022/counties/totals/co-est2022-alldata.csv
       - "https://api.census.gov/data/2020/dec/pl?get=P1_001N&for=county:*&in=state:*"
   gazetteer_places:
     urls:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import json
+import logging
 from typing import Literal
 
 import geopandas as gpd
@@ -12,6 +12,9 @@ from uap_geo.common.base import DataSource
 from uap_geo.common.config import SourceConfig
 from uap_geo.common.download import Downloader, filename_from_url
 from uap_geo.common.geo import COUNTY_ID, NON_CONUS_STATE_FIPS
+from uap_geo.data.scraping.parsers import parse_population
+
+log = logging.getLogger(__name__)
 
 
 class CountySource(DataSource):
@@ -26,15 +29,23 @@ class CountySource(DataSource):
 
 
 class PopulationSource(DataSource):
-    """2020 decennial total population per county from the Census API (no key needed)."""
+    """County population, 2020. Each configured URL is tried in turn; the format is detected from content:
+    - Census Population Estimates bulk CSV (STATE, COUNTY, SUMLEV, POPESTIMATE2020 or ESTIMATESBASE2020)
+    - Census Data API JSON (rows of [P1_001N, state, county])
+    """
 
     def load(self) -> pd.DataFrame:
-        path = self.downloader.fetch(self.config, "population_2020.json")
-        rows = json.loads(path.read_text())
-        frame = pd.DataFrame(rows[1:], columns=rows[0])
-        frame[COUNTY_ID] = frame["state"] + frame["county"]
-        frame["population"] = pd.to_numeric(frame["P1_001N"], errors="coerce")
-        return frame[[COUNTY_ID, "population"]]
+        errors = []
+        for index, url in enumerate(self.config.urls):
+            try:
+                path = self.downloader.fetch(self.config, f"population_{index}", url_index=index)
+                frame = parse_population(path.read_bytes())
+                log.info("Population: %d counties from %s", len(frame), url)
+                return frame
+            except Exception as exc:  # try the next URL
+                errors.append(f"{url}: {exc}")
+                log.warning("Population source failed (%s): %s", url, exc)
+        raise RuntimeError("No population source worked:\n" + "\n".join(errors))
 
 
 GazetteerLevel = Literal["place", "cousub"]

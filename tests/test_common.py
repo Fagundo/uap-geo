@@ -33,6 +33,30 @@ def test_join_places_matches_on_city_state_country():
     assert list(out["latitude"]) == [44.9, 42.5]
 
 
+def test_parse_population_csv_and_api_json():
+    from uap_geo.data.scraping.parsers import parse_population
+
+    csv = (
+        "﻿SUMLEV,STATE,COUNTY,STNAME,CTYNAME,ESTIMATESBASE2020,POPESTIMATE2020\n"
+        "040,53,000,Washington,Washington,7705281,7724031\n"
+        "050,53,033,Washington,King County,2269675,2274315\n"
+    ).encode("utf-8")
+    out = parse_population(csv)
+    assert out.to_dict("records") == [{"geoid": "53033", "population": 2274315}]
+
+    api = json.dumps([["P1_001N", "state", "county"], ["2269675", "53", "033"]]).encode()
+    assert parse_population(api).iloc[0].to_dict() == {"geoid": "53033", "population": 2269675}
+
+
+def test_parse_population_rejects_html():
+    import pytest
+
+    from uap_geo.data.scraping.parsers import parse_population
+
+    with pytest.raises(ValueError, match="Unrecognised"):
+        parse_population(b"<html>Invalid key</html>")
+
+
 def test_filename_from_url():
     assert filename_from_url("https://x.org/a/b/file.zip") == "file.zip"
     assert filename_from_url("https://sb.gov/file/get/123?name=Qfaults_GIS.zip") == "Qfaults_GIS.zip"
