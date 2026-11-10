@@ -21,6 +21,16 @@ def test_filename_from_url():
     assert filename_from_url("https://sb.gov/file/get/123?name=Qfaults_GIS.zip") == "Qfaults_GIS.zip"
 
 
+def test_auth_headers_only_for_huggingface_with_token(monkeypatch):
+    from uap_geo.common.download import auth_headers
+
+    monkeypatch.delenv("HF_TOKEN", raising=False)
+    assert auth_headers("https://huggingface.co/x") == {}
+    monkeypatch.setenv("HF_TOKEN", "abc")
+    assert auth_headers("https://huggingface.co/x") == {"Authorization": "Bearer abc"}
+    assert auth_headers("https://census.gov/x") == {}
+
+
 def test_read_report_json_layouts(tmp_path):
     records = [{"Occurred": "2010-01-01", "Location": "A, WA, USA"}]
     as_list = tmp_path / "list.json"

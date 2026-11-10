@@ -31,6 +31,16 @@ def filename_from_url(url: str) -> str:
     return tail or "download"
 
 
+def auth_headers(url: str) -> dict[str, str]:
+    """Bearer token for hosts that need one, read from the environment (never from config)."""
+    import os
+
+    token = os.environ.get("HF_TOKEN")
+    if "huggingface.co" in url and token:
+        return {"Authorization": f"Bearer {token}"}
+    return {}
+
+
 class Downloader:
     """Downloads files into a cache directory and skips files already present."""
 
@@ -68,8 +78,11 @@ class Downloader:
         target.parent.mkdir(parents=True, exist_ok=True)
         tmp = target.with_suffix(target.suffix + ".part")
         log.info("Downloading %s", url)
-        with self._session.get(url, params=params, stream=True, timeout=self._timeout) as resp:
-            resp.raise_for_status()
+        headers = auth_headers(url)
+        with self._session.get(url, params=params, headers=headers, stream=True, timeout=self._timeout) as resp:
+            if not resp.ok:
+                hint = " (set the HF_TOKEN secret)" if "huggingface.co" in url and not headers else ""
+                raise DownloadError(f"HTTP {resp.status_code}{hint}: {resp.text[:300]!r}")
             with tmp.open("wb") as fh:
                 for chunk in resp.iter_content(chunk_size=1 << 20):
                     fh.write(chunk)

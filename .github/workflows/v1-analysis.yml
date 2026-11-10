@@ -50,6 +50,8 @@ jobs:
           restore-keys: raw-
 
       - name: Run pipeline
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}   # optional; Hugging Face may refuse anonymous runner downloads
         run: >
           uv run uap-geo run --config configs/v1.yaml
           --stage ${{ inputs.stages }}
