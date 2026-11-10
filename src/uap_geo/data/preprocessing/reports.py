@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from uap_geo.common.geo import CONUS_STATES
+from uap_geo.common.geo import CONUS_STATES, STATE_NAME_TO_CODE
 
 log = logging.getLogger(__name__)
 
@@ -19,13 +19,15 @@ class ColumnResolver:
     """Finds a column among likely names, so the cleaner survives schema differences between scrapes."""
 
     CANDIDATES: dict[str, tuple[str, ...]] = {
-        "date": ("Occurred", "occurred", "date_time", "datetime", "Date / Time", "date", "Date"),
+        "date": ("Occurred", "occurred", "reported_date_time", "date_time", "datetime", "Date / Time", "date", "Date"),
         "location": ("Location", "location"),
         "city": ("City", "city"),
         "state": ("State", "state"),
-        "country": ("Country", "country"),
+        "country": ("Country", "country", "country_code"),
         "summary": ("Summary", "summary", "Text", "text", "description", "Description"),
         "shape": ("Shape", "shape"),
+        "lat": ("latitude", "lat", "city_latitude"),
+        "lon": ("longitude", "lon", "city_longitude"),
     }
 
     def __init__(self, columns: pd.Index) -> None:
@@ -51,6 +53,14 @@ def split_location(value: object) -> tuple[str | None, str | None, str | None]:
     if len(parts) == 2:
         return parts[0], parts[1].upper(), None
     return parts[0], None, None
+
+
+def to_state_code(value: object) -> str | None:
+    """'wa', 'WA', 'Washington' -> 'WA'; anything else is upper-cased as-is."""
+    if not isinstance(value, str) or not value.strip():
+        return None
+    text = value.strip()
+    return STATE_NAME_TO_CODE.get(text.lower(), text.upper())
 
 
 _LOCAL_SUFFIX = re.compile(r"\s+local\s*$", re.IGNORECASE)
@@ -87,6 +97,10 @@ class ReportCleaner:
         frame["summary"] = raw[summary_col].astype("string") if summary_col else pd.NA
         shape_col = resolver.find("shape")
         frame["shape"] = raw[shape_col].astype("string") if shape_col else pd.NA
+        lat_col, lon_col = resolver.find("lat"), resolver.find("lon")
+        if lat_col and lon_col:  # pre-geocoded sources keep their coordinates
+            frame["lat"] = pd.to_numeric(raw[lat_col], errors="coerce")
+            frame["lon"] = pd.to_numeric(raw[lon_col], errors="coerce")
 
         n_raw = len(frame)
         frame = frame.dropna(subset=["occurred"])
@@ -120,9 +134,9 @@ class ReportCleaner:
             frame["country"] = parts.map(lambda p: p[2])
             return
         frame["city"] = raw[resolver.require("city")]
-        frame["state"] = raw[resolver.require("state")].astype("string").str.upper()
+        frame["state"] = raw[resolver.require("state")].map(to_state_code)
         country_col = resolver.find("country")
-        frame["country"] = raw[country_col].astype("string").str.upper() if country_col else None
+        frame["country"] = raw[country_col].astype("string").str.upper().str.strip() if country_col else None
 
     @staticmethod
     def _deduplicate(frame: pd.DataFrame) -> pd.DataFrame:

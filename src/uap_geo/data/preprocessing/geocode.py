@@ -53,10 +53,20 @@ class GazetteerGeocoder:
         self._lookup = table.drop_duplicates(["state", "key"])[["state", "key", "lat", "lon", "level"]]
 
     def geocode(self, reports: pd.DataFrame) -> pd.DataFrame:
+        """Fill lat/lon from the gazetteer. Coordinates already on a report (from the source) are kept."""
         frame = reports.copy()
+        if "lat" not in frame.columns:
+            frame["lat"] = float("nan")
+            frame["lon"] = float("nan")
+        frame["geocode_level"] = frame["lat"].notna().map({True: "source", False: None})
         frame["key"] = frame["city"].map(normalize_place_name)
-        merged = frame.merge(self._lookup, on=["state", "key"], how="left")
-        merged = merged.rename(columns={"level": "geocode_level"}).drop(columns="key")
-        rate = merged["lat"].notna().mean() if len(merged) else 0.0
-        log.info("Geocoded %.1f%% of %d reports", 100 * rate, len(merged))
+        lookup = self._lookup.rename(columns={"lat": "gz_lat", "lon": "gz_lon", "level": "gz_level"})
+        merged = frame.merge(lookup, on=["state", "key"], how="left")
+        fill = merged["lat"].isna() & merged["gz_lat"].notna()
+        merged.loc[fill, "lat"] = merged.loc[fill, "gz_lat"]
+        merged.loc[fill, "lon"] = merged.loc[fill, "gz_lon"]
+        merged.loc[fill, "geocode_level"] = merged.loc[fill, "gz_level"]
+        merged = merged.drop(columns=["key", "gz_lat", "gz_lon", "gz_level"])
+        counts = merged["geocode_level"].value_counts(dropna=False).to_dict()
+        log.info("Geocoding of %d reports by level: %s", len(merged), counts)
         return merged

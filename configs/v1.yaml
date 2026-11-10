@@ -35,9 +35,12 @@ models:
     - magnetic_anomaly
 
 sources:
-  nuforc:
+  nuforc:                     # TidyTuesday 2023-06-20 NUFORC extract (sightings, then places)
+    options:
+      format: tidytuesday     # or "json" for a raw NUFORC JSON dump (single URL)
     urls:
-      - https://huggingface.co/datasets/kcimc/NUFORC/resolve/main/nuforc.json
+      - https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2023/2023-06-20/ufo_sightings.csv
+      - https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2023/2023-06-20/places.csv
   counties:
     urls:
       - https://www2.census.gov/geo/tiger/GENZ2020/shp/cb_2020_us_county_500k.zip

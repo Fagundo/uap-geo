@@ -10,8 +10,9 @@ and adds geologic covariates to the same model.
 
 ## What v1 does
 
-1. **Ingest** — NUFORC snapshot (Hugging Face `kcimc/NUFORC`), cleaned to 2001–2020 in the lower 48,
-   deduplicated, geocoded offline against the Census Gazetteer (places, then county subdivisions).
+1. **Ingest** — NUFORC reports from the [TidyTuesday 2023-06-20 extract](https://github.com/rfordatascience/tidytuesday/tree/main/data/2023/2023-06-20)
+   (city coordinates from geonames.org), cleaned to 2001–2020 in the lower 48 and deduplicated.
+   Reports without coordinates are geocoded offline against the Census Gazetteer.
 2. **Build** — one row per county: report count, 2020 population, and covariates.
 3. **Analyze**
    - Getis-Ord Gi* hotspots on reports per 10,000 people (k = 8 nearest neighbours).

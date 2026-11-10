@@ -43,6 +43,39 @@ def test_cleaner_filters_window_country_state_and_duplicates():
     assert report.kept == 2
 
 
+def test_cleaner_handles_tidytuesday_shape_and_keeps_coordinates():
+    raw = pd.DataFrame(
+        {
+            "reported_date_time": ["2014-07-04T03:00:00Z", "2014-07-04T03:00:00Z", "2016-01-01T05:00:00Z"],
+            "city": ["Phoenix", "Toronto", "Boise"],
+            "state": ["AZ", "ON", "Idaho"],
+            "country_code": ["US", "CA", "US"],
+            "summary": ["Lights", "Lights", "Disc"],
+            "shape": ["light", "light", "disk"],
+            "latitude": [33.45, 43.7, None],
+            "longitude": [-112.07, -79.4, None],
+        }
+    )
+    cleaned, report = ReportCleaner(2001, 2020).clean(raw)
+    assert list(cleaned["state"]) == ["AZ", "ID"]
+    assert cleaned.loc[0, "lat"] == 33.45
+    assert pd.isna(cleaned.loc[1, "lat"])
+    assert report.outside_conus == 1
+
+
+def test_geocoder_keeps_source_coordinates_and_fills_gaps():
+    gazetteer = pd.DataFrame(
+        [["ID", "Boise City city", 43.6, -116.2, 1, "place"], ["AZ", "Phoenix city", 0.0, 0.0, 1, "place"]],
+        columns=["state", "name", "lat", "lon", "ALAND", "level"],
+    )
+    reports = pd.DataFrame(
+        {"city": ["Phoenix", "Boise City"], "state": ["AZ", "ID"], "lat": [33.45, None], "lon": [-112.07, None]}
+    )
+    out = GazetteerGeocoder(gazetteer).geocode(reports)
+    assert out.loc[0, "lat"] == 33.45 and out.loc[0, "geocode_level"] == "source"
+    assert out.loc[1, "lat"] == 43.6 and out.loc[1, "geocode_level"] == "place"
+
+
 @pytest.mark.parametrize(
     ("raw", "expected"),
     [

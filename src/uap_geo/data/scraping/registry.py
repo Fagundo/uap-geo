@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from uap_geo.common.base import DataSource
 from uap_geo.common.config import Config
 from uap_geo.common.download import Downloader
 from uap_geo.data.scraping.census import (
@@ -10,7 +11,7 @@ from uap_geo.data.scraping.census import (
     MilitarySource,
     PopulationSource,
 )
-from uap_geo.data.scraping.nuforc import NuforcSource
+from uap_geo.data.scraping.nuforc import JsonNuforcSource, TidyTuesdayNuforcSource
 from uap_geo.data.scraping.other import AirportSource, RasterSource, RiverSource
 from uap_geo.data.scraping.usgs import EarthquakeSource, QuaternaryFaultSource
 
@@ -25,8 +26,13 @@ class SourceRegistry:
     def is_active(self, name: str) -> bool:
         return name in self._config.sources and self._config.source(name).is_active
 
-    def nuforc(self) -> NuforcSource:
-        return NuforcSource(self._config.source("nuforc"), self._dl)
+    def nuforc(self) -> DataSource:
+        config = self._config.source("nuforc")
+        formats = {"tidytuesday": TidyTuesdayNuforcSource, "json": JsonNuforcSource}
+        fmt = config.options.get("format", "tidytuesday")
+        if fmt not in formats:
+            raise ValueError(f"Unknown nuforc format '{fmt}'; expected one of {sorted(formats)}")
+        return formats[fmt](config, self._dl)
 
     def counties(self) -> CountySource:
         return CountySource(self._config.source("counties"), self._dl)

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from uap_geo.common.config import Config
 from uap_geo.common.download import filename_from_url
-from uap_geo.data.scraping.nuforc import read_report_json
+from uap_geo.data.scraping.nuforc import join_places, read_report_json
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -14,6 +14,23 @@ def test_config_loads_and_marks_unconfigured_rasters_inactive():
     assert config.source("faults").is_active
     assert not config.source("light_pollution").is_active
     assert "fault_length_per_km2" in config.models.geology
+
+
+def test_join_places_matches_on_city_state_country():
+    import pandas as pd
+
+    sightings = pd.DataFrame({"city": ["Salem", "Salem"], "state": ["OR", "MA"], "country_code": ["US", "US"]})
+    places = pd.DataFrame(
+        {
+            "city": ["Salem", "Salem"],
+            "state": ["MA", "OR"],
+            "country_code": ["US", "US"],
+            "latitude": [42.5, 44.9],
+            "longitude": [-70.9, -123.0],
+        }
+    )
+    out = join_places(sightings, places)
+    assert list(out["latitude"]) == [44.9, 42.5]
 
 
 def test_filename_from_url():
