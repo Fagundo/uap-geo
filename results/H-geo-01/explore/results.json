@@ -6,15 +6,15 @@
     2010
   ],
   "manifest": {
-    "run_id": "H-geo-01-explore-20261111T021509Z",
-    "started_utc": "2026-11-11T02:15:09+00:00",
-    "git_commit": "f4a2fb9472d15c8e16fa67e2cc6d37b73d2846af",
+    "run_id": "H-geo-01-explore-20261111T022308Z",
+    "started_utc": "2026-11-11T02:23:08+00:00",
+    "git_commit": "628a601e861239b35a371239897364b9fac86171",
     "git_dirty": false,
     "python": "3.12.16",
     "specs": {
       "spec": "c2f4e7ae69420ac87af41f7d1189e042e7b8ca8ebd44c3409d4c13471321b1b7",
-      "impl": "08b647819389779e9c1f323ac6856d39e489b54a533d9b08b631d1b3f45e06b8",
-      "filters": "3745ee2dc5399ad850f1955b8ebfa83c8d7977d3bf76b9b3415549f97d6f16af"
+      "impl": "bd91649c845dfa7bd715b772eede82394b6fb2bfbacd4b2903ecc565ea547220",
+      "filters": "8b2d4002b6f7fc9b75bc09a2f2b7179b72d7d7a42239921c5ddd2d694f6eeae9"
     },
     "inputs": {
       "data/raw/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -235,30 +235,28 @@
     }
   },
   "rule_counts": {
-    "nuforc_note": 1668,
-    "meteor_fireball": 1506,
-    "fireworks": 248,
-    "aurora": 151,
+    "nuforc_note": 2288,
+    "meteor_fireball": 1461,
     "sky_lantern": 56,
-    "possible_only": 4970
+    "possible_only": 4980
   },
   "tests": {
     "storm": {
       "verdict": "exploration (no verdict)",
-      "power": 0.9200157326831145,
-      "p_bh": 0.057343124675272326,
+      "power": 0.9196380074094646,
+      "p_bh": 0.06732776128240386,
       "checks": {
         "south_of_37N": {
-          "rate_ratio": 0.9610897042339799,
-          "p_value": 0.38165885350466955,
-          "n_events": 4275,
+          "rate_ratio": 0.9586020800799263,
+          "p_value": 0.3525966467184678,
+          "n_events": 4258,
           "holds": false
         },
         "kp8_vs_kp6_7": {
-          "strong_rate_ratio": 0.8896756185429925,
-          "strong_p": 0.07511368164300747,
-          "weak_rate_ratio": 0.9510299583846624,
-          "weak_p": 0.12037294030279758,
+          "strong_rate_ratio": 0.908196616867366,
+          "strong_p": 0.14094346790328935,
+          "weak_rate_ratio": 0.948394641387996,
+          "weak_p": 0.10146766739125676,
           "holds": false
         }
       },
@@ -288,56 +286,56 @@
           "terms": [
             {
               "term": "exposed",
-              "rate_ratio": 0.938503162787857,
-              "ci_low": 0.8866331358643771,
-              "ci_high": 0.9934077026166317,
-              "p_value": 0.028671562337636163
+              "rate_ratio": 0.9402550993600342,
+              "ci_low": 0.8882976106211824,
+              "ci_high": 0.9952516378540239,
+              "p_value": 0.03366388064120193
             },
             {
               "term": "moon",
-              "rate_ratio": 0.8622424264856475,
-              "ci_low": 0.8166405583892047,
-              "ci_high": 0.9103907397133328,
-              "p_value": 8.977617046710732e-08
+              "rate_ratio": 0.8624394187724856,
+              "ci_low": 0.8167863186601788,
+              "ci_high": 0.9106442334547464,
+              "p_value": 9.652657727742966e-08
             }
           ],
           "n_strata": 95,
-          "n_events": 10617,
+          "n_events": 10601,
           "exposed_share": 0.13587871982032565
         },
         "high_quality": {
           "terms": [
             {
               "term": "exposed",
-              "rate_ratio": 0.9352996359559749,
-              "ci_low": 0.8591439922324775,
-              "ci_high": 1.018205815239722,
-              "p_value": 0.12268484113106354
+              "rate_ratio": 0.9387852500097466,
+              "ci_low": 0.8621434629670256,
+              "ci_high": 1.022240245959587,
+              "p_value": 0.1460178325699912
             },
             {
               "term": "moon",
-              "rate_ratio": 0.8674283156633199,
-              "ci_low": 0.7999071591256157,
-              "ci_high": 0.9406490168646483,
-              "p_value": 0.0005821704696148505
+              "rate_ratio": 0.8689276555897855,
+              "ci_low": 0.8009878186496,
+              "ci_high": 0.942630153754009,
+              "p_value": 0.0007188507399533833
             }
           ],
           "n_strata": 95,
-          "n_events": 4780,
+          "n_events": 4737,
           "exposed_share": 0.13587871982032565
         }
       }
     },
     "quake": {
       "verdict": "exploration (no verdict)",
-      "power": 0.2132677597716255,
-      "p_bh": 0.06575639746031192,
+      "power": 0.21217939932455587,
+      "p_bh": 0.06955830476854244,
       "checks": {
         "m5_vs_m4_5": {
-          "strong_rate_ratio": 1.3428086007497937,
-          "strong_p": 0.37361459097772554,
-          "weak_rate_ratio": 0.8135298935454449,
-          "weak_p": 0.03210618746474463,
+          "strong_rate_ratio": 1.261606862283073,
+          "strong_p": 0.46373620913850266,
+          "weak_rate_ratio": 0.8174083865331012,
+          "weak_p": 0.036438980705423805,
           "holds": false
         }
       },
@@ -367,43 +365,43 @@
           "terms": [
             {
               "term": "exposed",
-              "rate_ratio": 0.8439649159522219,
-              "ci_low": 0.704447670477883,
-              "ci_high": 1.011113826063257,
-              "p_value": 0.06575639746031192
+              "rate_ratio": 0.8462655405447966,
+              "ci_low": 0.7066650629626219,
+              "ci_high": 1.0134438543079034,
+              "p_value": 0.06955830476854244
             },
             {
               "term": "moon",
-              "rate_ratio": 0.8853586118113991,
-              "ci_low": 0.36751041401944373,
-              "ci_high": 2.1328915905690127,
-              "p_value": 0.7860623361185175
+              "rate_ratio": 0.8135525476731158,
+              "ci_low": 0.3364534386365907,
+              "ci_high": 1.9671897261847056,
+              "p_value": 0.6469224537070446
             }
           ],
-          "n_strata": 339,
-          "n_events": 728,
-          "exposed_share": 0.2857142857142857
+          "n_strata": 337,
+          "n_events": 724,
+          "exposed_share": 0.28522039757994816
         },
         "high_quality": {
           "terms": [
             {
               "term": "exposed",
-              "rate_ratio": 0.9892963417096189,
-              "ci_low": 0.7741429783597754,
-              "ci_high": 1.2642461135456948,
-              "p_value": 0.9314616978461698
+              "rate_ratio": 0.9948797139359551,
+              "ci_low": 0.7772522153642211,
+              "ci_high": 1.273442038035843,
+              "p_value": 0.9674889464764853
             },
             {
               "term": "moon",
-              "rate_ratio": 0.6427719296800195,
-              "ci_low": 0.18849216045137418,
-              "ci_high": 2.1918988704634152,
-              "p_value": 0.4801059080051314
+              "rate_ratio": 0.5422713306453305,
+              "ci_low": 0.15696704525477737,
+              "ci_high": 1.8733753671833713,
+              "p_value": 0.33327937734012936
             }
           ],
-          "n_strata": 211,
-          "n_events": 360,
-          "exposed_share": 0.2756324900133156
+          "n_strata": 209,
+          "n_events": 356,
+          "exposed_share": 0.27479892761394104
         }
       }
     }
