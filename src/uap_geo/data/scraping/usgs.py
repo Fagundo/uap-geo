@@ -80,12 +80,15 @@ class EarthquakeSource(DataSource):
                 "maxlongitude": max_lon,
                 "orderby": "time-asc",
             }
-            path = self.downloader.fetch_url(self.name, self.config.urls[0], f"quakes_{year}.csv", params=params)
+            path = self.downloader.fetch_url(
+                self.name, self.config.urls[0], f"quakes_{year}_m{self.min_magnitude:g}.csv", params=params
+            )
             frame = pd.read_csv(path, usecols=["time", "latitude", "longitude", "mag"])
             if len(frame) >= self.MAX_EVENTS_PER_QUERY:
                 log.warning("Earthquakes %d hit the %d-event cap; split the query", year, self.MAX_EVENTS_PER_QUERY)
             frames.append(frame)
         quakes = pd.concat(frames, ignore_index=True)
+        quakes["time"] = pd.to_datetime(quakes["time"], utc=True, format="ISO8601").dt.tz_localize(None)
         return gpd.GeoDataFrame(
             quakes, geometry=gpd.points_from_xy(quakes["longitude"], quakes["latitude"]), crs=WGS84
         )

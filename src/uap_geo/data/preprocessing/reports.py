@@ -26,6 +26,9 @@ class ColumnResolver:
         "country": ("Country", "country", "country_code"),
         "summary": ("Summary", "summary", "Text", "text", "description", "Description"),
         "shape": ("Shape", "shape"),
+        "utc": ("reported_date_time_utc", "occurred_utc", "datetime_utc"),
+        "duration": ("duration_seconds", "Duration (seconds)"),
+        "timezone": ("timezone", "tz"),
         "lat": ("latitude", "lat", "city_latitude"),
         "lon": ("longitude", "lon", "city_longitude"),
     }
@@ -97,6 +100,15 @@ class ReportCleaner:
         frame["summary"] = raw[summary_col].astype("string") if summary_col else pd.NA
         shape_col = resolver.find("shape")
         frame["shape"] = raw[shape_col].astype("string") if shape_col else pd.NA
+        utc_col = resolver.find("utc")
+        frame["occurred_utc"] = (
+            pd.to_datetime(raw[utc_col], errors="coerce", utc=True, format="mixed").dt.tz_localize(None)
+            if utc_col else pd.NaT
+        )
+        duration_col = resolver.find("duration")
+        frame["duration_s"] = pd.to_numeric(raw[duration_col], errors="coerce") if duration_col else float("nan")
+        tz_col = resolver.find("timezone")
+        frame["timezone"] = raw[tz_col].astype("string") if tz_col else pd.NA
         lat_col, lon_col = resolver.find("lat"), resolver.find("lon")
         if lat_col and lon_col:  # pre-geocoded sources keep their coordinates
             frame["lat"] = pd.to_numeric(raw[lat_col], errors="coerce")

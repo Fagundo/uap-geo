@@ -42,7 +42,8 @@ def read_report_json(path: Path) -> pd.DataFrame:
 def join_places(sightings: pd.DataFrame, places: pd.DataFrame) -> pd.DataFrame:
     """Attach place coordinates to sightings on (city, state, country_code)."""
     keys = ["city", "state", "country_code"]
-    coords = places[[*keys, "latitude", "longitude"]].drop_duplicates(subset=keys)
+    extra = [c for c in ("timezone",) if c in places.columns]
+    coords = places[[*keys, "latitude", "longitude", *extra]].drop_duplicates(subset=keys)
     return sightings.merge(coords, on=keys, how="left")
 
 
