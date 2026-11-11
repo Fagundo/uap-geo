@@ -100,30 +100,37 @@ class SkyLanternRule(ExplanationRule):
 
 class FireworksRule(ExplanationRule):
     def confidence(self, ctx):
-        high = contains_any(ctx.text, self.params["text_any"]) & on_holiday(ctx.local_time) & evening(ctx.local_time)
-        return self._label(high, pd.Series(False, index=ctx.index))
+        match = contains_any(ctx.text, self.params["text_any"]) & on_holiday(ctx.local_time) & evening(ctx.local_time)
+        return _fixed(self, ctx, match)
 
 
 class AuroraRule(ExplanationRule):
+    """Text only. v1 also matched a northern glow on Kp >= 5 nights, which was circular with the storm test."""
+
     def confidence(self, ctx):
-        named = contains_any(ctx.text, self.params["text_any"])
-        northern_glow = contains_any(ctx.text, ["glow"]) & contains_any(ctx.text, ["north"]) & (ctx.kp_max >= 5)
-        return self._label(named | northern_glow, pd.Series(False, index=ctx.index))
+        return _fixed(self, ctx, contains_any(ctx.text, self.params["text_any"]))
+
+
+def _fixed(rule: ExplanationRule, ctx: RuleContext, match: pd.Series) -> pd.Series:
+    """Label matches at the rule's configured confidence (medium by default)."""
+    none = pd.Series(False, index=ctx.index)
+    if rule.params.get("confidence", MEDIUM) == HIGH:
+        return rule._label(match, none)
+    return rule._label(none, match)
 
 
 class KeywordRule(ExplanationRule):
     """Fixed-confidence keyword rule (aircraft, drone)."""
 
     def confidence(self, ctx):
-        match = contains_any(ctx.text, self.params["text_any"])
-        if self.params.get("confidence", MEDIUM) == HIGH:
-            return self._label(match, pd.Series(False, index=ctx.index))
-        return self._label(pd.Series(False, index=ctx.index), match)
+        return _fixed(self, ctx, contains_any(ctx.text, self.params["text_any"]))
 
 
 class MeteorRule(ExplanationRule):
     def confidence(self, ctx):
         text = contains_any(ctx.text, self.params["text_any"])
+        if self.params.get("text_none"):
+            text &= ~contains_any(ctx.text, self.params["text_none"])
         brief = ctx.duration_s <= float(self.params.get("duration_max_seconds", 10))
         return self._label(text & brief, text & ~brief)
 

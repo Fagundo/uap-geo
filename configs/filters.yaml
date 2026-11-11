@@ -1,7 +1,11 @@
-# Explanation filter rules, approved 2026-11-10 (version 1). Versioned like hypotheses:
-# a changed rule set gets a new version, recorded in every result that uses it.
-# The filtered tier drops events matched at high confidence only.
-version: 1
+# Explanation filter rules. Versioned like hypotheses: a changed rule set gets a new version,
+# recorded in every result that uses it. The filtered tier drops events matched at high confidence only.
+# v1 approved 2026-11-10. v2 (2026-11-10) after validation (results/filters/validation_v1.md):
+#   aurora    -> medium only, no Kp clause: ~3% precision, and the Kp clause keyed on the storm exposure
+#   fireworks -> medium only: ~3% precision (matches fireworks as context, not as the cause)
+#   meteor    -> excludes reports that describe hovering, turns or "slower than a meteor" (77% -> 92% in sample)
+#   nuforc_note -> also matches notes naming a star, Sirius, missile, advertising lights or lens flare
+version: 2
 rules:
   starlink_train:
     applies_from: 2019-05-24
@@ -21,11 +25,10 @@ rules:
     text_any: [firework, burst, "colored flashes"]
     dates: [July 3-5, Dec 31-Jan 1]
     local_time: evening
-    confidence: high
+    confidence: medium   # v2: was high
   aurora:
-    text_any: [aurora, "northern lights", "curtain of light", "green glow"]
-    or: glow in the northern sky on a night with Kp >= 5
-    confidence: high
+    text_any: ["aurora borealis", "northern lights"]
+    confidence: medium   # v2: was high, with a Kp >= 5 clause (circular with H-geo-01's storm exposure)
   planet:
     text_any: [stationary, hovering, "not moving", "bright star"]
     duration_min_minutes: 15
@@ -40,6 +43,9 @@ rules:
     confidence: medium
   meteor_fireball:
     text_any: [streak, "shooting star", fireball, meteor]
+    text_none: [hover, stationary, "stopped", "changed direction", "changes direction", "change direction",
+                "changed course", "changes course", "zig", "not a meteor", "not a shooting star",
+                "slower than", "other than a meteor", "directional change"]
     duration_max_seconds: 10
     boost: major meteor-shower peak nights
     confidence: high
@@ -48,7 +54,7 @@ rules:
     phase: later (needs historical orbit data)
     confidence: high when matched
   nuforc_note:
-    text_regex: "\\(\\(NUFORC Note:.*?(starlink|iss|international space station|satellite|planet|venus|jupiter|lantern|hoax|aircraft|meteor|rocket|flare).*?\\)\\)"
+    text_regex: "\\(\\(NUFORC Note:.*?(starlink|iss|international space station|satellite|planet|venus|jupiter|sirius|star|lantern|hoax|aircraft|meteor|rocket|missile|flare|advertis).*?\\)\\)"
     confidence: high
 validation: hand-label about 300 random summaries; drop or tighten any rule below 80% precision
 circularity_guard: a hypothesis lists in filters_disabled any rule that keys on its own exposure

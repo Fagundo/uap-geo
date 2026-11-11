@@ -43,6 +43,9 @@ choices:
   filter_validation: >
     Rule precision is checked on a stratified sample labelled by Claude (an AI), not by a human; the
     report card says so. A rule below 80% precision is tightened or dropped before the confirm run.
+    Done before registration: filters v2 demotes aurora and fireworks to medium (about 3% precision
+    each; the aurora Kp clause also keyed on the storm exposure, so no filter now keys on storms) and
+    adds exclusions to meteor_fireball (77% before). See results/filters/validation_v1.md.
 
 parameters:
   dedup: {km: 50, hours: 3}
