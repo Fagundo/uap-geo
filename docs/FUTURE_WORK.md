@@ -29,3 +29,12 @@ July 4 and New Year's Eve nights keep a rise of about 2.5x and 1.8x after removi
 and fire-coloured-light wording. Read a sample of those reports to see what they describe
 (undescribed lanterns, drones, aircraft, other), and consider a text classifier for the unexplained
 tier instead of word lists.
+
+## Persistence refinements (from H-persist-01)
+
+The 2001-2020 watch list is still led by hotel-tourism beach counties (the seasonal-housing control
+catches vacation homes, not hotel stays) and by small Virginia independent cities, whose reports are
+named for the city while nearby residents are counted in the surrounding county. Next steps: a
+visitor-volume control (lodging tax or hotel occupancy by county), merging Virginia independent
+cities into their surrounding counties, the 2011-2020 -> 2021-2023 holdout check, and a forecasting
+version that scores counties by prior excess and measures ranking accuracy on later years.
