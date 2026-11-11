@@ -1,0 +1,63 @@
+# Draft for review; not yet registered. Once registered, do not edit: a changed hypothesis gets a new ID.
+id: H-anomaly-01
+title: Structure in high-strangeness residual reports
+status: draft
+claim: >
+  Among reports left after removing known explanations (residual set v1), events whose reports describe
+  high-strangeness features (LLM-extracted, validated on known causes) show structure that reporting habits
+  do not explain: (1) counties keep their excess of such events from one period to the next beyond their
+  excess of reports in general, and (2) independent witnesses to the same event agree on odd motion more
+  often than chance.
+
+inputs:
+  residual_set: configs/residual.yaml (v1) -> results/residual/residual_reports.parquet
+  features: >
+    configs/llm.yaml model, schema features-v1, prompt in src/uap_geo/llm/schema.py; the model sees only
+    the report text with NUFORC notes removed and the duration, never the date or place
+  strangeness: >
+    strangeness-v1 (src/uap_geo/llm/strangeness.py), 0-7: odd motions (sharp turn, sudden acceleration,
+    vanished instantly, split or merged, hovered then moved; up to 3), structured shape, silent and close,
+    physical effects, no ordinary cause above 0.3 likelihood. High strangeness = 3 or more.
+
+gate:   # must pass on the stratified validation sample before any test runs; otherwise revise as a new version
+  - launch-window, Starlink-train and meteor-rule reports have a high-strangeness share at most half the residual group's
+  - the extractor names the expected ordinary cause as most likely for at least 60% of launch-window, Starlink-train and meteor-rule reports
+  - agreement with Michael's labels on a 100-report subsample is reported (Cohen's kappa on high strangeness), no threshold
+
+unit: event (reports within 50 km and 3 hours); an event is high strangeness if any of its reports is
+tiers: an event is in the residual tier if none of its reports is explained or possible
+
+tests:
+  persistence:
+    model: >
+      as H-persist-01 (negative binomial, observer controls, tourism and college shares, state fixed effects,
+      state-clustered errors, holiday and launch nights removed), outcome = high-strangeness residual events,
+      covariates = prior-period shrunken excess of high-strangeness residual events and prior-period excess of all events
+    prediction: rate ratio per SD of prior high-strangeness excess > 1, with prior all-event excess in the model
+    discriminating_checks:
+      - holds when the outcome is restricted to events with a duration of at least 60 seconds (excludes brief glimpses)
+  corroboration:
+    sample: residual-tier events with at least two reports from different cities
+    measure: both reports describe an odd motion (sharp turn, sudden acceleration, vanished instantly, split or merged)
+    null: pairs formed by permuting reports across events within the same year and state (1,000 permutations)
+    prediction: observed share of both-odd pairs exceeds the permutation null (odds ratio > 1)
+    discriminating_checks:
+      - known-cause multi-report events (launch window, Starlink train) do not show the same excess of both-odd pairs
+
+splits:
+  explore: [2001, 2010]   # persistence: prior 2001-2005 -> outcome 2006-2010
+  confirm: [2011, 2020]   # persistence: prior 2001-2010 -> outcome 2011-2020
+  holdout: [2021, null]
+
+multiple_testing: Benjamini-Hochberg across the two tests
+smallest_effect_of_interest: 1.10
+decision_rules:
+  confirmed: BH-adjusted p < 0.05, effect > 1, and the discriminating check holds
+  refuted: power >= 0.80 and the upper 95% limit below 1.10
+  underpowered: power < 0.50
+
+limits: >
+  The summaries are short (about 88 characters), so features are coarse. Strangeness is a property of the
+  description, not of the object; the gate checks that known causes do not score as strange, but writing
+  style can still vary by place. A confirmed result shows non-random structure in strange descriptions;
+  it does not show what was seen.
