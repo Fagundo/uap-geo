@@ -1,8 +1,10 @@
 {
-  "git_commit": "add562b00966b07a09b6ec61522fccca4edd7e89",
+  "git_commit": "5d35db9dafe5e90c54a5a790226d4a625a62ef79",
   "git_dirty": false,
   "inputs": {
     "data/raw/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "data/raw/acs_housing/acsdt5y2021-b25001.dat": "ddc83069353064aee56b4fb58df7bdc04ea9c01307def64028d2aeb9424dcf75",
+    "data/raw/acs_housing/acsdt5y2021-b25004.dat": "0a6ebcf71d078820e3883ad3b480db4c15ab868e797fa677e1a1645169b91589",
     "data/raw/airports/airports.csv": "b311ab030775908769395b6814840f01732b27a5176b85f1a9ed3b5d98ff052b",
     "data/raw/cloud_cover/MODCF_meanannual.tif": "ed8c67d259bd02ab9960f8b385299b374ee906d2924c33e80759faf594acfa46",
     "data/raw/coastline/ne_10m_coastline.zip": "bfa04cdbcbef07ef90dfca1dabb48062eca29900a113df0f389303e255484017",
@@ -207,12 +209,12 @@
     "data/raw/rivers/ne_10m_rivers_north_america.zip": "7fbe85a2acbf1f3ef4361a16bb39677ad1ea86f888be1689f7a4caeafc7529e8"
   },
   "python": "3.12.16",
-  "run_id": "H-persist-01-explore-20261111T123954Z",
+  "run_id": "H-persist-01-explore-20261111T125018Z",
   "settings": {},
   "specs": {
     "filters": "8b2d4002b6f7fc9b75bc09a2f2b7179b72d7d7a42239921c5ddd2d694f6eeae9",
-    "impl": "d42c1f8d5cf79787786fe5e68ca290945b8ad088a8ef4dfd520a8c552b42d29f",
-    "spec": "66b435d6d475a6895a31e26a7e39f0caf09b0da8883fdca7d563a6a9224d6ce1"
+    "impl": "5b6f3c8eba2d7cba50a3f1f1cc4f33c573730a34dbc7e0e0a20ba14d72c05c75",
+    "spec": "8fd1abbcee059a5dd6540f33918047efde6836f3d31ad7cb28a2763c68c8b7ec"
   },
-  "started_utc": "2026-11-11T12:39:54+00:00"
+  "started_utc": "2026-11-11T12:50:18+00:00"
 }
