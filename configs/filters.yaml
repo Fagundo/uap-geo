@@ -1,0 +1,54 @@
+# Explanation filter rules, approved 2026-11-10 (version 1). Versioned like hypotheses:
+# a changed rule set gets a new version, recorded in every result that uses it.
+# The filtered tier drops events matched at high confidence only.
+version: 1
+rules:
+  starlink_train:
+    applies_from: 2019-05-24
+    text_any: ["line of lights", "string of lights", "train of lights", "lights in a row", "evenly spaced", "starlink"]
+    high_if: within 10 days after a Starlink launch and within 2 hours of local dusk or dawn
+    else: medium
+  rocket_plume:
+    text_any: [plume, spiral, jellyfish, rocket]
+    timing: 0-60 minutes after a launch within 1000 km
+    high_if: text and timing both match
+    else: medium
+  sky_lantern:
+    text_all_groups: [["orange", "red"], ["orb", "orbs", "ball", "balls"], ["drift", "floating", "slow", "silent", "rising"]]
+    high_if: July 3-5 or Dec 31-Jan 1
+    else: medium
+  fireworks:
+    text_any: [firework, burst, "colored flashes"]
+    dates: [July 3-5, Dec 31-Jan 1]
+    local_time: evening
+    confidence: high
+  aurora:
+    text_any: [aurora, "northern lights", "curtain of light", "green glow"]
+    or: glow in the northern sky on a night with Kp >= 5
+    confidence: high
+  planet:
+    text_any: [stationary, hovering, "not moving", "bright star"]
+    duration_min_minutes: 15
+    check: Venus or Jupiter brighter than magnitude -2 and above the horizon at that place and time (Skyfield)
+    high_if: reported direction matches the planet
+    else: medium
+  aircraft_helicopter:
+    text_any: ["blinking red", "blinking green", "strobe", "engine sound", rotor, "like a plane", "like a helicopter"]
+    confidence: medium
+  drone:
+    text_any: [drone, quadcopter, buzzing]
+    confidence: medium
+  meteor_fireball:
+    text_any: [streak, "shooting star", fireball, meteor]
+    duration_max_seconds: 10
+    boost: major meteor-shower peak nights
+    confidence: high
+  iss_satellite_flare:
+    check: a steady light crossing in 2-6 minutes matching a visible ISS pass, or a brief flare
+    phase: later (needs historical orbit data)
+    confidence: high when matched
+  nuforc_note:
+    text_regex: "\\(\\(NUFORC Note:.*?(starlink|iss|international space station|satellite|planet|venus|jupiter|lantern|hoax|aircraft|meteor|rocket|flare).*?\\)\\)"
+    confidence: high
+validation: hand-label about 300 random summaries; drop or tighten any rule below 80% precision
+circularity_guard: a hypothesis lists in filters_disabled any rule that keys on its own exposure

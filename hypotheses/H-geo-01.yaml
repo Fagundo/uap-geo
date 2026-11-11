@@ -1,0 +1,58 @@
+# Pre-registered 2026-11-10, before any analysis of these exposures.
+# Do not edit. A changed hypothesis gets a new ID; the registry stores this file's hash.
+id: H-geo-01
+title: Geophysical triggers (Persinger)
+status: registered
+registered: 2026-11-10
+claim: >
+  Unexplained UAP reports rise during geomagnetic storms and in the two weeks before
+  nearby earthquakes, compared with the same place on comparable nights.
+literature:
+  - "Persinger, M. A. (1981). Geophysical variables and behavior: III. Prediction of UFO reports by geomagnetic and seismic activity. Perceptual and Motor Skills 53, 115-122."
+  - "Persinger, M. A. & Derr, J. S. (1985). Geophysical variables and behavior: XXIII. Relations between UFO reports within the Uinta Basin and local seismicity. Perceptual and Motor Skills 60, 143-152."
+
+data:
+  reports: TidyTuesday 2023-06-20 NUFORC extract (event timestamps, city coordinates)
+  kp: GFZ Potsdam 3-hourly Kp index
+  earthquakes: USGS ComCat, contiguous US; mainshocks only (no event within 30 days and 50 km of a larger one)
+
+unit: county-day
+outcome: events per county-day (reports within 50 km and 3 hours merged into one event)
+outcome_tiers: [all, filtered, high_quality]
+primary_tier: filtered
+filters_disabled: []   # no filter rule keys on storms or earthquakes; the aurora rule stays on
+model: conditional Poisson, stratified by exposure x county
+adjust: [moon_illumination]
+
+tests:
+  storm:
+    exposure: national daily maximum Kp >= 6
+    window_days: [0, 1]            # storm day and the following day
+    controls: same county, same weekday, offsets of +-7, +-14, +-21, +-28 days, excluding any storm day
+    prediction: rate_ratio > 1
+    discriminating_checks:
+      - effect also present in counties south of 37 N, where aurora is rarely visible
+      - effect larger for Kp >= 8 than for Kp 6-7
+  quake:
+    exposure: mainshock M >= 4.0 within 100 km of the county centroid
+    window_days: [-14, 0]          # 14 days before through the quake day
+    controls: same county, equal-length windows offset +-28 and +-56 days, with no M >= 3.0 within 100 km
+    prediction: rate_ratio > 1
+    discriminating_checks:
+      - effect larger for M >= 5.0 than for M 4.0-5.0
+
+splits:
+  explore: [2001, 2010]   # pipeline checks and power only; nothing above is tuned
+  confirm: [2011, 2020]
+  holdout: [2021, null]   # plus any newly obtained data
+
+multiple_testing: Benjamini-Hochberg across the two tests, primary tier
+smallest_effect_of_interest: 1.10   # rate ratio
+decision_rules:
+  confirmed: BH-adjusted p < 0.05 in the filtered tier on the confirm split, and at least one discriminating check holds
+  refuted: power >= 0.80 and the upper 95% confidence limit is below 1.10
+  underpowered: power < 0.50; reported as underpowered, not as a null
+
+limits: >
+  A confirmed effect shows that reporting rises with geophysical activity, not why.
+  Earthquake lights, altered perception, and people spending more time outdoors would all fit.
