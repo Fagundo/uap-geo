@@ -22,7 +22,11 @@ def _fmt_p(p: float) -> str:
 
 
 class ReportCard:
-    def __init__(self, hypothesis_id, split, spec, impl, manifest, table, outcomes, primary_tier) -> None:
+    def __init__(self, hypothesis_id, split, spec, impl, manifest, table, outcomes, primary_tier,
+                 test_labels: dict | None = None, check_labels: dict | None = None, extra: list[str] | None = None) -> None:
+        self.extra = list(extra or [])
+        self.test_labels = {**TEST_LABEL, **(test_labels or {})}
+        self.check_labels = {**CHECK_LABEL, **(check_labels or {})}
         self.hypothesis_id = hypothesis_id
         self.split = split
         self.spec = spec
@@ -75,10 +79,10 @@ class ReportCard:
                   "| --- | --- | --- | --- | --- |"]
         for o in self.outcomes:
             r = o.by_tier[self.primary].terms.loc["exposed"]
-            lines.append(f"| {TEST_LABEL[o.name]} | **{o.verdict}** | {r['rate_ratio']:.3f} ({r['ci_low']:.3f}–{r['ci_high']:.3f}) "
+            lines.append(f"| {self.test_labels.get(o.name, o.name)} | **{o.verdict}** | {r['rate_ratio']:.3f} ({r['ci_low']:.3f}–{r['ci_high']:.3f}) "
                          f"| {_fmt_p(o.p_bh)} | {o.power:.0%} |")
         for o in self.outcomes:
-            lines += ["", f"## {TEST_LABEL[o.name]}", "", "| Tier | Rate ratio | 95% CI | p | Strata | Events |",
+            lines += ["", f"## {self.test_labels.get(o.name, o.name)}", "", "| Tier | Rate ratio | 95% CI | p | Strata | Events |",
                       "| --- | --- | --- | --- | --- | --- |"]
             for tier in TIERS:
                 res = o.by_tier[tier]
@@ -92,12 +96,18 @@ class ReportCard:
             for name, check in o.checks.items():
                 if "rate_ratio" in check:
                     detail = f"rate ratio {check['rate_ratio']:.3f}, p {_fmt_p(check['p_value'])}"
+                elif "labels" in check:
+                    a, b = check["labels"]
+                    detail = (f"{a} {check['strong_rate_ratio']:.3f} (p {_fmt_p(check['strong_p'])}) vs "
+                              f"{b} {check['weak_rate_ratio']:.3f}; difference p {_fmt_p(check['difference_p'])}")
                 elif "strong_rate_ratio" in check:
                     detail = (f"strong {check['strong_rate_ratio']:.3f} (p {_fmt_p(check['strong_p'])}) vs "
                               f"weaker {check['weak_rate_ratio']:.3f} (p {_fmt_p(check['weak_p'])})")
                 else:
                     detail = check.get("note", "")
-                lines.append(f"- {CHECK_LABEL.get(name, name)}: **{'holds' if check.get('holds') else 'does not hold'}** ({detail})")
+                lines.append(f"- {self.check_labels.get(name, name)}: **{'holds' if check.get('holds') else 'does not hold'}** ({detail})")
+        if self.extra:
+            lines += [""] + self.extra
         summary = self.table.summary
         lines += [
             "",

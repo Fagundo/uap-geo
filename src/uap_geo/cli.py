@@ -93,7 +93,8 @@ def main(argv: list[str] | None = None) -> None:
         _filters(args)
 
 
-STUDIES = {"H-geo-01": "uap_geo.hypotheses.geo_triggers:GeoTriggerStudy"}
+STUDIES = {"H-geo-01": "uap_geo.hypotheses.geo_triggers:GeoTriggerStudy",
+           "H-launch-01": "uap_geo.hypotheses.launches:LaunchStudy"}
 DIAGNOSTICS = {"H-geo-01": "uap_geo.hypotheses.diagnostics:DiagnosticsReport"}
 
 

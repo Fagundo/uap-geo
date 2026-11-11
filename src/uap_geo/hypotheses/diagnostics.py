@@ -17,7 +17,6 @@ import pandas as pd
 
 from uap_geo.common.geo import COUNTY_ID
 from uap_geo.data.preprocessing.mainshocks import haversine_km
-from uap_geo.events.moon import nightly_illumination
 from uap_geo.hypotheses.designs.conditional_poisson import ConditionalPoissonTest
 from uap_geo.hypotheses.designs.exposures import QuakeExposure, StormExposure, quake_local_night
 from uap_geo.hypotheses.geo_triggers import PRIMARY_TIER, GeoTriggerStudy

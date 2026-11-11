@@ -1,0 +1,60 @@
+# Draft for review; not yet registered. Once registered, do not edit: a changed hypothesis gets a new ID.
+id: H-launch-01
+title: Rocket launches seen at twilight
+status: draft
+claim: >
+  Rockets launched in twilight, when the exhaust plume is sunlit above a dark sky, raise UAP reports
+  in counties within 1,200 km of the pad on the night of the launch, compared with the same counties
+  on comparable nights.
+role: >
+  Positive control. The stimulus is real, visible and well documented (for example the Vandenberg
+  "jellyfish" of 22 December 2017). If the pipeline cannot detect it, its null results, including
+  H-geo-01, carry little weight; the pipeline (geocoding, times, merging, filters) is then reviewed
+  before any further hypothesis is tested.
+literature:
+  - "McDowell, J. C. General Catalog of Artificial Space Objects (GCAT), launch list. planet4589.org (CC-BY)."
+  - "NUFORC case notes attribute many reports to launches seen from the Southwest and the Southeast."
+
+data:
+  reports: TidyTuesday 2023-06-20 NUFORC extract (event timestamps, city coordinates)
+  launches: >
+    GCAT launch list. Launch attempts with a clock time, from sites in the contiguous US, that were
+    orbital attempts or reached an apogee of at least 100 km (orbital launches, ballistic missile tests,
+    high sounding rockets). Failures count: an attempt that leaves the pad is visible.
+
+unit: county-night (local observing night, 06:00 rollover)
+outcome: events per county-night (reports within 50 km and 3 hours merged into one event)
+outcome_tiers: [all, filtered, high_quality]
+primary_tier: filtered
+filters_disabled: [rocket_plume, starlink_train, nuforc_note]   # each keys on launches; NUFORC notes name launches as the explanation
+model: conditional Poisson, stratified by launch x distance band, county-nights as exposure time
+adjust: [moon_illumination]
+
+tests:
+  twilight:
+    exposure: >
+      a twilight launch (Sun 4 to 18 degrees below the horizon at the pad at liftoff) on the county's
+      local observing night, county centroid within 1,200 km of the pad
+    controls: same county, same weekday, offsets of +-7, +-14, +-21, +-28 days, dropping county-nights exposed to any launch
+    prediction: rate_ratio > 1
+    discriminating_checks:
+      - reports concentrate in the 90 minutes after liftoff (rate ratio for that window above the whole-night rate ratio)
+      - twilight launches raise reports more than daytime launches (daytime launches serve as a negative control)
+      - the effect is stronger within 400 km of the pad than at 800-1,200 km
+
+splits:
+  explore: [2001, 2010]   # pipeline checks and power only; nothing above is tuned
+  confirm: [2011, 2020]
+  holdout: [2021, null]
+
+multiple_testing: none needed (one primary test)
+smallest_effect_of_interest: 1.10   # rate ratio
+decision_rules:
+  confirmed: p < 0.05 and rate ratio > 1 in the filtered tier on the confirm split, and at least one discriminating check holds
+  refuted: power >= 0.80 and the upper 95% confidence limit is below 1.10
+  underpowered: power < 0.50; reported as underpowered, not as a null
+
+limits: >
+  A confirmed effect shows that visible launches generate reports, which is expected; its value is
+  in showing the pipeline can see a real stimulus, and in sizing how much launches contribute.
+  It says nothing about reports on other nights.

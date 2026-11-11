@@ -1,0 +1,38 @@
+# Implementation choices for H-launch-01, fixed before any confirm run.
+# Registered together with the spec and filters; a confirm run refuses to start if any changes.
+hypothesis: H-launch-01
+notes:
+  launch_times: GCAT Launch_JD to UTC; launches whose date has no clock time are dropped.
+  launch_sites: GCAT sites.tsv coordinates; sites inside the contiguous-US box (24-50 N, 66-125 W).
+  lighting: >
+    Solar altitude at the pad at liftoff from almanac formulas (about 0.01 degree). night below -18,
+    twilight -18 to -4, day above -4. Observers farther east see a darker sky; the distance check covers this.
+  county_night: >
+    Each county's observing night uses local solar time from its centroid longitude (06:00 rollover),
+    so one launch can fall on different calendar nights in different counties.
+  strata: >
+    launch x distance band (0-400, 400-800, 800-1,200 km). Counties in a band are summed per row, with
+    the number of county-nights as exposure time, so dropped (contaminated) county-nights are handled exactly.
+  same_night_launches: two launches exposing the same county-night are separate strata; both include it.
+  window_check: >
+    Events whose first report falls in the 90 minutes after liftoff on exposed rows, against the same
+    clock window shifted by the offset on control rows; same strata and exposure time.
+  comparisons: >
+    A check holds when the first estimate exceeds 1 with p < 0.05 and exceeds the second
+    (one-sided z test on log rate ratios, p < 0.05).
+  verdict: >
+    Confirmed: p < 0.05 and rate ratio > 1 in the filtered tier, and at least one discriminating check
+    holds. Refuted: power >= 0.80 and upper 95% limit < 1.10. Underpowered: power < 0.50. Otherwise
+    inconclusive. Explore runs get no verdict.
+
+parameters:
+  dedup: {km: 50, hours: 3}
+  quality: {min_reports: 2, min_duration_s: 300}
+  launch:
+    min_apogee_km: 100
+    radius_km: 1200
+    bands_km: [0, 400, 800, 1200]
+    offsets_days: [-28, -21, -14, -7, 7, 14, 21, 28]
+    twilight_sun_alt: [-18, -4]
+    window_minutes: 90
+  power: {rate_ratio: 1.10, alpha: 0.05, underpowered_below: 0.50, refute_requires: 0.80}

@@ -116,6 +116,10 @@ sources:
   kp:                         # GFZ Potsdam 3-hourly Kp since 1932 (nowcast + definitive)
     urls:
       - https://kp.gfz.de/fileadmin/files_for_gfz_cms/Kp_ap_since_1932.txt
+  gcat_launches:              # Jonathan McDowell's GCAT (CC-BY): every launch attempt, and launch-site coordinates
+    urls:
+      - https://planet4589.org/space/gcat/tsv/launch/launch.tsv
+      - https://planet4589.org/space/gcat/tsv/tables/sites.tsv
   earthquakes:
     urls:
       - https://earthquake.usgs.gov/fdsnws/event/1/query
