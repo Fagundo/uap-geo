@@ -1,0 +1,26 @@
+name: peek urls
+
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "Space-separated URLs to fetch and print the first lines of"
+        required: true
+
+jobs:
+  peek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync
+      - name: Peek
+        env:
+          URLS: ${{ inputs.urls }}   # passed via env, never interpolated into the script
+        run: |
+          read -r -a argv <<< "$URLS"
+          uv run python scripts/peek_urls.py "${argv[@]}"
