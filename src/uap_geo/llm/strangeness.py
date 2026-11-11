@@ -12,6 +12,32 @@ STRUCTURED = {"disc", "triangle", "cylinder_or_cigar", "rectangle", "chevron_or_
 HIGH_THRESHOLD = 3
 
 
+def normalize(features: dict) -> dict:
+    """Repair the odd malformed output: nested fields returned as JSON strings, probabilities as strings."""
+    out = dict(features)
+    for key in ("conventional_likelihood", "shapes", "motions", "physical_effects", "colours", "evidence"):
+        value = out.get(key)
+        if isinstance(value, str):
+            try:
+                out[key] = json.loads(value)
+            except ValueError:
+                out[key] = {} if key == "conventional_likelihood" else [value]
+    lk = out.get("conventional_likelihood")
+    if not isinstance(lk, dict):
+        lk = {}
+    clean = {}
+    for k, v in lk.items():
+        try:
+            clean[k] = float(v)
+        except (TypeError, ValueError):
+            continue
+    out["conventional_likelihood"] = clean
+    for key in ("shapes", "motions", "physical_effects"):
+        if not isinstance(out.get(key), list):
+            out[key] = []
+    return out
+
+
 def score(features: dict) -> int:
     """0-7: odd motions (up to 3), structured shape (1), silent and close (1), physical effects (1),
     no ordinary cause above 0.3 likelihood (1)."""
@@ -32,8 +58,8 @@ def feature_table(raw: pd.DataFrame) -> pd.DataFrame:
     for r in raw.itertuples(index=False):
         if not isinstance(r.features, str):
             continue
-        f = json.loads(r.features)
-        lk = f.get("conventional_likelihood") or {}
+        f = normalize(json.loads(r.features))
+        lk = f["conventional_likelihood"]
         top = max(lk, key=lk.get) if lk else None
         rows.append({"report_id": r.report_id, "strangeness": score(f), "top_conventional": top,
                      "top_conventional_p": lk.get(top) if top else None, "detail": f.get("detail"),

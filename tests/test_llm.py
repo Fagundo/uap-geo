@@ -59,3 +59,9 @@ def test_v2_prompt_adds_cause_guide():
     v1 = FeatureExtractor("m", schema="features-v1").params("x", 1.0)["system"][0]["text"]
     v2 = FeatureExtractor("m", schema="features-v2").params("x", 1.0)["system"][0]["text"]
     assert v2.startswith(v1) and "jellyfish" in v2 and "jellyfish" not in v1
+
+
+def test_feature_table_repairs_string_fields():
+    bad = dict(FEATURES, conventional_likelihood=json.dumps({"aircraft": "0.8", "meteor": 0.1}), motions="sharp_turn")
+    table = feature_table(pd.DataFrame({"report_id": ["a"], "features": [json.dumps(bad)]}))
+    assert table.loc[0, "top_conventional"] == "aircraft" and table.loc[0, "p_aircraft"] == 0.8

@@ -217,7 +217,9 @@ def _llm(args: argparse.Namespace) -> None:
         raw.to_parquet(out / f"{args.name}_features_raw.parquet", index=False)
         print(f"extracted {raw['features'].notna().sum()} of {len(raw)}; errors: {raw['error'].dropna().head(3).tolist()}")
     elif args.action == "validate":
-        raw = pd.read_parquet(out / f"{args.name}_features_raw.parquet")
+        raw = pd.read_parquet(out / ("features_raw.parquet" if args.name == "full" else f"{args.name}_features_raw.parquet"))
+        print(f"{raw['features'].notna().sum():,} of {len(raw):,} reports have features; errors: "
+              f"{raw['error'].value_counts().to_dict()}")
         path = validation_report(feature_table(raw), residual, out / f"validation_{args.name}.md", args.name)
         print(path.read_text())
     elif args.action == "submit":
