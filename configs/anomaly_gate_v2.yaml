@@ -1,0 +1,19 @@
+# Known-cause gate v2 for H-anomaly-01, written and committed 2026-11-11 before any twilight-only numbers
+# were computed. Replaces gate v1, whose launch group mixed twilight launches (most nearby reports in the
+# 90-minute window are the rocket: window rate ratio 9-16 in H-launch-01) with night launches (about a
+# quarter are). Features: features-v2 from the full batch (prompt unchanged). Reports from validation
+# samples 1 and 2 are excluded, so no report used to revise the prompt counts here.
+version: 2
+features: results/llm/features_raw.parquet
+residual: results/residual/residual_v2_reports.parquet
+exclude_samples: [results/llm/sample_reports.parquet, results/llm/sample2_reports.parquet]
+groups:
+  twilight_launch_window:
+    definition: report within 90 minutes after a launch with the Sun 4-18 degrees below the horizon at the pad, within 1,200 km
+    expected_cause: rocket_launch
+  starlink_train: {reason: starlink_train, expected_cause: starlink_train}
+  meteor_rule: {reason: meteor_fireball, expected_cause: meteor}
+criteria:
+  named_top_min: 0.60            # each group: expected cause rated most likely in at least 60% of reports
+  high_strangeness_ratio_max: 0.5  # each group's high-strangeness share at most half the residual tier's (residual set v2)
+pass_rule: every criterion holds for every group
