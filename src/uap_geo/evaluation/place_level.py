@@ -24,6 +24,7 @@ log = logging.getLogger(__name__)
 
 @dataclass
 class PlaceLevelResult:
+    size_label: str
     coefficients: pd.DataFrame  # odds ratio per +1 SD of each term, 95% CI, p-value
     medians: pd.DataFrame  # median distance (km) to each water type, reporting vs not
     n_places: int
@@ -32,8 +33,12 @@ class PlaceLevelResult:
 
 
 class PlaceLevelTest:
-    def __init__(self, match_km: float) -> None:
+    def __init__(self, match_km: float, size_column: str = "ALAND", label: str = "land area") -> None:
+        """`size_column`: town size control, 'ALAND' (m², every place) or 'place_population'
+        (incorporated places only; CDPs have no population estimate and are left out)."""
         self.match_m = match_km * M_PER_KM
+        self.size_column = size_column
+        self.label = label
 
     def run(
         self,
@@ -43,7 +48,7 @@ class PlaceLevelTest:
         water: dict[str, gpd.GeoDataFrame],
     ) -> PlaceLevelResult:
         crs = counties.crs
-        pts = places.to_crs(crs)[["ALAND", "geometry"]].reset_index(drop=True)
+        pts = places.to_crs(crs)[[self.size_column, "geometry"]].reset_index(drop=True)
         pts["place_id"] = np.arange(len(pts))
         pts = gpd.sjoin(pts, counties[[COUNTY_ID, "geometry"]], predicate="within").drop(columns="index_right")
 
@@ -67,12 +72,18 @@ class PlaceLevelTest:
             pts[f"dist_{name}_km"] = dist_km
             pts[f"log_dist_{name}"] = np.log1p(dist_km)
             distance_cols.append(name)
-        pts["log_area"] = np.log1p(pts["ALAND"] / M2_PER_KM2)
+        size = pd.to_numeric(pts[self.size_column], errors="coerce")
+        if self.size_column == "ALAND":
+            size = size / M2_PER_KM2
+        pts["log_size"] = np.log1p(size)
 
         # Only counties with both reporting and non-reporting places carry information.
+        # Places without a size value (e.g. CDPs when sizing by population) are dropped before
+        # deciding which counties carry information.
+        pts = pts.dropna(subset=["log_size"])
         share = pts.groupby(COUNTY_ID)["reported"].transform("mean")
-        data = pts.loc[(share > 0) & (share < 1)].dropna(subset=[f"log_dist_{n}" for n in distance_cols] + ["log_area"])
-        terms = [f"log_dist_{n}" for n in distance_cols] + ["log_area"]
+        data = pts.loc[(share > 0) & (share < 1)].dropna(subset=[f"log_dist_{n}" for n in distance_cols])
+        terms = [f"log_dist_{n}" for n in distance_cols] + ["log_size"]
         z = (data[terms] - data[terms].mean()) / data[terms].std(ddof=0)
         model = ConditionalLogit(data["reported"].to_numpy(), z.to_numpy(), groups=data[COUNTY_ID].to_numpy())
         fit = model.fit(disp=False)
@@ -93,8 +104,9 @@ class PlaceLevelTest:
             .rename(index={0: "no reports", 1: "reports"})
         )
         result = PlaceLevelResult(
+            self.label,
             coefficients, medians, len(data), int(data["reported"].sum()), int(data[COUNTY_ID].nunique())
         )
-        log.info("Place-level conditional logit (%d places, %d counties):\n%s",
-                 result.n_places, result.n_counties, coefficients.round(4).to_string())
+        log.info("Place-level conditional logit, size = %s (%d places, %d counties):\n%s",
+                 self.label, result.n_places, result.n_counties, coefficients.round(4).to_string())
         return result

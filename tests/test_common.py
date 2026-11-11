@@ -85,3 +85,21 @@ def test_read_report_json_layouts(tmp_path):
     assert len(read_report_json(as_list)) == 1
     assert read_report_json(as_dict).loc[0, "report_id"] == "r1"
     assert len(read_report_json(as_lines)) == 2
+
+
+def test_cli_overrides_years_tag_and_shift_settings():
+    import argparse
+
+    from uap_geo.cli import apply_overrides
+
+    config = Config.from_yaml(ROOT / "configs" / "v1.yaml", root=ROOT)
+    args = argparse.Namespace(
+        permutations=50, start_year=2021, end_year=2023, tag="holdout",
+        shift_models=["R_confirmatory"], layer_permutations=["rivers=200"],
+    )
+    out = apply_overrides(config, args)
+    assert (out.study.start_year, out.study.end_year, out.study.shift_permutations) == (2021, 2023, 50)
+    assert out.study.shift_models == ("R_confirmatory",)
+    assert out.study.shift_permutations_by_layer["rivers"] == 200
+    assert out.paths.outputs == config.paths.outputs / "holdout"
+    assert out.paths.raw == config.paths.raw

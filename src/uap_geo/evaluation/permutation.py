@@ -76,10 +76,17 @@ class PermutationResult:
 
 class ShiftPermutation:
     def __init__(
-        self, specs: Sequence[ModelSpec], n: int, max_shift_km: float, max_rotate_deg: float, seed: int
+        self,
+        specs: Sequence[ModelSpec],
+        n: int,
+        max_shift_km: float,
+        max_rotate_deg: float,
+        seed: int,
+        n_by_layer: dict[str, int] | None = None,
     ) -> None:
         self.specs = list(specs)
         self.n = n
+        self.n_by_layer = dict(n_by_layer or {})
         self.max_shift_m = max_shift_km * M_PER_KM
         self.max_rotate_deg = max_rotate_deg
         self.rng = np.random.default_rng(seed)
@@ -105,7 +112,8 @@ class ShiftPermutation:
                             {"model": spec.name, "column": column, "log_rr": float(np.log(fit.loc[column, "rate_ratio"]))}
                         )
             base = table.drop(columns=list(layer.columns), errors="ignore").set_index(COUNTY_ID)
-            for trial in range(self.n):
+            n_trials = self.n_by_layer.get(layer.name, self.n)
+            for trial in range(n_trials):
                 shifted = self._shift(layer.data, origin)
                 trial_table = base.join(layer.features(counties, shifted)).reset_index()
                 for spec in self.specs:
@@ -125,8 +133,8 @@ class ShiftPermutation:
                                     "log_rr": float(np.log(coefficients.loc[column, "rate_ratio"])),
                                 }
                             )
-                if (trial + 1) % 10 == 0:
-                    log.info("Shift test %s: %d/%d", layer.name, trial + 1, self.n)
+                if (trial + 1) % 50 == 0:
+                    log.info("Shift test %s: %d/%d", layer.name, trial + 1, n_trials)
         observed = pd.DataFrame(observed_rows).set_index(["model", "column"])
         result = PermutationResult(observed, pd.DataFrame(null_rows))
         log.info("Shift-test p-values:\n%s", result.p_values().to_string(index=False))

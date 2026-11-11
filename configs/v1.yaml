@@ -12,6 +12,11 @@ study:
     - rivers
     - lakes
     - reservoirs
+  shift_permutations_by_layer:  # overrides shift_permutations for a layer
+    rivers: 1000
+  shift_models:               # models the shift tests are run on
+    - F_plus_radiation
+    - R_confirmatory
   min_reservoir_acre_ft: 1000 # dams below this normal storage are not counted as reservoirs
   place_match_km: 5           # report-level test: a report belongs to the nearest Census place within this distance
   max_shift_km: 400
@@ -40,14 +45,25 @@ models:
     - magnetic_anomaly
   region_effects:             # model C = model B + these categorical fixed effects
     - state_fips
-  settlement_controls:        # model D = model C + these; reports sit at town points and towns sit on rivers
+  settlement_controls:        # model D = model C + these; reports sit at town points, and towns, roads and rail follow rivers
     - places_per_km2
+    - primary_road_length_per_km2
+    - rail_length_per_km2
   water_terrain:              # model E = model D + other water and a terrain control
     - lake_area_share
     - dist_to_lake_km
     - reservoirs_per_km2
     - dist_to_coast_km
     - elevation_relief_m
+  confirmatory:               # model R: lean, pre-specified model for the holdout (state fixed effects added)
+    - light_pollution
+    - airports_per_km2
+    - places_per_km2
+    - primary_road_length_per_km2
+    - rail_length_per_km2
+    - elevation_relief_m
+    - dist_to_coast_km
+    - river_length_per_km2
   radiation:                  # model F = model E + these. Binary band columns are not standardized.
     - gamma_uranium
     - gamma_thorium
@@ -73,6 +89,17 @@ sources:
   gazetteer_places:
     urls:
       - https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2020_Gazetteer/2020_Gaz_place_national.zip
+  place_population:           # Census cities-and-towns estimates (incorporated places); newest vintage first
+    urls:
+      - https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/cities/totals/sub-est2025.csv
+      - https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/cities/totals/sub-est2024.csv
+      - https://www2.census.gov/programs-surveys/popest/datasets/2020-2023/cities/totals/sub-est2023.csv
+  primary_roads:              # TIGER 2020 primary roads (interstates and other limited-access highways)
+    urls:
+      - https://www2.census.gov/geo/tiger/TIGER2020/PRIMARYROADS/tl_2020_us_primaryroads.zip
+  rail:                       # TIGER 2020 rail lines
+    urls:
+      - https://www2.census.gov/geo/tiger/TIGER2020/RAILS/tl_2020_us_rails.zip
   gazetteer_cousubs:
     urls:
       - https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2020_Gazetteer/2020_Gaz_cousubs_national.zip

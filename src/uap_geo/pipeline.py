@@ -94,25 +94,30 @@ class V1Pipeline:
             "F_plus_radiation", spec_e.covariates + models.radiation, models.region_effects
         ).available_in(table)
         specs = _distinct([spec_a, spec_b, spec_c, spec_d, spec_e, spec_f])
+        spec_r = ModelSpec("R_confirmatory", models.confirmatory, models.region_effects).available_in(table)
+        if spec_r.covariates:
+            specs.append(spec_r)
         # Fit every model on the same counties so their AICs are comparable.
-        needed = ["report_count", "population", *specs[-1].covariates, *spec_c.fixed_effects]
+        all_covariates = list(dict.fromkeys(c for spec in specs for c in spec.covariates))
+        needed = ["report_count", "population", *all_covariates, *spec_c.fixed_effects]
         complete = table.dropna(subset=needed)
         complete = complete.loc[complete["population"] > 0]
         log.info("Counties with every covariate: %d of %d", len(complete), len(table))
         fits = [NegBinRateModel(spec).fit(complete) for spec in specs]
         for fit in fits:
             self.writer.save_fit(fit)
-        vif = variance_inflation(complete[list(specs[-1].covariates)])
+        widest = max(specs, key=lambda spec: len(spec.covariates))
+        vif = variance_inflation(complete[list(widest.covariates)])
 
         autocorrelation = ResidualAutocorrelation(study.knn_k, study.gi_permutations, study.seed)
         morans = {fit.spec.name: autocorrelation.run(complete, fit.pearson_residuals) for fit in fits[1:]}
-        # Shift tests on the two most controlled models (earlier runs covered B and C).
-        permutation = self._shift_tests(complete, fits[-2:])
-        place_level = self._place_level_test(complete)
+        shift_fits = [f for f in fits if f.spec.name in set(study.shift_models)] or fits[-1:]
+        permutation = self._shift_tests(complete, shift_fits)
+        place_level = self._place_level_tests(complete)
 
         cleaning_path = self.config.paths.interim / "cleaning.json"
         cleaning = json.loads(cleaning_path.read_text()) if cleaning_path.exists() else {}
-        summary = self.writer.summary(fits, morans, permutation, hotspots, cleaning, vif, place_level)
+        summary = self.writer.summary(fits, morans, permutation, hotspots, cleaning, vif, place_level, widest.name)
         log.info("Summary written to %s", summary)
 
     def _shift_layers(self, crs: str) -> list[ShiftLayer]:
@@ -153,34 +158,49 @@ class V1Pipeline:
                 log.exception("Could not load shift layer '%s'", name)
         return layers
 
-    def _place_level_test(self, table) -> PlaceLevelResult | None:
-        """Within-county test: do Census places that produced reports sit closer to water?"""
+    def _place_level_tests(self, table) -> list[PlaceLevelResult]:
+        """Within-county tests: do Census places that produced reports sit closer to water?
+        Run twice: sized by land area (all places) and by population (incorporated places)."""
         if not self.interim.exists("reports"):
-            return None
-        try:
-            crs = str(table.crs)
-            water = {}
-            for name, loader in (("river", self.sources.rivers), ("lake", self.sources.lakes),
-                                 ("coast", self.sources.coastline)):
-                if self.sources.is_active({"river": "rivers", "lake": "lakes", "coast": "coastline"}[name]):
+            return []
+        crs = str(table.crs)
+        layers = {"river": ("rivers", self.sources.rivers), "lake": ("lakes", self.sources.lakes),
+                  "coast": ("coastline", self.sources.coastline), "road": ("primary_roads", self.sources.primary_roads),
+                  "rail": ("rail", self.sources.rail)}
+        water = {}
+        for name, (source, loader) in layers.items():
+            if self.sources.is_active(source):
+                try:
                     water[name] = loader().load().to_crs(crs)
-            test = PlaceLevelTest(self.config.study.place_match_km)
-            result = test.run(self.sources.place_points(), self.interim.load("reports"), table, water)
-            result.coefficients.to_csv(self.config.paths.outputs / "place_level_coefficients.csv")
-            return result
-        except Exception:
-            log.exception("Place-level test failed")
-            return None
+                except Exception:
+                    log.exception("Place-level: could not load %s", source)
+        places = self.sources.place_points()
+        reports = self.interim.load("reports")
+        results = []
+        for size_column, label in (("ALAND", "land area"), ("place_population", "population")):
+            if size_column not in places.columns or places[size_column].notna().sum() == 0:
+                log.warning("Place-level: no %s available; variant skipped", label)
+                continue
+            try:
+                result = PlaceLevelTest(self.config.study.place_match_km, size_column, label).run(
+                    places, reports, table, water
+                )
+                slug = label.replace(" ", "_")
+                result.coefficients.to_csv(self.config.paths.outputs / f"place_level_{slug}.csv")
+                results.append(result)
+            except Exception:
+                log.exception("Place-level test (%s) failed", label)
+        return results
 
     def _shift_tests(self, table, fits) -> PermutationResult | None:
         study = self.config.study
-        if study.shift_permutations <= 0:
+        if study.shift_permutations <= 0 or not fits:
             log.info("Shift tests skipped")
             return None
         counties = table[["geoid", "area_km2", "geometry"]]
         layers = self._shift_layers(str(table.crs))
         test = ShiftPermutation([f.spec for f in fits], study.shift_permutations, study.max_shift_km,
-                                study.max_rotate_deg, study.seed)
+                                study.max_rotate_deg, study.seed, study.shift_permutations_by_layer)
         result = test.run(table, counties, layers, {f.spec.name: f.coefficients for f in fits})
         result.null.to_csv(self.config.paths.outputs / "shift_test_null.csv", index=False)
         result.p_values().to_csv(self.config.paths.outputs / "shift_test_p_values.csv", index=False)

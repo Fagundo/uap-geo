@@ -90,3 +90,21 @@ def select_sciencebase_files(
         best = max(matches, key=lambda f: (f[0].lower().endswith((".tif", ".tiff")), f[2]))
         chosen[column] = (best[0], best[1])
     return chosen
+
+
+def parse_place_population(content: bytes) -> pd.DataFrame:
+    """Census SUB-EST (cities and towns) CSV -> place GEOID (state + place, 7 digits) and 2020 population.
+
+    Only incorporated-place totals (SUMLEV 162) are kept; CDPs are not in this file.
+    """
+    text = content.decode("latin-1").lstrip("﻿ï»¿ \n\r\t")
+    frame = pd.read_csv(io.StringIO(text), dtype={"SUMLEV": str, "STATE": str, "PLACE": str})
+    frame = frame.loc[frame["SUMLEV"] == "162"]
+    column = next(c for c in ("POPESTIMATE2020", "ESTIMATESBASE2020", "CENSUS2020POP") if c in frame.columns)
+    out = pd.DataFrame(
+        {
+            "place_geoid": frame["STATE"].str.zfill(2) + frame["PLACE"].str.zfill(5),
+            "place_population": pd.to_numeric(frame[column], errors="coerce"),
+        }
+    )
+    return out.dropna().drop_duplicates("place_geoid").reset_index(drop=True)

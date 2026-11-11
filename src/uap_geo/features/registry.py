@@ -41,6 +41,10 @@ class CovariateRegistry:
             "reservoirs": lambda: [PointDensityBuilder("reservoirs_per_km2", self._sources.reservoirs().load())],
             "elevation": lambda: [RasterReliefBuilder("elevation_relief_m", self._sources.raster("elevation").load())],
             "gamma_rays": self._gamma_builders,
+            "primary_roads": lambda: [
+                LineDensityBuilder("primary_road_length_per_km2", self._sources.primary_roads().load())
+            ],
+            "rail": lambda: [LineDensityBuilder("rail_length_per_km2", self._sources.rail().load())],
             "nuclear_power": lambda: [
                 WithinDistanceBuilder("nuclear_power_within_50km", self._sources.nuclear_power().load(), 50.0)
             ],

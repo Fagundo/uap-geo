@@ -61,7 +61,37 @@ class SourceRegistry:
         from uap_geo.common.geo import WGS84
 
         places = self.gazetteers()[0].load().dropna(subset=["lat", "lon"])
+        places = places.merge(self.place_population(), on="place_geoid", how="left")
         return gpd.GeoDataFrame(places, geometry=gpd.points_from_xy(places["lon"], places["lat"]), crs=WGS84)
+
+    def place_population(self):
+        """Incorporated-place population (empty frame if no configured vintage could be read)."""
+        import logging
+
+        import pandas as pd
+
+        from uap_geo.data.scraping.parsers import parse_place_population
+
+        log = logging.getLogger(__name__)
+        empty = pd.DataFrame(columns=["place_geoid", "place_population"])
+        if not self.is_active("place_population"):
+            return empty
+        config = self._config.source("place_population")
+        for index, url in enumerate(config.urls):
+            try:
+                path = self._dl.fetch(config, f"place_population_{index}.csv", url_index=index)
+                frame = parse_place_population(path.read_bytes())
+                log.info("Place population: %d incorporated places from %s", len(frame), url)
+                return frame
+            except Exception as exc:
+                log.warning("Place population source failed (%s): %s", url, exc)
+        return empty
+
+    def primary_roads(self) -> NaturalEarthSource:
+        return NaturalEarthSource(self._config.source("primary_roads"), self._dl)
+
+    def rail(self) -> NaturalEarthSource:
+        return NaturalEarthSource(self._config.source("rail"), self._dl)
 
     def airports(self) -> AirportSource:
         return AirportSource(self._config.source("airports"), self._dl)

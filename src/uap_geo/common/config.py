@@ -36,6 +36,8 @@ class StudyConfig:
     min_quake_magnitude: float
     seed: int
     shift_layers: tuple[str, ...] = ()
+    shift_permutations_by_layer: dict[str, int] = field(default_factory=dict)
+    shift_models: tuple[str, ...] = ()
     min_reservoir_acre_ft: float = 1000.0
     place_match_km: float = 5.0
 
@@ -60,6 +62,7 @@ class ModelsConfig:
     settlement_controls: tuple[str, ...] = ()
     water_terrain: tuple[str, ...] = ()
     radiation: tuple[str, ...] = ()
+    confirmatory: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -83,7 +86,14 @@ class Config:
             for name, spec in raw["sources"].items()
         }
         return cls(
-            study=StudyConfig(**{**raw["study"], "shift_layers": tuple(raw["study"].get("shift_layers") or ())}),
+            study=StudyConfig(
+                **{
+                    **raw["study"],
+                    "shift_layers": tuple(raw["study"].get("shift_layers") or ()),
+                    "shift_permutations_by_layer": dict(raw["study"].get("shift_permutations_by_layer") or {}),
+                    "shift_models": tuple(raw["study"].get("shift_models") or ()),
+                }
+            ),
             paths=PathsConfig(**{k: base / v for k, v in raw["paths"].items()}),
             models=ModelsConfig(
                 observer=tuple(raw["models"]["observer"]),
@@ -92,6 +102,7 @@ class Config:
                 settlement_controls=tuple(raw["models"].get("settlement_controls") or ()),
                 water_terrain=tuple(raw["models"].get("water_terrain") or ()),
                 radiation=tuple(raw["models"].get("radiation") or ()),
+                confirmatory=tuple(raw["models"].get("confirmatory") or ()),
             ),
             sources=sources,
         )

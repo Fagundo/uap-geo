@@ -62,11 +62,13 @@ class GazetteerSource(DataSource):
         path = self.downloader.fetch(self.config, filename_from_url(self.config.urls[0]))
         frame = pd.read_csv(path, sep="\t", dtype=str, compression="zip", encoding="latin-1")
         frame.columns = [c.strip() for c in frame.columns]
-        frame = frame.rename(columns={"USPS": "state", "NAME": "name", "INTPTLAT": "lat", "INTPTLONG": "lon"})
+        frame = frame.rename(
+            columns={"USPS": "state", "NAME": "name", "INTPTLAT": "lat", "INTPTLONG": "lon", "GEOID": "place_geoid"}
+        )
         for col in ("lat", "lon", "ALAND"):
             frame[col] = pd.to_numeric(frame[col], errors="coerce")
         frame["level"] = self.level
-        return frame[["state", "name", "lat", "lon", "ALAND", "level"]]
+        return frame[["place_geoid", "state", "name", "lat", "lon", "ALAND", "level"]]
 
 
 class MilitarySource(DataSource):

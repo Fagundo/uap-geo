@@ -14,7 +14,7 @@ from uap_geo.common.geo import WGS84
 
 
 class NaturalEarthSource(DataSource):
-    """Natural Earth 1:10m layers (rivers, lakes, coastline); every configured URL is a layer to merge."""
+    """Zipped vector layers (Natural Earth rivers/lakes/coast, TIGER roads/rail); every URL is a layer to merge."""
 
     def load(self) -> gpd.GeoDataFrame:
         layers = []

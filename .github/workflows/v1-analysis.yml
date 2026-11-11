@@ -11,8 +11,11 @@ on:
         description: "Stages to run (space-separated: ingest build analyze)"
         default: "ingest build analyze"
       permutations:
-        description: "Fault-shift permutations (0 to skip)"
+        description: "Shift-test copies per layer (0 to skip)"
         default: "100"
+      extra_args:
+        description: "Extra CLI args, e.g. --start-year 2021 --end-year 2023 --tag holdout --shift-models R_confirmatory"
+        default: ""
 
 jobs:
   test:
@@ -52,16 +55,21 @@ jobs:
       - name: Run pipeline
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}   # optional; Hugging Face may refuse anonymous runner downloads
-        run: >
-          uv run uap-geo run --config configs/v1.yaml
-          --stage ${{ inputs.stages }}
-          --permutations ${{ inputs.permutations }}
+          # Inputs pass through env vars, never straight into the script, to avoid shell injection.
+          STAGES: ${{ inputs.stages }}
+          PERMUTATIONS: ${{ inputs.permutations }}
+          EXTRA_ARGS: ${{ inputs.extra_args }}
+        run: |
+          read -r -a stages <<< "$STAGES"
+          read -r -a extra <<< "$EXTRA_ARGS"
+          uv run uap-geo run --config configs/v1.yaml --stage "${stages[@]}" \
+            --permutations "$PERMUTATIONS" "${extra[@]}"
 
       - name: Print results to the log
         if: always()
         run: |
           shopt -s nullglob
-          for f in outputs/summary.md outputs/shift_test_p_values.csv outputs/results.json; do
+          for f in outputs/summary.md outputs/*/summary.md outputs/shift_test_p_values.csv outputs/*/shift_test_p_values.csv; do
             echo "===== $f"; cat "$f"; echo
           done
 

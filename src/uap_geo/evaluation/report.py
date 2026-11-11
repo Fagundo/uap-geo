@@ -56,7 +56,8 @@ class ReportWriter:
         hotspots: gpd.GeoDataFrame,
         cleaning: dict[str, int],
         vif: pd.Series | None = None,
-        place_level: PlaceLevelResult | None = None,
+        place_level: list[PlaceLevelResult] | None = None,
+        vif_model: str = "",
     ) -> Path:
         base = fits[0]
         lines = [
@@ -87,26 +88,25 @@ class ReportWriter:
         for fit in fits:
             lines += ["", f"## {fit.spec.name} rate ratios", "", _markdown_table(fit, permutation)]
         if vif is not None:
-            lines += ["", f"## Collinearity in {fits[-1].spec.name} (VIF; above 5 = poorly identified)", "",
+            lines += ["", f"## Collinearity in {vif_model or fits[-1].spec.name} (VIF; above 5 = poorly identified)", "",
                       "| Covariate | VIF |", "| --- | --- |",
                       *[f"| {k} | {v:.1f} |" for k, v in vif.sort_values(ascending=False).items()]]
-        if place_level is not None:
-            pl = place_level
+        for pl in place_level or []:
             lines += [
                 "",
-                "## Report-level water test (within county)",
+                f"## Report-level test (within county), town size = {pl.size_label}",
                 "",
                 f"{pl.n_places} Census places in {pl.n_counties} counties that have both reporting and",
                 f"non-reporting places; {pl.n_reporting} places had at least one report.",
                 "Conditional logit grouped by county; odds ratio per +1 SD of log(1 + distance km).",
-                "Odds ratio below 1 = places closer to that water are more likely to have reports.",
+                "Odds ratio below 1 = places closer to that feature are more likely to have reports.",
                 "",
                 "| Term | Odds ratio | 95% CI | p |",
                 "| --- | --- | --- | --- |",
                 *[f"| {t} | {r['odds_ratio']:.3f} | {r['ci_low']:.3f}–{r['ci_high']:.3f} | {r['p_value']:.3g} |"
                   for t, r in pl.coefficients.iterrows()],
                 "",
-                "Median distance (km) to water, places with vs without reports:",
+                "Median distance (km), places with vs without reports:",
                 "",
                 _frame_markdown(pl.medians.round(2)),
             ]
@@ -120,7 +120,9 @@ class ReportWriter:
                     "moran": {k: v.__dict__ for k, v in morans.items()},
                     "shift_p": permutation.p_values().to_dict("records") if permutation else [],
                     "vif": vif.to_dict() if vif is not None else {},
-                    "place_level": place_level.coefficients.reset_index().to_dict("records") if place_level else [],
+                    "place_level": {
+                        pl.size_label: pl.coefficients.reset_index().to_dict("records") for pl in (place_level or [])
+                    },
                     "cleaning": cleaning,
                 },
                 indent=2,

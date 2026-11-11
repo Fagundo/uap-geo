@@ -58,3 +58,20 @@ def test_select_sciencebase_files_prefers_tif_and_skips_uncertainty():
     exclude = "(?i)(?<![a-z])(sd|std)(?![a-z])|\\.xml$"
     chosen = select_sciencebase_files(items, patterns, exclude)
     assert chosen == {"gamma_uranium": ("eU_mean.tif", "u/tif"), "gamma_potassium": ("K_mean.tif", "k/tif")}
+
+
+def test_parse_place_population_keeps_incorporated_places():
+    from uap_geo.data.scraping.parsers import parse_place_population
+
+    csv = (
+        "SUMLEV,STATE,COUNTY,PLACE,COUSUB,NAME,ESTIMATESBASE2020,POPESTIMATE2020\n"
+        "040,53,000,00000,00000,Washington,7705281,7724031\n"
+        "162,53,000,63000,00000,Seattle city,737015,738172\n"
+        "157,53,033,63000,00000,Seattle city,737015,738172\n"
+        "162,6,000,44000,00000,Los Angeles city,3898767,3895848\n"
+    ).encode()
+    out = parse_place_population(csv)
+    assert out.to_dict("records") == [
+        {"place_geoid": "5363000", "place_population": 738172},
+        {"place_geoid": "0644000", "place_population": 3895848},
+    ]
