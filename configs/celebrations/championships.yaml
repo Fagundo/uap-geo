@@ -3,6 +3,24 @@
 # is registered; its implementation notes record this file's SHA-256.
 finals:
 - league: NFL
+  year: 2001
+  date: '2001-01-28'
+  winner: Baltimore Ravens
+  loser: New York Giants
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XXXV
+- league: NFL
+  year: 2004
+  date: '2004-02-01'
+  winner: New England Patriots
+  loser: Carolina Panthers
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XXXVIII
+- league: NFL
+  year: 2005
+  date: '2005-02-06'
+  winner: New England Patriots
+  loser: Philadelphia Eagles
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XXXIX
+- league: NFL
   year: 2010
   date: '2010-02-07'
   winner: New Orleans Saints
@@ -15,6 +33,18 @@ finals:
   loser: Pittsburgh Steelers
   source: https://en.wikipedia.org/wiki/Super_Bowl_XLV
 - league: NFL
+  year: 2012
+  date: '2012-02-05'
+  winner: New York Giants
+  loser: New England Patriots
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XLVI
+- league: NFL
+  year: 2013
+  date: '2013-02-03'
+  winner: Baltimore Ravens
+  loser: San Francisco 49ers
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XLVII
+- league: NFL
   year: 2014
   date: '2014-02-02'
   winner: Seattle Seahawks
@@ -26,6 +56,12 @@ finals:
   winner: New England Patriots
   loser: Seattle Seahawks
   source: https://en.wikipedia.org/wiki/Super_Bowl_XLIX
+- league: NFL
+  year: 2016
+  date: '2016-02-07'
+  winner: Denver Broncos
+  loser: Carolina Panthers
+  source: https://en.wikipedia.org/wiki/Super_Bowl_50
 - league: NFL
   year: 2017
   date: '2017-02-05'
@@ -62,6 +98,12 @@ finals:
   winner: Los Angeles Rams
   loser: Cincinnati Bengals
   source: https://en.wikipedia.org/wiki/Super_Bowl_LVI
+- league: NFL
+  year: 2023
+  date: '2023-02-12'
+  winner: Kansas City Chiefs
+  loser: Philadelphia Eagles
+  source: https://en.wikipedia.org/wiki/Super_Bowl_LVII
 - league: MLB
   year: 2001
   date: '2001-11-04'
@@ -338,3 +380,135 @@ finals:
   winner: Denver Nuggets
   loser: Miami Heat
   source: https://en.wikipedia.org/wiki/2023_NBA_Finals
+- league: NHL
+  year: 2001
+  date: '2001-06-09'
+  winner: Colorado Avalanche
+  loser: New Jersey Devils
+  source: https://en.wikipedia.org/wiki/2001_Stanley_Cup_Final
+- league: NHL
+  year: 2002
+  date: '2002-06-13'
+  winner: Detroit Red Wings
+  loser: Carolina Hurricanes
+  source: https://en.wikipedia.org/wiki/2002_Stanley_Cup_Final
+- league: NHL
+  year: 2003
+  date: '2003-06-09'
+  winner: New Jersey Devils
+  loser: Mighty Ducks of Anaheim
+  source: https://en.wikipedia.org/wiki/2003_Stanley_Cup_Final
+- league: NHL
+  year: 2004
+  date: '2004-06-07'
+  winner: Tampa Bay Lightning
+  loser: Calgary Flames
+  source: https://en.wikipedia.org/wiki/2004_Stanley_Cup_Final
+- league: NHL
+  year: 2006
+  date: '2006-06-19'
+  winner: Carolina Hurricanes
+  loser: Edmonton Oilers
+  source: https://en.wikipedia.org/wiki/2006_Stanley_Cup_Final
+- league: NHL
+  year: 2007
+  date: '2007-06-06'
+  winner: Anaheim Ducks
+  loser: Ottawa Senators
+  source: https://en.wikipedia.org/wiki/2007_Stanley_Cup_Final
+- league: NHL
+  year: 2008
+  date: '2008-06-04'
+  winner: Detroit Red Wings
+  loser: Pittsburgh Penguins
+  source: https://en.wikipedia.org/wiki/2008_Stanley_Cup_Final
+- league: NHL
+  year: 2009
+  date: '2009-06-12'
+  winner: Pittsburgh Penguins
+  loser: Detroit Red Wings
+  source: https://en.wikipedia.org/wiki/2009_Stanley_Cup_Final
+- league: NHL
+  year: 2010
+  date: '2010-06-09'
+  winner: Chicago Blackhawks
+  loser: Philadelphia Flyers
+  source: https://en.wikipedia.org/wiki/2010_Stanley_Cup_Final
+- league: NHL
+  year: 2011
+  date: '2011-06-15'
+  winner: Boston Bruins
+  loser: Vancouver Canucks
+  source: https://en.wikipedia.org/wiki/2011_Stanley_Cup_Final
+- league: NHL
+  year: 2012
+  date: '2012-06-11'
+  winner: Los Angeles Kings
+  loser: New Jersey Devils
+  source: https://en.wikipedia.org/wiki/2012_Stanley_Cup_Final
+- league: NHL
+  year: 2013
+  date: '2013-06-24'
+  winner: Chicago Blackhawks
+  loser: Boston Bruins
+  source: https://en.wikipedia.org/wiki/2013_Stanley_Cup_Final
+- league: NHL
+  year: 2014
+  date: '2014-06-13'
+  winner: Los Angeles Kings
+  loser: New York Rangers
+  source: https://en.wikipedia.org/wiki/2014_Stanley_Cup_Final
+- league: NHL
+  year: 2015
+  date: '2015-06-15'
+  winner: Chicago Blackhawks
+  loser: Tampa Bay Lightning
+  source: https://en.wikipedia.org/wiki/2015_Stanley_Cup_Final
+- league: NHL
+  year: 2016
+  date: '2016-06-12'
+  winner: Pittsburgh Penguins
+  loser: San Jose Sharks
+  source: https://en.wikipedia.org/wiki/2016_Stanley_Cup_Final
+- league: NHL
+  year: 2017
+  date: '2017-06-11'
+  winner: Pittsburgh Penguins
+  loser: Nashville Predators
+  source: https://en.wikipedia.org/wiki/2017_Stanley_Cup_Final
+- league: NHL
+  year: 2018
+  date: '2018-06-07'
+  winner: Washington Capitals
+  loser: Vegas Golden Knights
+  source: https://en.wikipedia.org/wiki/2018_Stanley_Cup_Final
+- league: NHL
+  year: 2019
+  date: '2019-06-12'
+  winner: St. Louis Blues
+  loser: Boston Bruins
+  source: https://en.wikipedia.org/wiki/2019_Stanley_Cup_Final
+- league: NHL
+  year: 2020
+  date: '2020-09-28'
+  winner: Tampa Bay Lightning
+  loser: Dallas Stars
+  source: https://en.wikipedia.org/wiki/2020_Stanley_Cup_Final
+- league: NHL
+  year: 2021
+  date: '2021-07-07'
+  winner: Tampa Bay Lightning
+  loser: Montreal Canadiens
+  source: https://en.wikipedia.org/wiki/2021_Stanley_Cup_Final
+- league: NHL
+  year: 2022
+  date: '2022-06-26'
+  winner: Colorado Avalanche
+  loser: Tampa Bay Lightning
+  source: https://en.wikipedia.org/wiki/2022_Stanley_Cup_Final
+- league: NHL
+  year: 2023
+  date: '2023-06-13'
+  winner: Vegas Golden Knights
+  loser: Florida Panthers
+  source: https://en.wikipedia.org/wiki/2023_Stanley_Cup_Final
