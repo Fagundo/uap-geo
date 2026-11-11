@@ -70,6 +70,7 @@ jobs:
         run: |
           shopt -s nullglob
           for f in outputs/summary.md outputs/*/summary.md outputs/shift_test_p_values.csv outputs/*/shift_test_p_values.csv; do
+            [ -f "$f" ] || continue   # a tagged run writes only under outputs/<tag>/
             echo "===== $f"; cat "$f"; echo
           done
 
