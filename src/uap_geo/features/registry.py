@@ -58,6 +58,8 @@ class CovariateRegistry:
             "gazetteer_places": lambda: [PointDensityBuilder("places_per_km2", self._sources.place_points())],
             # Tourism: share of housing held for seasonal or recreational use (ACS 5-year).
             "acs_housing": lambda: [TableColumnBuilder(self._sources.seasonal_housing().load(), ("seasonal_housing_share",))],
+            # College towns: share of residents enrolled in college (ACS 5-year).
+            "acs_college": lambda: [TableColumnBuilder(self._sources.college_enrollment().load(), ("college_enrolled_share",))],
         }
         for name in RASTER_SOURCES:
             factories[name] = (lambda n=name: [RasterMeanBuilder(n, self._sources.raster(n).load())])

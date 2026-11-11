@@ -27,19 +27,25 @@ def read_acs_counties(text: str, columns: list[str]) -> pd.DataFrame:
     return frame[[COUNTY_ID, *columns]].apply(lambda c: c if c.name == COUNTY_ID else pd.to_numeric(c, errors="coerce"))
 
 
-class SeasonalHousingSource(DataSource):
-    """urls[0] = B25004 (vacancy status), urls[1] = B25001 (housing units).
-    Returns COUNTY_ID, seasonal_units, housing_units, seasonal_housing_share."""
+class AcsShareSource(DataSource):
+    """A county share from ACS tables: sum(numerators) / denominator.
 
-    SEASONAL = "B25004_E006"   # vacant: for seasonal, recreational, or occasional use
-    TOTAL = "B25001_E001"
+    urls[0] holds the numerator columns; urls[1] (optional) the denominator column, else urls[0].
+    Returns COUNTY_ID and `column`.
+    """
+
+    def __init__(self, config, downloader, column: str, numerators: tuple[str, ...], denominator: str) -> None:
+        super().__init__(config, downloader)
+        self.column, self.numerators, self.denominator = column, numerators, denominator
 
     def load(self) -> pd.DataFrame:
-        vacancy = self.downloader.fetch(self.config, filename_from_url(self.config.urls[0]), url_index=0)
-        units = self.downloader.fetch(self.config, filename_from_url(self.config.urls[1]), url_index=1)
-        a = read_acs_counties(vacancy.read_text(), [self.SEASONAL]).rename(columns={self.SEASONAL: "seasonal_units"})
-        b = read_acs_counties(units.read_text(), [self.TOTAL]).rename(columns={self.TOTAL: "housing_units"})
-        out = a.merge(b, on=COUNTY_ID)
-        out["seasonal_housing_share"] = out["seasonal_units"] / out["housing_units"].where(out["housing_units"] > 0)
-        log.info("ACS seasonal housing: %d counties, median share %.3f", len(out), out["seasonal_housing_share"].median())
-        return out
+        paths = [self.downloader.fetch(self.config, filename_from_url(u), url_index=i) for i, u in enumerate(self.config.urls)]
+        num = read_acs_counties(paths[0].read_text(), list(self.numerators))
+        den_path = paths[1] if len(paths) > 1 else paths[0]
+        den = read_acs_counties(den_path.read_text(), [self.denominator])
+        out = num.merge(den, on=COUNTY_ID)
+        total = out[self.denominator].where(out[self.denominator] > 0)
+        out[self.column] = out[list(self.numerators)].sum(axis=1) / total
+        log.info("ACS %s: %d counties, median %.3f, 99th percentile %.3f", self.column, len(out),
+                 out[self.column].median(), out[self.column].quantile(0.99))
+        return out[[COUNTY_ID, self.column]]

@@ -11,6 +11,10 @@ notes:
     use) / B25001_E001 (housing units). Added after the first explore run, whose top counties were
     almost all beach and vacation counties: visitors are outdoors at night but absent from the
     resident-population exposure.
+  college_towns: >
+    college_enrolled_share = ACS 2017-2021 (B14001_E008 + B14001_E009) / B14001_E001: residents aged 3+
+    enrolled in college (undergraduate, graduate or professional). Added after the second explore run,
+    whose top counties included many college towns. No further controls are added after this run.
   neighbours: 8 nearest county centroids (equal-area projection), excluding the county itself.
   exposure: >
     population x nights kept, scaled per decade. Removed launch county-nights that fall on holiday
@@ -36,9 +40,9 @@ parameters:
     launch_min_apogee_km: 100
     covariates: [light_pollution, airports_per_km2, places_per_km2, primary_road_length_per_km2,
                  rail_length_per_km2, elevation_relief_m, dist_to_coast_km, river_length_per_km2,
-                 seasonal_housing_share]
+                 seasonal_housing_share, college_enrolled_share]
     covariate_sources: [light_pollution, airports, gazetteer_places, primary_roads, rail, elevation, coastline, rivers,
-                        acs_housing]
+                        acs_housing, acs_college]
     fixed_effects: [state_fips]
     cluster: state_fips
     neighbours: 8

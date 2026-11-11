@@ -18,7 +18,8 @@ data:
   covariates: >
     v1 confirmatory controls (light pollution, airports, places, primary roads, rail, terrain relief,
     distance to coast, river density), plus the share of housing held for seasonal or recreational use
-    (ACS 2017-2021, a tourism control), with state fixed effects; 2020 county population as exposure.
+    (tourism) and the share of residents enrolled in college (college towns), both ACS 2017-2021, with
+    state fixed effects; 2020 county population as exposure.
 
 unit: county x period
 outcome: events per county in the outcome period, after removals (reports within 50 km and 3 hours merged into one event)
