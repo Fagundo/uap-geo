@@ -1,0 +1,1219 @@
+{
+  "storms": [
+    {
+      "storm_id": 1307,
+      "first_day": "2011-05-28",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 14,
+      "all_obs": 22.0,
+      "all_exp": 14.142857142857142,
+      "north_obs": 18.0,
+      "north_exp": 8.714285714285714,
+      "south_obs": 4.0,
+      "south_exp": 5.428571428571429,
+      "aurora_text_obs": 1.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1308,
+      "first_day": "2011-06-05",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 15,
+      "all_obs": 10.0,
+      "all_exp": 28.666666666666668,
+      "north_obs": 4.0,
+      "north_exp": 21.6,
+      "south_obs": 6.0,
+      "south_exp": 7.066666666666666,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1309,
+      "first_day": "2011-08-05",
+      "max_kp": 7.667,
+      "exposed_nights": 3,
+      "control_nights": 24,
+      "all_obs": 35.0,
+      "all_exp": 43.625,
+      "north_obs": 22.0,
+      "north_exp": 29.25,
+      "south_obs": 13.0,
+      "south_exp": 14.375,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1310,
+      "first_day": "2011-09-26",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 14,
+      "all_obs": 14.0,
+      "all_exp": 18.142857142857142,
+      "north_obs": 8.0,
+      "north_exp": 11.714285714285714,
+      "south_obs": 6.0,
+      "south_exp": 6.428571428571429,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1311,
+      "first_day": "2011-10-24",
+      "max_kp": 7.333,
+      "exposed_nights": 3,
+      "control_nights": 22,
+      "all_obs": 27.0,
+      "all_exp": 30.81818181818182,
+      "north_obs": 16.0,
+      "north_exp": 19.09090909090909,
+      "south_obs": 11.0,
+      "south_exp": 11.727272727272727,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.13636363636363635
+    },
+    {
+      "storm_id": 1312,
+      "first_day": "2012-03-07",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 14,
+      "all_obs": 12.0,
+      "all_exp": 14.714285714285714,
+      "north_obs": 11.0,
+      "north_exp": 8.285714285714286,
+      "south_obs": 1.0,
+      "south_exp": 6.428571428571429,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1313,
+      "first_day": "2012-03-09",
+      "max_kp": 8.0,
+      "exposed_nights": 2,
+      "control_nights": 15,
+      "all_obs": 23.0,
+      "all_exp": 19.466666666666665,
+      "north_obs": 12.0,
+      "north_exp": 12.533333333333333,
+      "south_obs": 11.0,
+      "south_exp": 6.933333333333334,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1314,
+      "first_day": "2012-03-12",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 15,
+      "all_obs": 22.0,
+      "all_exp": 17.866666666666667,
+      "north_obs": 16.0,
+      "north_exp": 10.4,
+      "south_obs": 6.0,
+      "south_exp": 7.466666666666667,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1315,
+      "first_day": "2012-03-15",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 14,
+      "all_obs": 25.0,
+      "all_exp": 17.142857142857142,
+      "north_obs": 13.0,
+      "north_exp": 10.285714285714286,
+      "south_obs": 12.0,
+      "south_exp": 6.857142857142857,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1316,
+      "first_day": "2012-04-24",
+      "max_kp": 6.667,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 19.0,
+      "all_exp": 17.75,
+      "north_obs": 7.0,
+      "north_exp": 10.375,
+      "south_obs": 12.0,
+      "south_exp": 7.375,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1317,
+      "first_day": "2012-06-16",
+      "max_kp": 6.333,
+      "exposed_nights": 3,
+      "control_nights": 19,
+      "all_obs": 46.0,
+      "all_exp": 50.526315789473685,
+      "north_obs": 35.0,
+      "north_exp": 37.421052631578945,
+      "south_obs": 11.0,
+      "south_exp": 13.105263157894736,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.15789473684210525
+    },
+    {
+      "storm_id": 1318,
+      "first_day": "2012-07-09",
+      "max_kp": 6.667,
+      "exposed_nights": 2,
+      "control_nights": 13,
+      "all_obs": 32.0,
+      "all_exp": 32.46153846153846,
+      "north_obs": 25.0,
+      "north_exp": 23.846153846153847,
+      "south_obs": 7.0,
+      "south_exp": 8.615384615384615,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1319,
+      "first_day": "2012-07-15",
+      "max_kp": 7.0,
+      "exposed_nights": 3,
+      "control_nights": 19,
+      "all_obs": 33.0,
+      "all_exp": 50.05263157894737,
+      "north_obs": 22.0,
+      "north_exp": 36.315789473684205,
+      "south_obs": 11.0,
+      "south_exp": 13.736842105263158,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1320,
+      "first_day": "2012-10-01",
+      "max_kp": 6.667,
+      "exposed_nights": 2,
+      "control_nights": 14,
+      "all_obs": 27.0,
+      "all_exp": 26.142857142857142,
+      "north_obs": 16.0,
+      "north_exp": 16.0,
+      "south_obs": 11.0,
+      "south_exp": 10.142857142857142,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1321,
+      "first_day": "2012-10-08",
+      "max_kp": 6.667,
+      "exposed_nights": 3,
+      "control_nights": 22,
+      "all_obs": 37.0,
+      "all_exp": 41.59090909090909,
+      "north_obs": 23.0,
+      "north_exp": 27.81818181818182,
+      "south_obs": 14.0,
+      "south_exp": 13.772727272727273,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1322,
+      "first_day": "2012-11-14",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 35.0,
+      "all_exp": 33.0,
+      "north_obs": 27.0,
+      "north_exp": 21.5,
+      "south_obs": 8.0,
+      "south_exp": 11.5,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1323,
+      "first_day": "2013-03-17",
+      "max_kp": 6.667,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 7.0,
+      "all_exp": 13.75,
+      "north_obs": 3.0,
+      "north_exp": 7.625,
+      "south_obs": 4.0,
+      "south_exp": 6.125,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1324,
+      "first_day": "2013-06-01",
+      "max_kp": 7.0,
+      "exposed_nights": 2,
+      "control_nights": 14,
+      "all_obs": 34.0,
+      "all_exp": 37.142857142857146,
+      "north_obs": 24.0,
+      "north_exp": 24.857142857142858,
+      "south_obs": 10.0,
+      "south_exp": 12.285714285714286,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1325,
+      "first_day": "2013-06-29",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 14,
+      "all_obs": 42.0,
+      "all_exp": 40.57142857142857,
+      "north_obs": 29.0,
+      "north_exp": 29.428571428571427,
+      "south_obs": 13.0,
+      "south_exp": 11.142857142857142,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1326,
+      "first_day": "2013-10-02",
+      "max_kp": 7.667,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 29.0,
+      "all_exp": 31.375,
+      "north_obs": 23.0,
+      "north_exp": 19.625,
+      "south_obs": 6.0,
+      "south_exp": 11.75,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1327,
+      "first_day": "2013-12-08",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 21.0,
+      "all_exp": 23.0,
+      "north_obs": 13.0,
+      "north_exp": 12.75,
+      "south_obs": 8.0,
+      "south_exp": 10.25,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1328,
+      "first_day": "2014-02-19",
+      "max_kp": 6.333,
+      "exposed_nights": 3,
+      "control_nights": 24,
+      "all_obs": 46.0,
+      "all_exp": 39.5,
+      "north_obs": 18.0,
+      "north_exp": 21.625,
+      "south_obs": 28.0,
+      "south_exp": 17.875,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1329,
+      "first_day": "2014-06-08",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 20.0,
+      "all_exp": 30.875,
+      "north_obs": 13.0,
+      "north_exp": 19.875,
+      "south_obs": 7.0,
+      "south_exp": 11.0,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1330,
+      "first_day": "2014-09-12",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 53.0,
+      "all_exp": 44.5,
+      "north_obs": 33.0,
+      "north_exp": 28.625,
+      "south_obs": 20.0,
+      "south_exp": 15.875,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1331,
+      "first_day": "2015-01-07",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 19.0,
+      "all_exp": 24.5,
+      "north_obs": 12.0,
+      "north_exp": 13.375,
+      "south_obs": 7.0,
+      "south_exp": 11.125,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1332,
+      "first_day": "2015-03-17",
+      "max_kp": 7.667,
+      "exposed_nights": 3,
+      "control_nights": 22,
+      "all_obs": 29.0,
+      "all_exp": 23.318181818181817,
+      "north_obs": 23.0,
+      "north_exp": 14.863636363636363,
+      "south_obs": 6.0,
+      "south_exp": 8.454545454545455,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.2727272727272727
+    },
+    {
+      "storm_id": 1333,
+      "first_day": "2015-03-22",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 15,
+      "all_obs": 11.0,
+      "all_exp": 17.6,
+      "north_obs": 8.0,
+      "north_exp": 10.666666666666666,
+      "south_obs": 3.0,
+      "south_exp": 6.933333333333334,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1334,
+      "first_day": "2015-04-16",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 15,
+      "all_obs": 19.0,
+      "all_exp": 19.066666666666666,
+      "north_obs": 13.0,
+      "north_exp": 11.866666666666667,
+      "south_obs": 6.0,
+      "south_exp": 7.2,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1335,
+      "first_day": "2015-06-08",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 14,
+      "all_obs": 20.0,
+      "all_exp": 14.142857142857142,
+      "north_obs": 11.0,
+      "north_exp": 8.428571428571429,
+      "south_obs": 9.0,
+      "south_exp": 5.714285714285714,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1336,
+      "first_day": "2015-06-22",
+      "max_kp": 8.333,
+      "exposed_nights": 3,
+      "control_nights": 22,
+      "all_obs": 35.0,
+      "all_exp": 26.727272727272727,
+      "north_obs": 25.0,
+      "north_exp": 15.818181818181817,
+      "south_obs": 10.0,
+      "south_exp": 10.909090909090908,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1337,
+      "first_day": "2015-08-15",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 14,
+      "all_obs": 32.0,
+      "all_exp": 29.285714285714285,
+      "north_obs": 26.0,
+      "north_exp": 21.142857142857142,
+      "south_obs": 6.0,
+      "south_exp": 8.142857142857142,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1338,
+      "first_day": "2015-08-27",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 13,
+      "all_obs": 22.0,
+      "all_exp": 26.307692307692307,
+      "north_obs": 12.0,
+      "north_exp": 18.615384615384617,
+      "south_obs": 10.0,
+      "south_exp": 7.6923076923076925,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1339,
+      "first_day": "2015-09-07",
+      "max_kp": 6.333,
+      "exposed_nights": 4,
+      "control_nights": 26,
+      "all_obs": 51.0,
+      "all_exp": 45.69230769230769,
+      "north_obs": 33.0,
+      "north_exp": 29.076923076923077,
+      "south_obs": 18.0,
+      "south_exp": 16.615384615384617,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1340,
+      "first_day": "2015-09-11",
+      "max_kp": 7.0,
+      "exposed_nights": 2,
+      "control_nights": 12,
+      "all_obs": 39.0,
+      "all_exp": 34.833333333333336,
+      "north_obs": 29.0,
+      "north_exp": 22.833333333333332,
+      "south_obs": 10.0,
+      "south_exp": 12.0,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1341,
+      "first_day": "2015-09-20",
+      "max_kp": 7.0,
+      "exposed_nights": 2,
+      "control_nights": 14,
+      "all_obs": 24.0,
+      "all_exp": 29.285714285714285,
+      "north_obs": 16.0,
+      "north_exp": 20.571428571428573,
+      "south_obs": 8.0,
+      "south_exp": 8.714285714285714,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1342,
+      "first_day": "2015-10-07",
+      "max_kp": 7.333,
+      "exposed_nights": 2,
+      "control_nights": 14,
+      "all_obs": 29.0,
+      "all_exp": 27.142857142857142,
+      "north_obs": 17.0,
+      "north_exp": 16.571428571428573,
+      "south_obs": 12.0,
+      "south_exp": 10.571428571428571,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1343,
+      "first_day": "2015-11-07",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 52.0,
+      "all_exp": 25.875,
+      "north_obs": 37.0,
+      "north_exp": 16.75,
+      "south_obs": 15.0,
+      "south_exp": 9.125,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.125
+    },
+    {
+      "storm_id": 1344,
+      "first_day": "2015-12-20",
+      "max_kp": 6.667,
+      "exposed_nights": 3,
+      "control_nights": 24,
+      "all_obs": 29.0,
+      "all_exp": 22.0,
+      "north_obs": 15.0,
+      "north_exp": 12.625,
+      "south_obs": 14.0,
+      "south_exp": 9.375,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1345,
+      "first_day": "2016-01-01",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 15,
+      "all_obs": 21.0,
+      "all_exp": 15.733333333333333,
+      "north_obs": 11.0,
+      "north_exp": 9.333333333333334,
+      "south_obs": 10.0,
+      "south_exp": 6.4,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1346,
+      "first_day": "2016-03-06",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 22.0,
+      "all_exp": 16.25,
+      "north_obs": 13.0,
+      "north_exp": 8.75,
+      "south_obs": 9.0,
+      "south_exp": 7.5,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1347,
+      "first_day": "2016-05-08",
+      "max_kp": 6.333,
+      "exposed_nights": 3,
+      "control_nights": 24,
+      "all_obs": 25.0,
+      "all_exp": 21.5,
+      "north_obs": 9.0,
+      "north_exp": 13.125,
+      "south_obs": 16.0,
+      "south_exp": 8.375,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1348,
+      "first_day": "2016-06-14",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 16.0,
+      "all_exp": 14.875,
+      "north_obs": 13.0,
+      "north_exp": 9.0,
+      "south_obs": 3.0,
+      "south_exp": 5.875,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1349,
+      "first_day": "2016-09-02",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 29.0,
+      "all_exp": 27.625,
+      "north_obs": 20.0,
+      "north_exp": 18.625,
+      "south_obs": 9.0,
+      "south_exp": 9.0,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1350,
+      "first_day": "2016-10-13",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 18.0,
+      "all_exp": 24.125,
+      "north_obs": 10.0,
+      "north_exp": 14.625,
+      "south_obs": 8.0,
+      "south_exp": 9.5,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1351,
+      "first_day": "2016-10-25",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 15,
+      "all_obs": 17.0,
+      "all_exp": 20.666666666666668,
+      "north_obs": 6.0,
+      "north_exp": 13.733333333333333,
+      "south_obs": 11.0,
+      "south_exp": 6.933333333333334,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1352,
+      "first_day": "2016-12-21",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 12.0,
+      "all_exp": 12.25,
+      "north_obs": 10.0,
+      "north_exp": 5.875,
+      "south_obs": 2.0,
+      "south_exp": 6.375,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1353,
+      "first_day": "2017-03-27",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 11.0,
+      "all_exp": 15.0,
+      "north_obs": 4.0,
+      "north_exp": 7.125,
+      "south_obs": 7.0,
+      "south_exp": 7.875,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1354,
+      "first_day": "2017-05-28",
+      "max_kp": 7.0,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 20.0,
+      "all_exp": 17.25,
+      "north_obs": 16.0,
+      "north_exp": 10.75,
+      "south_obs": 4.0,
+      "south_exp": 6.5,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1355,
+      "first_day": "2017-07-16",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 25.0,
+      "all_exp": 17.125,
+      "north_obs": 19.0,
+      "north_exp": 12.0,
+      "south_obs": 6.0,
+      "south_exp": 5.125,
+      "aurora_text_obs": 1.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1356,
+      "first_day": "2017-09-07",
+      "max_kp": 8.333,
+      "exposed_nights": 3,
+      "control_nights": 22,
+      "all_obs": 31.0,
+      "all_exp": 26.18181818181818,
+      "north_obs": 24.0,
+      "north_exp": 18.136363636363637,
+      "south_obs": 7.0,
+      "south_exp": 8.045454545454545,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1357,
+      "first_day": "2017-09-27",
+      "max_kp": 6.667,
+      "exposed_nights": 3,
+      "control_nights": 21,
+      "all_obs": 44.0,
+      "all_exp": 28.0,
+      "north_obs": 31.0,
+      "north_exp": 17.57142857142857,
+      "south_obs": 13.0,
+      "south_exp": 10.428571428571429,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1358,
+      "first_day": "2017-11-07",
+      "max_kp": 6.333,
+      "exposed_nights": 3,
+      "control_nights": 24,
+      "all_obs": 22.0,
+      "all_exp": 27.25,
+      "north_obs": 16.0,
+      "north_exp": 17.625,
+      "south_obs": 6.0,
+      "south_exp": 9.625,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1359,
+      "first_day": "2018-03-18",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 12.0,
+      "all_exp": 11.0,
+      "north_obs": 9.0,
+      "north_exp": 7.125,
+      "south_obs": 3.0,
+      "south_exp": 3.875,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1360,
+      "first_day": "2018-04-20",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 6.0,
+      "all_exp": 9.5,
+      "north_obs": 5.0,
+      "north_exp": 5.25,
+      "south_obs": 1.0,
+      "south_exp": 4.25,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1361,
+      "first_day": "2018-08-26",
+      "max_kp": 7.333,
+      "exposed_nights": 2,
+      "control_nights": 15,
+      "all_obs": 9.0,
+      "all_exp": 12.533333333333333,
+      "north_obs": 7.0,
+      "north_exp": 8.0,
+      "south_obs": 2.0,
+      "south_exp": 4.533333333333333,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1362,
+      "first_day": "2018-09-11",
+      "max_kp": 6.0,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 8.0,
+      "all_exp": 11.25,
+      "north_obs": 4.0,
+      "north_exp": 6.875,
+      "south_obs": 4.0,
+      "south_exp": 4.375,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    },
+    {
+      "storm_id": 1363,
+      "first_day": "2019-05-14",
+      "max_kp": 6.333,
+      "exposed_nights": 2,
+      "control_nights": 16,
+      "all_obs": 14.0,
+      "all_exp": 14.875,
+      "north_obs": 7.0,
+      "north_exp": 6.875,
+      "south_obs": 7.0,
+      "south_exp": 8.0,
+      "aurora_text_obs": 0.0,
+      "aurora_text_exp": 0.0
+    }
+  ],
+  "strong_leave_one_out": [
+    {
+      "left_out": null,
+      "rate_ratio": 1.2627218604464592,
+      "p_value": 0.04921032173029975,
+      "n_events": 623
+    },
+    {
+      "left_out": "1313",
+      "rate_ratio": 1.2814884957791022,
+      "p_value": 0.06832817389981957,
+      "n_events": 454
+    },
+    {
+      "left_out": "1336",
+      "rate_ratio": 1.2081579833379943,
+      "p_value": 0.23870179909874722,
+      "n_events": 392
+    },
+    {
+      "left_out": "1356",
+      "rate_ratio": 1.2780698175409158,
+      "p_value": 0.08885847924998645,
+      "n_events": 400
+    }
+  ],
+  "strong_by_latitude": {
+    "north of 37N": {
+      "rate_ratio": 1.3712742817172574,
+      "p_value": 0.029299852391289457,
+      "n_events": 404
+    },
+    "south of 37N": {
+      "rate_ratio": 1.0812504313977982,
+      "p_value": 0.7066866826948548,
+      "n_events": 219
+    }
+  },
+  "quake_profile": [
+    {
+      "offset": -28,
+      "events": 13.0
+    },
+    {
+      "offset": -27,
+      "events": 19.0
+    },
+    {
+      "offset": -26,
+      "events": 17.0
+    },
+    {
+      "offset": -25,
+      "events": 18.0
+    },
+    {
+      "offset": -24,
+      "events": 25.0
+    },
+    {
+      "offset": -23,
+      "events": 11.0
+    },
+    {
+      "offset": -22,
+      "events": 23.0
+    },
+    {
+      "offset": -21,
+      "events": 14.0
+    },
+    {
+      "offset": -20,
+      "events": 18.0
+    },
+    {
+      "offset": -19,
+      "events": 20.0
+    },
+    {
+      "offset": -18,
+      "events": 16.0
+    },
+    {
+      "offset": -17,
+      "events": 24.0
+    },
+    {
+      "offset": -16,
+      "events": 15.0
+    },
+    {
+      "offset": -15,
+      "events": 24.0
+    },
+    {
+      "offset": -14,
+      "events": 20.0
+    },
+    {
+      "offset": -13,
+      "events": 14.0
+    },
+    {
+      "offset": -12,
+      "events": 22.0
+    },
+    {
+      "offset": -11,
+      "events": 32.0
+    },
+    {
+      "offset": -10,
+      "events": 26.0
+    },
+    {
+      "offset": -9,
+      "events": 17.0
+    },
+    {
+      "offset": -8,
+      "events": 26.0
+    },
+    {
+      "offset": -7,
+      "events": 30.0
+    },
+    {
+      "offset": -6,
+      "events": 23.0
+    },
+    {
+      "offset": -5,
+      "events": 26.0
+    },
+    {
+      "offset": -4,
+      "events": 21.0
+    },
+    {
+      "offset": -3,
+      "events": 25.0
+    },
+    {
+      "offset": -2,
+      "events": 16.0
+    },
+    {
+      "offset": -1,
+      "events": 22.0
+    },
+    {
+      "offset": 0,
+      "events": 11.0
+    },
+    {
+      "offset": 1,
+      "events": 21.0
+    },
+    {
+      "offset": 2,
+      "events": 20.0
+    },
+    {
+      "offset": 3,
+      "events": 19.0
+    },
+    {
+      "offset": 4,
+      "events": 21.0
+    },
+    {
+      "offset": 5,
+      "events": 19.0
+    },
+    {
+      "offset": 6,
+      "events": 23.0
+    },
+    {
+      "offset": 7,
+      "events": 19.0
+    },
+    {
+      "offset": 8,
+      "events": 18.0
+    },
+    {
+      "offset": 9,
+      "events": 19.0
+    },
+    {
+      "offset": 10,
+      "events": 25.0
+    },
+    {
+      "offset": 11,
+      "events": 11.0
+    },
+    {
+      "offset": 12,
+      "events": 14.0
+    },
+    {
+      "offset": 13,
+      "events": 15.0
+    },
+    {
+      "offset": 14,
+      "events": 26.0
+    },
+    {
+      "offset": 15,
+      "events": 19.0
+    },
+    {
+      "offset": 16,
+      "events": 28.0
+    },
+    {
+      "offset": 17,
+      "events": 18.0
+    },
+    {
+      "offset": 18,
+      "events": 19.0
+    },
+    {
+      "offset": 19,
+      "events": 26.0
+    },
+    {
+      "offset": 20,
+      "events": 20.0
+    },
+    {
+      "offset": 21,
+      "events": 18.0
+    },
+    {
+      "offset": 22,
+      "events": 13.0
+    },
+    {
+      "offset": 23,
+      "events": 17.0
+    },
+    {
+      "offset": 24,
+      "events": 20.0
+    },
+    {
+      "offset": 25,
+      "events": 17.0
+    },
+    {
+      "offset": 26,
+      "events": 14.0
+    },
+    {
+      "offset": 27,
+      "events": 22.0
+    },
+    {
+      "offset": 28,
+      "events": 13.0
+    }
+  ],
+  "quake_variants": {
+    "registered: nights -14..0, UTC date": {
+      "rate_ratio": 1.140232285663846,
+      "ci_low": 0.9792136264247132,
+      "ci_high": 1.327728322181553,
+      "p_value": 0.0911175901232713,
+      "n_events": 899,
+      "n_strata": 397,
+      "power": 0.24989133041558126
+    },
+    "nights -14..0, local night": {
+      "rate_ratio": 1.130819861172529,
+      "ci_low": 0.9700444977721209,
+      "ci_high": 1.3182421645183724,
+      "p_value": 0.11612053758692975,
+      "n_events": 893,
+      "n_strata": 395,
+      "power": 0.2492338890948988
+    },
+    "nights -14..-1 (quake night excluded), local": {
+      "rate_ratio": 1.188760063954052,
+      "ci_low": 1.018893967933197,
+      "ci_high": 1.3869455842579828,
+      "p_value": 0.027957198021502955,
+      "n_events": 877,
+      "n_strata": 394,
+      "power": 0.24226797812755424
+    },
+    "nights -7..-1, local": {
+      "rate_ratio": 1.3091773084419687,
+      "ci_low": 1.0732160074810084,
+      "ci_high": 1.5970179469855583,
+      "p_value": 0.007888392037637379,
+      "n_events": 502,
+      "n_strata": 276,
+      "power": 0.150966044138361
+    },
+    "nights 0..+3 (after the quake), local": {
+      "rate_ratio": 0.9192796772756847,
+      "ci_low": 0.699308564111447,
+      "ci_high": 1.2084438378441043,
+      "p_value": 0.5464098534146054,
+      "n_events": 303,
+      "n_strata": 195,
+      "power": 0.10881076206724993
+    },
+    "within 50 km, -14..-1, local": {
+      "rate_ratio": 1.2116518188897347,
+      "ci_low": 0.937855334159309,
+      "ci_high": 1.5653801569885015,
+      "p_value": 0.14182527057817446,
+      "n_events": 315,
+      "n_strata": 127,
+      "power": 0.11085050023858828
+    },
+    "M >= 3.5, -14..-1, local": {
+      "rate_ratio": 1.0867175707155463,
+      "ci_low": 0.9902294247343096,
+      "ci_high": 1.192607540236206,
+      "p_value": 0.07960303113291847,
+      "n_events": 2421,
+      "n_strata": 1079,
+      "power": 0.5594460765316733
+    },
+    "Oklahoma + Kansas (mostly induced), registered window": {
+      "rate_ratio": 1.9128762374071828,
+      "ci_low": 0.9074045286135842,
+      "ci_high": 4.032485384691393,
+      "p_value": 0.08826895429824198,
+      "n_events": 60,
+      "n_strata": 46,
+      "power": 0.0656379328366487
+    },
+    "California + Nevada, registered window": {
+      "rate_ratio": 1.1828050866556203,
+      "ci_low": 0.9887868740828933,
+      "ci_high": 1.4148932491807371,
+      "p_value": 0.06626808234013588,
+      "n_events": 618,
+      "n_strata": 237,
+      "power": 0.18936182754499808
+    },
+    "all other states, registered window": {
+      "rate_ratio": 0.9601284535129128,
+      "ci_low": 0.6929515667082123,
+      "ci_high": 1.330319017278834,
+      "p_value": 0.8068097704616446,
+      "n_events": 221,
+      "n_strata": 114,
+      "power": 0.09051622175581253
+    }
+  }
+}
