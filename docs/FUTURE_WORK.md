@@ -22,3 +22,10 @@ local night, exclude the quake night, include M >= 3.5 for power, and needs repo
 
 The Kp >= 8 hint in 2011-2020 rests on three storms and does not replicate in 2001-2010. Worth
 revisiting only with reports covering the May and October 2024 storms.
+
+## What the unexplained celebration excess is (from H-celebrate-01)
+
+July 4 and New Year's Eve nights keep a rise of about 2.5x and 1.8x after removing lantern, fireworks
+and fire-coloured-light wording. Read a sample of those reports to see what they describe
+(undescribed lanterns, drones, aircraft, other), and consider a text classifier for the unexplained
+tier instead of word lists.
