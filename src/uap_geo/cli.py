@@ -94,6 +94,10 @@ def main(argv: list[str] | None = None) -> None:
     llm.add_argument("--name", default="sample", help="file stem for sample/extract/validate outputs")
     llm.add_argument("--seed", type=int, default=7)
     llm.add_argument("--exclude", nargs="*", default=[], help="sample: names of earlier samples whose reports to leave out")
+    aud = sub.add_parser("audit", help="Sensitivity checks on registered results")
+    aud.add_argument("action", choices=["dispersion"])
+    aud.add_argument("--split", choices=["explore", "confirm", "holdout"], default="confirm")
+    aud.add_argument("--config", type=Path, default=Path("configs/v1.yaml"))
     args = parser.parse_args(argv)
 
     configure()
@@ -108,6 +112,10 @@ def main(argv: list[str] | None = None) -> None:
         _residual(args)
     elif args.command == "llm":
         _llm(args)
+    elif args.command == "audit":
+        from uap_geo.audit.dispersion import run as dispersion_run
+
+        print(dispersion_run(Path.cwd(), Config.from_yaml(args.config), args.split).read_text())
 
 
 STUDIES = {"H-geo-01": "uap_geo.hypotheses.geo_triggers:GeoTriggerStudy",

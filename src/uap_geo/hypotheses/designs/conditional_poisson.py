@@ -21,6 +21,7 @@ class TestResult:
     n_strata: int
     n_events: int
     exposed_share: float      # share of observed time that is exposed, in informative strata
+    dispersion: float = float("nan")  # Pearson chi-square / df within strata (1 = Poisson; > 1 = overdispersed)
 
     def rate_ratio(self, term: str = "exposed") -> float:
         return float(self.terms.loc[term, "rate_ratio"])
@@ -34,6 +35,7 @@ class TestResult:
             "n_strata": self.n_strata,
             "n_events": self.n_events,
             "exposed_share": self.exposed_share,
+            "dispersion": self.dispersion,
         }
 
 
@@ -73,4 +75,16 @@ class ConditionalPoissonTest:
         )
         weight = data[self.exposure_time] if self.exposure_time else pd.Series(1.0, index=data.index)
         exposed_share = float(weight[data[exposed_flag] == 1].sum() / weight.sum())
-        return TestResult(table, int(data[self.group].nunique()), int(data[self.count].sum()), exposed_share)
+        dispersion = self._dispersion(data, exog[varying].to_numpy(), params, weight)
+        return TestResult(table, int(data[self.group].nunique()), int(data[self.count].sum()), exposed_share, dispersion)
+
+    def _dispersion(self, data: pd.DataFrame, x: np.ndarray, params: np.ndarray, weight: pd.Series) -> float:
+        """Pearson chi-square / df: expected count of each row is its stratum total times its share of
+        weight * exp(x b) within the stratum."""
+        lin = np.asarray(weight, dtype=float) * np.exp(x @ params)
+        frame = pd.DataFrame({"g": data[self.group].to_numpy(), "y": data[self.count].to_numpy(dtype=float), "lin": lin})
+        frame["mu"] = frame.groupby("g")["y"].transform("sum") * frame["lin"] / frame.groupby("g")["lin"].transform("sum")
+        ok = frame["mu"] > 0
+        chi2 = float((((frame["y"] - frame["mu"]) ** 2) / frame["mu"])[ok].sum())
+        df = int(ok.sum()) - frame["g"].nunique() - len(params)
+        return chi2 / df if df > 0 else float("nan")

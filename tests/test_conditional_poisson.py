@@ -54,3 +54,21 @@ def test_collapsing_counties_gives_identical_estimate():
     collapsed_rows = data.groupby(["storm", "exposed", "moon"], as_index=False)["count"].sum()
     collapsed = ConditionalPoissonTest(group="storm").fit(collapsed_rows, ["exposed", "moon"]).terms
     assert np.allclose(full["rate_ratio"], collapsed["rate_ratio"], rtol=1e-3)
+
+
+def test_dispersion_near_one_for_poisson_and_above_for_overdispersed():
+    import numpy as np
+    import pandas as pd
+
+    from uap_geo.hypotheses.designs.conditional_poisson import ConditionalPoissonTest
+
+    rng = np.random.default_rng(0)
+    n, k = 3000, 9
+    g = np.repeat(np.arange(n), k)
+    exposed = np.tile([1] + [0] * (k - 1), n)
+    base = rng.gamma(2.0, 1.0, n).repeat(k)
+    pois = pd.DataFrame({"s": g, "exposed": exposed, "count": rng.poisson(base * 0.5)})
+    over = pd.DataFrame({"s": g, "exposed": exposed, "count": rng.poisson(base * 0.5 * rng.gamma(0.5, 2.0, n * k))})
+    test = ConditionalPoissonTest(group="s")
+    assert 0.9 < test.fit(pois, ["exposed"]).dispersion < 1.1
+    assert test.fit(over, ["exposed"]).dispersion > 1.5
