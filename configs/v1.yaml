@@ -113,6 +113,9 @@ sources:
     urls:
       - https://www.sciencebase.gov/catalog/file/get/589097b1e4b072a7ac0cae23?name=Qfaults_GIS.zip
       - https://earthquake.usgs.gov/static/lfs/nshm/qfaults/Qfaults_GIS.zip
+  kp:                         # GFZ Potsdam 3-hourly Kp since 1932 (nowcast + definitive)
+    urls:
+      - https://kp.gfz.de/fileadmin/files_for_gfz_cms/Kp_ap_since_1932.txt
   earthquakes:
     urls:
       - https://earthquake.usgs.gov/fdsnws/event/1/query

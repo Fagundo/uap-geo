@@ -1,0 +1,65 @@
+# Implementation notes for H-geo-01: choices the spec leaves open, fixed before the explore run.
+# Registered together with the spec and filters; a confirm run refuses to start if any changes.
+hypothesis: H-geo-01
+choices:
+  observing_night: >
+    A report belongs to the night that began on the local evening before it; local times before
+    06:00 count toward the previous date. Local time = UTC converted with the place's IANA timezone.
+  storm_days: >
+    Kp is daily in UTC. "Kp >= 6" means a daily maximum Kp >= 6.0 (6o and above; 6- = 5.667 does not
+    count), as the spec is written. A storm day D exposes the US nights beginning on D and D + 1.
+    Consecutive storm days merge into one storm, whose window runs from its first day to one day
+    after its last.
+  storm_controls: >
+    Each exposed night shifted by +-7, +-14, +-21, +-28 days; control nights within one day of any
+    Kp >= 6 day are dropped.
+  quake_windows: >
+    Quake night = UTC date of the quake. Windows run 14 nights before through the quake night.
+    Overlapping windows in one county merge, keeping the largest magnitude.
+  quake_controls: >
+    The whole window shifted by +-28 and +-56 days; dropped if it overlaps any exposure window in that
+    county or contains any M >= 3.0 event (aftershocks included) within 100 km of the county centroid.
+  county_location: Events join counties by coordinates; distances use county centroids, as in the spec.
+  event_merging: >
+    Reports within 50 km of an event's first report and within 3 hours after it join that event
+    (anchored, not chained). An event is explained if any of its reports matches a rule at high confidence.
+  high_quality_tier: Filtered events with at least 2 merged reports or a reported duration of at least 5 minutes.
+  moon: One illumination value per night, at 06:00 UTC the following morning (about local midnight in the US).
+  sparse_strata: Strata with no events drop out; they carry no information in a conditional model.
+  split_boundaries: Design rows (exposed and control nights) are kept only if the night falls inside the split's years.
+  deferred_rules: >
+    Planet and ISS rules need ephemerides and are not yet implemented. Launch-matched Starlink and
+    rocket-timing rules need launch data, so those rules match on text only, at medium confidence,
+    which never removes an event. None of these key on storms or earthquakes.
+  discriminating_checks: >
+    A check holds when the named subgroup's rate ratio is above 1 with p < 0.05 (unadjusted). Storm
+    latitude: counties whose centroid is south of 37 N. Storm dose: storms with max Kp >= 8 have a higher
+    rate ratio than Kp 6-7 storms, and their own p < 0.05. Quake dose: windows keyed to M >= 5.0 have a
+    higher rate ratio than M 4.0-5.0, and their own p < 0.05.
+  verdicts: >
+    Confirmed: BH-adjusted p < 0.05 and rate ratio > 1 in the filtered tier, and at least one
+    discriminating check holds. Refuted: power >= 0.80 and upper 95% limit < 1.10. Underpowered:
+    power < 0.50. Anything else: inconclusive. Explore runs get no verdict.
+  filter_validation: >
+    Rule precision is checked on a stratified sample labelled by Claude (an AI), not by a human; the
+    report card says so. A rule below 80% precision is tightened or dropped before the confirm run.
+
+parameters:
+  dedup: {km: 50, hours: 3}
+  quality: {min_reports: 2, min_duration_s: 300}
+  storm:
+    threshold: 6.0
+    strong: 8.0
+    offsets_days: [-28, -21, -14, -7, 7, 14, 21, 28]
+    contamination_days: 1
+    aurora_free_latitude: 37.0
+  quake:
+    catalog_min_mag: 3.0
+    min_mag: 4.0
+    strong_mag: 5.0
+    radius_km: 100
+    window: [-14, 0]
+    control_offsets_days: [-56, -28, 28, 56]
+    contamination_mag: 3.0
+    decluster: {days: 30, km: 50}
+  power: {rate_ratio: 1.10, alpha: 0.05, underpowered_below: 0.50, refute_requires: 0.80}

@@ -32,6 +32,10 @@ class SourceRegistry:
         self._config = config
         self._dl = downloader
 
+    @property
+    def downloader(self) -> Downloader:
+        return self._dl
+
     def is_active(self, name: str) -> bool:
         return name in self._config.sources and self._config.source(name).is_active
 

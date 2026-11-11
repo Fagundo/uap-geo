@@ -1,0 +1,47 @@
+name: study
+
+on:
+  workflow_dispatch:
+    inputs:
+      args:
+        description: "CLI arguments, e.g. 'hypothesis run H-geo-01 --split explore' or 'filters sample'"
+        required: true
+        default: "hypothesis run H-geo-01 --split explore"
+
+permissions:
+  contents: write
+
+jobs:
+  study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync
+      - uses: actions/cache@v4
+        with:
+          path: data/raw
+          key: raw-${{ hashFiles('configs/v1.yaml') }}-v1
+          restore-keys: raw-
+      - name: Run
+        env:
+          ARGS: ${{ inputs.args }}   # passed via env, never interpolated into the script
+        run: |
+          read -r -a argv <<< "$ARGS"
+          uv run uap-geo "${argv[@]}"
+      - name: Commit results
+        if: success()
+        run: |
+          if [ -z "$(git status --porcelain -- results hypotheses/registry.yaml)" ]; then echo "nothing to commit"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add results hypotheses/registry.yaml 2>/dev/null || git add results
+          git commit -m "Study results: $ARGS"
+          git pull --rebase -q
+          git push
+        env:
+          ARGS: ${{ inputs.args }}
