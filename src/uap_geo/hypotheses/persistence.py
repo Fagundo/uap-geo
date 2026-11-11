@@ -61,6 +61,12 @@ class PersistenceStudy(EventStudy):
         self.controls = tuple(p["covariates"])
         self.fixed_effects = tuple(p["fixed_effects"])
 
+    def _all_years(self) -> tuple[int, int]:
+        """Outcome periods plus every prior period."""
+        first, last = super()._all_years()
+        priors = [int(v[0]) for v in self.p["prior_periods"].values()]
+        return min(first, *priors), last
+
     # ------------------------------------------------------------------------------ inputs
     def _county_table(self) -> pd.DataFrame:
         counties = prepare_counties(self.sources.counties().load(), self.config.study.crs)
