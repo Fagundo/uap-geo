@@ -86,7 +86,7 @@ def main(argv: list[str] | None = None) -> None:
     res.add_argument("--settings", type=Path, default=Path("configs/residual.yaml"))
     res.add_argument("--config", type=Path, default=Path("configs/v1.yaml"))
     llm = sub.add_parser("llm", help="LLM feature extraction (needs ANTHROPIC_API_KEY)")
-    llm.add_argument("action", choices=["sample", "extract", "validate", "submit", "collect"])
+    llm.add_argument("action", choices=["sample", "extract", "validate", "submit", "collect", "gate"])
     llm.add_argument("--settings", type=Path, default=Path("configs/llm.yaml"))
     llm.add_argument("--per-group", type=int, default=40)
     llm.add_argument("--residual", type=int, default=120)
@@ -228,6 +228,16 @@ def _llm(args: argparse.Namespace) -> None:
         (out / "batches.json").write_text(json.dumps({"model": s["model"], "schema": extractor.schema, "batches": ids,
                                                       "requests": len(rows)}, indent=2))
         print(f"submitted {len(rows)} requests in {len(ids)} batches: {ids}")
+    elif args.action == "gate":
+        from uap_geo.common.download import Downloader
+        from uap_geo.data.scraping.registry import SourceRegistry
+        from uap_geo.llm.gate import KnownCauseGate
+
+        cfg = Config.from_yaml(Path("configs/v1.yaml"))
+        launches = SourceRegistry(cfg, Downloader(cfg.paths.raw)).launches(100.0).load()
+        gate = KnownCauseGate(root, root / "configs" / "anomaly_gate_v2.yaml")
+        table, passed = gate.run(launches)
+        print(gate.report(table, passed, out / "gate_v2.md").read_text())
     elif args.action == "collect":
         info = json.loads((out / "batches.json").read_text())
         status = extractor.status(info["batches"])
