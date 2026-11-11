@@ -53,3 +53,12 @@ def test_bright_planet_venus_evening():
                   ["2020-03-25 03:30", "2020-03-24 20:30", 47.6, -122.3, 60, "stationary bright light in the west"],
                   ["2020-03-25 11:00", "2020-03-25 04:00", 47.6, -122.3, 1800, "stationary bright light"]])
     assert check.match(r).tolist() == [True, False, False]
+
+
+def test_llm_explainer_uses_top_probability():
+    from uap_geo.residual.checks import LlmExplainerCheck
+
+    features = pd.DataFrame({"report_id": ["a", "b"], "p_aircraft": [0.9, 0.2], "p_meteor": [0.1, 0.5]})
+    check = LlmExplainerCheck({"causes": ["aircraft", "meteor"], "min_probability": 0.7}, features)
+    reports = pd.DataFrame({"report_id": ["a", "b", "c"]})
+    assert check.match(reports).tolist() == [True, False, False]

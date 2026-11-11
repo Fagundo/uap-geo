@@ -1,0 +1,44 @@
+# Residual set v2 (v1 plus the LLM explainer): what is left after removing reports with a known, checkable explanation.
+# Separate from configs/filters.yaml, which is frozen by registered hypotheses.
+version: 2
+years: [2001, 2023]
+rule_filters: configs/filters.yaml       # high-confidence rule matches count as explained (meteor, NUFORC note, lantern ...)
+checks:
+  launch_window:            # measured in H-launch-01
+    minutes_after: 90
+    radius_km: 1200
+    lighting: [twilight, night]
+    twilight_sun_alt: [-18, -4]
+    min_apogee_km: 100
+    confidence: high
+  holiday_night:            # measured in H-celebrate-01
+    nights: ["07-03", "07-04", "07-05", "12-31", "01-01"]
+    confidence: possible    # many holiday reports are lanterns or fireworks, but not all
+  lantern_wording:          # as the H-celebrate-01 unexplained tier, any date
+    colour_words: [orange, red, amber, fiery, fireball, "ball of fire", flame, flickering]
+    confidence: possible
+  starlink_train:
+    from: 2019-05-24
+    days_after_launch: 14
+    text_any: ["line of lights", "string of lights", "train of lights", "lights in a row", "row of lights", "in a line",
+               "single file", "evenly spaced", "starlink", "chain of lights", "string of pearls"]
+    local_hours: [[17, 23], [3, 7]]      # evening and morning twilight passes
+    confidence: high
+  bright_planet:
+    bodies: [venus, jupiter]
+    min_altitude_deg: 5
+    sun_max_altitude_deg: -4
+    min_duration_s: 600
+    text_any: [stationary, hovering, hovered, "not moving", "didn't move", "did not move", "bright star", "very bright light",
+               "brightest star", "star-like", "like a star", twinkl]
+    confidence: possible    # no direction in most summaries, so a planet cannot be confirmed
+  llm_explainer:            # an ordinary cause rated at least 0.7 from the text alone (features-v2, blinded)
+    features: results/llm/features_raw.parquet
+    causes: [aircraft, helicopter, drone, satellite, starlink_train, planet_or_star, meteor, sky_lantern, balloon,
+             rocket_launch, fireworks, bird_or_insect, searchlight_or_laser]
+    min_probability: 0.7
+    confidence: possible    # a reading of the text, not a check against an outside record
+tiers:
+  explained: any high-confidence match (rule filters, launch window, Starlink train)
+  possible: no high match, at least one possible match
+  residual: no match of either kind

@@ -21,6 +21,7 @@ from uap_geo.residual.checks import (
     HolidayNightCheck,
     LanternWordingCheck,
     LaunchWindowCheck,
+    LlmExplainerCheck,
     StarlinkTrainCheck,
     strip_notes,
 )
@@ -50,9 +51,21 @@ class ResidualSetBuilder:
         all_launches = self.sources.launches(0.0).load()
         starlink = all_launches.loc[all_launches["mission"].str.contains("starlink", case=False, na=False), "time_utc"]
         log.info("Starlink launches in GCAT: %d (first %s)", len(starlink), starlink.min() if len(starlink) else "-")
-        return [LaunchWindowCheck(c["launch_window"], launches), HolidayNightCheck(c["holiday_night"]),
-                LanternWordingCheck(c["lantern_wording"], self.filters), StarlinkTrainCheck(c["starlink_train"], starlink),
-                BrightPlanetCheck(c["bright_planet"])]
+        checks = [LaunchWindowCheck(c["launch_window"], launches), HolidayNightCheck(c["holiday_night"]),
+                  LanternWordingCheck(c["lantern_wording"], self.filters), StarlinkTrainCheck(c["starlink_train"], starlink),
+                  BrightPlanetCheck(c["bright_planet"])]
+        if "llm_explainer" in c:
+            checks.append(LlmExplainerCheck(c["llm_explainer"], self._llm_features(c["llm_explainer"])))
+        return checks
+
+    def _llm_features(self, params: dict) -> pd.DataFrame:
+        from uap_geo.llm.strangeness import feature_table
+
+        raw = pd.read_parquet(self.root / params["features"])
+        table = feature_table(raw)
+        self.llm_table = table
+        log.info("LLM features: %d reports (%s)", len(table), table.attrs.get("schema", "?"))
+        return table
 
     def build(self) -> ResidualResult:
         years = tuple(self.settings["years"])
@@ -77,6 +90,12 @@ class ResidualSetBuilder:
                 possible |= matched
             for i in reports.index[matched]:
                 reasons.at[i] = reasons.at[i] + [check.name]
+        llm = getattr(self, "llm_table", None)
+        if llm is not None and len(llm):
+            flags = llm.set_index("report_id")
+            reports["strangeness"] = reports["report_id"].map(flags["strangeness"])
+            reports["high_strangeness"] = reports["report_id"].map(flags["high_strangeness"])
+            reports["llm_top_cause"] = reports["report_id"].map(flags["top_conventional"])
         reports["tier"] = "residual"
         reports.loc[possible, "tier"] = "possible"
         reports.loc[high, "tier"] = "explained"
@@ -94,7 +113,7 @@ class ResidualSetBuilder:
         }
         log.info("Residual set: %s", summary)
         keep = ["report_id", "event_id", "occurred_utc", "local_time", "lat", "lon", "city", "state", "duration_s",
-                "text", "tier", "reasons"]
+                "text", "tier", "reasons", "strangeness", "high_strangeness", "llm_top_cause"]
         return ResidualResult(reports[[c for c in keep if c in reports.columns]], events, summary)
 
 

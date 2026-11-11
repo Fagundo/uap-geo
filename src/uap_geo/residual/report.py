@@ -21,6 +21,13 @@ def write_residual(result: ResidualResult, out_dir: Path, name: str) -> Path:
               "| Check or rule | Reports matched |", "| --- | --- |"]
     for name_, n in sorted(s["matches"].items(), key=lambda kv: -kv[1]):
         lines.append(f"| {name_} | {n:,} |")
+    if "strangeness" in result.reports and result.reports["strangeness"].notna().any():
+        rep = result.reports
+        lines += ["", "| Tier | Reports with LLM features | High strangeness |", "| --- | --- | --- |"]
+        for tier in ("explained", "possible", "residual"):
+            t = rep.loc[(rep["tier"] == tier) & rep["strangeness"].notna()]
+            share = f"{t['high_strangeness'].astype(bool).mean():.1%}" if len(t) else "—"
+            lines.append(f"| {tier} | {len(t):,} | {share} |")
     path = out_dir / f"{name}.md"
     path.write_text("\n".join(lines) + "\n")
     return path

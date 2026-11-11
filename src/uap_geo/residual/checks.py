@@ -129,3 +129,20 @@ class BrightPlanetCheck(Check):
                 up |= planets.altitude(body, t, lat, lon) >= p["min_altitude_deg"]
             out[np.flatnonzero(candidates)] = dark & up
         return pd.Series(out, index=reports.index)
+
+
+class LlmExplainerCheck(Check):
+    """An ordinary cause the LLM rates at or above min_probability, from the report text alone."""
+
+    name = "llm_explainer"
+
+    def __init__(self, params: dict, features: pd.DataFrame) -> None:
+        super().__init__(params)
+        causes = [f"p_{c}" for c in params["causes"]]
+        present = [c for c in causes if c in features]
+        top = features[present].max(axis=1) if present else pd.Series(0.0, index=features.index)
+        self.top = pd.Series(top.to_numpy(), index=features["report_id"].to_numpy())
+
+    def match(self, reports: pd.DataFrame) -> pd.Series:
+        p = reports["report_id"].map(self.top).fillna(0.0)
+        return p >= self.params["min_probability"]
