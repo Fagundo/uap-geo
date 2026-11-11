@@ -9,6 +9,18 @@ finals:
   loser: New York Giants
   source: https://en.wikipedia.org/wiki/Super_Bowl_XXXV
 - league: NFL
+  year: 2002
+  date: '2002-02-03'
+  winner: New England Patriots
+  loser: St. Louis Rams
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XXXVI
+- league: NFL
+  year: 2003
+  date: '2003-01-26'
+  winner: Tampa Bay Buccaneers
+  loser: Oakland Raiders
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XXXVII
+- league: NFL
   year: 2004
   date: '2004-02-01'
   winner: New England Patriots
@@ -20,6 +32,30 @@ finals:
   winner: New England Patriots
   loser: Philadelphia Eagles
   source: https://en.wikipedia.org/wiki/Super_Bowl_XXXIX
+- league: NFL
+  year: 2006
+  date: '2006-02-05'
+  winner: Pittsburgh Steelers
+  loser: Seattle Seahawks
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XL
+- league: NFL
+  year: 2007
+  date: '2007-02-04'
+  winner: Indianapolis Colts
+  loser: Chicago Bears
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XLI
+- league: NFL
+  year: 2008
+  date: '2008-02-03'
+  winner: New York Giants
+  loser: New England Patriots
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XLII
+- league: NFL
+  year: 2009
+  date: '2009-02-01'
+  winner: Pittsburgh Steelers
+  loser: Arizona Cardinals
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XLIII
 - league: NFL
   year: 2010
   date: '2010-02-07'
