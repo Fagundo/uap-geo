@@ -25,7 +25,8 @@ class KnownCauseGate:
             excluded |= set(pd.read_parquet(self.root / path)["report_id"])
         reports = reports.loc[~reports["report_id"].isin(excluded)]
         features = feature_table(pd.read_parquet(self.root / s["features"]))
-        data = reports.merge(features, on="report_id", how="inner")
+        overlap = [c for c in features.columns if c != "report_id" and c in reports.columns]
+        data = reports.drop(columns=overlap).merge(features, on="report_id", how="inner")
 
         twilight = LaunchWindowCheck({"minutes_after": 90, "radius_km": 1200, "lighting": ["twilight"],
                                       "twilight_sun_alt": [-18, -4]}, launches).match(data)
