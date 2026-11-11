@@ -5,7 +5,10 @@ notes:
   unexplained_tier: >
     Filtered tier (sky_lantern and fireworks rules disabled), minus events where any report matches
     lantern wording (all three sky_lantern text groups: orange or red; orb or ball; drifting, floating,
-    slow, silent or rising) or fireworks wording (firework, burst, colored flashes), on any date.
+    slow, silent or rising), fireworks wording (firework, burst, colored flashes) or fire-coloured light
+    wording (colour_words below), on any date. The colour words were added after the first explore run
+    showed the three-group lantern wording misses most lantern-like reports; they are conservative
+    (they also remove some aircraft and other red lights, equally on every night).
   national_strata: year x state; all counties in a state share the night, so summing them is exact.
   championship_cities: >
     Counties whose centroid lies within 50 km of the team's home city. The night is the deciding game's
@@ -31,6 +34,7 @@ parameters:
     offsets_days: [-28, -21, -14, -7, 7, 14, 21, 28]
     window_hours: [21, 2]
     metro_radius_km: 50
+    colour_words: [orange, red, amber, fiery, fireball, "ball of fire", flame, flickering]
     holiday_nights: ["07-03", "07-04", "07-05", "12-24", "12-25", "12-31", "01-01"]
     championships: configs/celebrations/championships.yaml
     championships_sha256: 45bb290fad29ac3f78c8bc9aaa09d10a192000d3afb379eb0584d0e3c7780cee

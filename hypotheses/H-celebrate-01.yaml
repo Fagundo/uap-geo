@@ -3,8 +3,8 @@ id: H-celebrate-01
 title: Celebration nights
 status: draft
 claim: >
-  Celebration nights raise UAP reports that the filters leave unexplained: reports with no lantern or
-  fireworks wording rise on the Fourth of July and New Year's Eve in every county, and on the night of a
+  Celebration nights raise UAP reports that the filters leave unexplained: reports with no lantern,
+  fireworks or fire-coloured-light wording rise on the Fourth of July and New Year's Eve in every county, and on the night of a
   championship win in the counties around the winner's home city, compared with the same counties on
   comparable nights.
 why: >
@@ -24,7 +24,7 @@ data:
 unit: county-night (local observing night, 06:00 rollover)
 outcome: events per county-night (reports within 50 km and 3 hours merged into one event)
 outcome_tiers: [all, filtered, unexplained, high_quality]
-primary_tier: unexplained   # filtered, and no report in the event has lantern or fireworks wording
+primary_tier: unexplained   # filtered, and no report in the event has lantern, fireworks or fire-coloured-light wording
 filters_disabled: [sky_lantern, fireworks]   # both key on holiday dates; replaced by wording matched the same way on every night
 model: conditional Poisson, county-nights as exposure time
 adjust: [moon_illumination]

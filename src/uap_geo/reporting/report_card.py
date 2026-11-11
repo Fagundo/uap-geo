@@ -8,7 +8,7 @@ from pathlib import Path
 from uap_geo.classify.tiers import TIERS
 
 TIER_LABEL = {"all": "All events", "filtered": "Filtered (explainable removed)", "high_quality": "High quality",
-              "unexplained": "Unexplained (filtered, no lantern or fireworks description)"}
+              "unexplained": "Unexplained (filtered; no lantern, fireworks or fire-coloured light wording)"}
 CHECK_LABEL = {
     "south_of_37N": "Effect present south of 37 N (aurora rarely visible)",
     "kp8_vs_kp6_7": "Stronger for Kp >= 8 than Kp 6-7",

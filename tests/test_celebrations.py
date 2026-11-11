@@ -16,6 +16,7 @@ def test_lantern_wording_is_date_free():
     text = pd.Series(["three orange orbs floating silently", "red ball, fast and zigzagging",
                       "saw fireworks then a light", "white disc hovering"])
     assert lantern_like(text, FILTERS).tolist() == [True, False, True, False]
+    assert lantern_like(text, FILTERS, ("orange", "red", "amber")).tolist() == [True, True, True, False]
 
 
 def test_window_crosses_midnight():

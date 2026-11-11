@@ -29,13 +29,14 @@ from uap_geo.hypotheses.event_table import EventTable
 log = logging.getLogger(__name__)
 
 
-def lantern_like(text: pd.Series, filters: dict) -> pd.Series:
-    """Lantern or fireworks wording, judged the same way on every night (no date condition)."""
+def lantern_like(text: pd.Series, filters: dict, colour_words: tuple[str, ...] = ()) -> pd.Series:
+    """Lantern, fireworks or fire-coloured-light wording, judged the same way on every night (no date condition)."""
     groups = filters["rules"]["sky_lantern"]["text_all_groups"]
     lantern = pd.Series(True, index=text.index)
     for words in groups:
         lantern &= contains_any(text, words)
-    return lantern | contains_any(text, filters["rules"]["fireworks"]["text_any"])
+    out = lantern | contains_any(text, filters["rules"]["fireworks"]["text_any"])
+    return out | contains_any(text, colour_words) if colour_words else out
 
 
 class CelebrationStudy(EventStudy):
@@ -54,6 +55,7 @@ class CelebrationStudy(EventStudy):
         p = self.impl["parameters"]["celebration"]
         self.settings = NightSettings(offsets_days=tuple(p["offsets_days"]), window_hours=tuple(p["window_hours"]))
         self.radius_km = float(p["metro_radius_km"])
+        self.colour_words = tuple(p.get("colour_words", ()))
         self.holidays = {tuple(int(x) for x in md.split("-")) for md in p["holiday_nights"]}
         self.finals_path = root / p["championships"]
         self.teams_path = root / p["teams"]
@@ -81,7 +83,7 @@ class CelebrationStudy(EventStudy):
         events["geoid"] = events["geoid"].astype(str)
         reports = table.reports
         text = reports["summary"].astype("string").str.lower().fillna("")
-        lantern_events = set(reports.loc[lantern_like(text, self.filters), "event_id"])
+        lantern_events = set(reports.loc[lantern_like(text, self.filters, self.colour_words), "event_id"])
         events["lantern_like"] = events["event_id"].isin(lantern_events)
         events["in_unexplained"] = events["in_filtered"] & ~events["lantern_like"]
         events["in_lantern_like"] = events["in_filtered"] & events["lantern_like"]
@@ -164,7 +166,7 @@ class CelebrationStudy(EventStudy):
                 self.secondary["championship, loser's city"] = lost
             for tier in self.TIERS:
                 o.by_tier[tier] = self.test.fit(self._select(by_tier[tier], name), ["exposed", "moon"])
-            self.secondary[f"{name}, lantern or fireworks wording"] = fit_exposed(self.test, self._select(by_tier["lantern_like"], name))
+            self.secondary[f"{name}, lantern, fireworks or fire-coloured wording"] = fit_exposed(self.test, self._select(by_tier["lantern_like"], name))
             outcomes.append(o)
         self.counts = {"championship strata": int(exposures.loc[exposures["kind"] == "championship", "stratum"].nunique()),
                        "lantern-like events (filtered tier)": int(events["in_lantern_like"].sum())}
@@ -172,8 +174,8 @@ class CelebrationStudy(EventStudy):
 
     def extra_report_lines(self) -> list[str]:
         lines = ["## Secondary estimates", "",
-                 "Lantern or fireworks wording is matched the same way on every night; the primary tier removes "
-                 "those events, this row counts only them.", "",
+                 "Lantern, fireworks or fire-coloured-light wording is matched the same way on every night; the "
+                 "primary tier removes those events, the 'wording' rows count only them.", "",
                  "| Subset | Rate ratio | 95% CI | p | Events |", "| --- | --- | --- | --- | --- |"]
         for name, r in getattr(self, "secondary", {}).items():
             if "note" in r:
