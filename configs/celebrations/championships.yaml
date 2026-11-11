@@ -1,0 +1,340 @@
+# Deciding-game dates, champions and runners-up, 2001-2023, read from Wikipedia infoboxes by
+# scripts/build_championships.py (Super Bowl teams given in the script). Frozen once H-celebrate-01
+# is registered; its implementation notes record this file's SHA-256.
+finals:
+- league: NFL
+  year: 2010
+  date: '2010-02-07'
+  winner: New Orleans Saints
+  loser: Indianapolis Colts
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XLIV
+- league: NFL
+  year: 2011
+  date: '2011-02-06'
+  winner: Green Bay Packers
+  loser: Pittsburgh Steelers
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XLV
+- league: NFL
+  year: 2014
+  date: '2014-02-02'
+  winner: Seattle Seahawks
+  loser: Denver Broncos
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XLVIII
+- league: NFL
+  year: 2015
+  date: '2015-02-01'
+  winner: New England Patriots
+  loser: Seattle Seahawks
+  source: https://en.wikipedia.org/wiki/Super_Bowl_XLIX
+- league: NFL
+  year: 2017
+  date: '2017-02-05'
+  winner: New England Patriots
+  loser: Atlanta Falcons
+  source: https://en.wikipedia.org/wiki/Super_Bowl_LI
+- league: NFL
+  year: 2018
+  date: '2018-02-04'
+  winner: Philadelphia Eagles
+  loser: New England Patriots
+  source: https://en.wikipedia.org/wiki/Super_Bowl_LII
+- league: NFL
+  year: 2019
+  date: '2019-02-03'
+  winner: New England Patriots
+  loser: Los Angeles Rams
+  source: https://en.wikipedia.org/wiki/Super_Bowl_LIII
+- league: NFL
+  year: 2020
+  date: '2020-02-02'
+  winner: Kansas City Chiefs
+  loser: San Francisco 49ers
+  source: https://en.wikipedia.org/wiki/Super_Bowl_LIV
+- league: NFL
+  year: 2021
+  date: '2021-02-07'
+  winner: Tampa Bay Buccaneers
+  loser: Kansas City Chiefs
+  source: https://en.wikipedia.org/wiki/Super_Bowl_LV
+- league: NFL
+  year: 2022
+  date: '2022-02-13'
+  winner: Los Angeles Rams
+  loser: Cincinnati Bengals
+  source: https://en.wikipedia.org/wiki/Super_Bowl_LVI
+- league: MLB
+  year: 2001
+  date: '2001-11-04'
+  winner: Arizona Diamondbacks
+  loser: New York Yankees
+  source: https://en.wikipedia.org/wiki/2001_World_Series
+- league: MLB
+  year: 2002
+  date: '2002-10-27'
+  winner: Anaheim Angels
+  loser: San Francisco Giants
+  source: https://en.wikipedia.org/wiki/2002_World_Series
+- league: MLB
+  year: 2003
+  date: '2003-10-25'
+  winner: Florida Marlins
+  loser: New York Yankees
+  source: https://en.wikipedia.org/wiki/2003_World_Series
+- league: MLB
+  year: 2004
+  date: '2004-10-27'
+  winner: Boston Red Sox
+  loser: St. Louis Cardinals
+  source: https://en.wikipedia.org/wiki/2004_World_Series
+- league: MLB
+  year: 2005
+  date: '2005-10-26'
+  winner: Chicago White Sox
+  loser: Houston Astros
+  source: https://en.wikipedia.org/wiki/2005_World_Series
+- league: MLB
+  year: 2006
+  date: '2006-10-27'
+  winner: St. Louis Cardinals
+  loser: Detroit Tigers
+  source: https://en.wikipedia.org/wiki/2006_World_Series
+- league: MLB
+  year: 2007
+  date: '2007-10-28'
+  winner: Boston Red Sox
+  loser: Colorado Rockies
+  source: https://en.wikipedia.org/wiki/2007_World_Series
+- league: MLB
+  year: 2008
+  date: '2008-10-29'
+  winner: Philadelphia Phillies
+  loser: Tampa Bay Rays
+  source: https://en.wikipedia.org/wiki/2008_World_Series
+- league: MLB
+  year: 2009
+  date: '2009-11-04'
+  winner: New York Yankees
+  loser: Philadelphia Phillies
+  source: https://en.wikipedia.org/wiki/2009_World_Series
+- league: MLB
+  year: 2010
+  date: '2010-11-01'
+  winner: San Francisco Giants
+  loser: Texas Rangers
+  source: https://en.wikipedia.org/wiki/2010_World_Series
+- league: MLB
+  year: 2011
+  date: '2011-10-28'
+  winner: St. Louis Cardinals
+  loser: Texas Rangers
+  source: https://en.wikipedia.org/wiki/2011_World_Series
+- league: MLB
+  year: 2012
+  date: '2012-10-28'
+  winner: San Francisco Giants
+  loser: Detroit Tigers
+  source: https://en.wikipedia.org/wiki/2012_World_Series
+- league: MLB
+  year: 2013
+  date: '2013-10-30'
+  winner: Boston Red Sox
+  loser: St. Louis Cardinals
+  source: https://en.wikipedia.org/wiki/2013_World_Series
+- league: MLB
+  year: 2014
+  date: '2014-10-29'
+  winner: San Francisco Giants
+  loser: Kansas City Royals
+  source: https://en.wikipedia.org/wiki/2014_World_Series
+- league: MLB
+  year: 2015
+  date: '2015-11-01'
+  winner: Kansas City Royals
+  loser: New York Mets
+  source: https://en.wikipedia.org/wiki/2015_World_Series
+- league: MLB
+  year: 2016
+  date: '2016-11-02'
+  winner: Chicago Cubs
+  loser: Cleveland Indians
+  source: https://en.wikipedia.org/wiki/2016_World_Series
+- league: MLB
+  year: 2017
+  date: '2017-11-01'
+  winner: Houston Astros
+  loser: Los Angeles Dodgers
+  source: https://en.wikipedia.org/wiki/2017_World_Series
+- league: MLB
+  year: 2018
+  date: '2018-10-28'
+  winner: Boston Red Sox
+  loser: Los Angeles Dodgers
+  source: https://en.wikipedia.org/wiki/2018_World_Series
+- league: MLB
+  year: 2019
+  date: '2019-10-30'
+  winner: Washington Nationals
+  loser: Houston Astros
+  source: https://en.wikipedia.org/wiki/2019_World_Series
+- league: MLB
+  year: 2020
+  date: '2020-10-27'
+  winner: Los Angeles Dodgers
+  loser: Tampa Bay Rays
+  source: https://en.wikipedia.org/wiki/2020_World_Series
+- league: MLB
+  year: 2021
+  date: '2021-11-02'
+  winner: Atlanta Braves
+  loser: Houston Astros
+  source: https://en.wikipedia.org/wiki/2021_World_Series
+- league: MLB
+  year: 2022
+  date: '2022-11-05'
+  winner: Houston Astros
+  loser: Philadelphia Phillies
+  source: https://en.wikipedia.org/wiki/2022_World_Series
+- league: MLB
+  year: 2023
+  date: '2023-11-01'
+  winner: Texas Rangers
+  loser: Arizona Diamondbacks
+  source: https://en.wikipedia.org/wiki/2023_World_Series
+- league: NBA
+  year: 2001
+  date: '2001-06-15'
+  winner: Los Angeles Lakers
+  loser: Philadelphia 76ers
+  source: https://en.wikipedia.org/wiki/2001_NBA_Finals
+- league: NBA
+  year: 2002
+  date: '2002-06-12'
+  winner: Los Angeles Lakers
+  loser: New Jersey Nets
+  source: https://en.wikipedia.org/wiki/2002_NBA_Finals
+- league: NBA
+  year: 2003
+  date: '2003-06-15'
+  winner: San Antonio Spurs
+  loser: New Jersey Nets
+  source: https://en.wikipedia.org/wiki/2003_NBA_Finals
+- league: NBA
+  year: 2004
+  date: '2004-06-15'
+  winner: Detroit Pistons
+  loser: Los Angeles Lakers
+  source: https://en.wikipedia.org/wiki/2004_NBA_Finals
+- league: NBA
+  year: 2005
+  date: '2005-06-23'
+  winner: San Antonio Spurs
+  loser: Detroit Pistons
+  source: https://en.wikipedia.org/wiki/2005_NBA_Finals
+- league: NBA
+  year: 2006
+  date: '2006-06-20'
+  winner: Miami Heat
+  loser: Dallas Mavericks
+  source: https://en.wikipedia.org/wiki/2006_NBA_Finals
+- league: NBA
+  year: 2007
+  date: '2007-06-14'
+  winner: San Antonio Spurs
+  loser: Cleveland Cavaliers
+  source: https://en.wikipedia.org/wiki/2007_NBA_Finals
+- league: NBA
+  year: 2008
+  date: '2008-06-17'
+  winner: Boston Celtics
+  loser: Los Angeles Lakers
+  source: https://en.wikipedia.org/wiki/2008_NBA_Finals
+- league: NBA
+  year: 2009
+  date: '2009-06-14'
+  winner: Los Angeles Lakers
+  loser: Orlando Magic
+  source: https://en.wikipedia.org/wiki/2009_NBA_Finals
+- league: NBA
+  year: 2010
+  date: '2010-06-17'
+  winner: Los Angeles Lakers
+  loser: Boston Celtics
+  source: https://en.wikipedia.org/wiki/2010_NBA_Finals
+- league: NBA
+  year: 2011
+  date: '2011-06-12'
+  winner: Dallas Mavericks
+  loser: Miami Heat
+  source: https://en.wikipedia.org/wiki/2011_NBA_Finals
+- league: NBA
+  year: 2012
+  date: '2012-06-21'
+  winner: Miami Heat
+  loser: Oklahoma City Thunder
+  source: https://en.wikipedia.org/wiki/2012_NBA_Finals
+- league: NBA
+  year: 2013
+  date: '2013-06-20'
+  winner: Miami Heat
+  loser: San Antonio Spurs
+  source: https://en.wikipedia.org/wiki/2013_NBA_Finals
+- league: NBA
+  year: 2014
+  date: '2014-06-15'
+  winner: San Antonio Spurs
+  loser: Miami Heat
+  source: https://en.wikipedia.org/wiki/2014_NBA_Finals
+- league: NBA
+  year: 2015
+  date: '2015-06-16'
+  winner: Golden State Warriors
+  loser: Cleveland Cavaliers
+  source: https://en.wikipedia.org/wiki/2015_NBA_Finals
+- league: NBA
+  year: 2016
+  date: '2016-06-19'
+  winner: Cleveland Cavaliers
+  loser: Golden State Warriors
+  source: https://en.wikipedia.org/wiki/2016_NBA_Finals
+- league: NBA
+  year: 2017
+  date: '2017-06-12'
+  winner: Golden State Warriors
+  loser: Cleveland Cavaliers
+  source: https://en.wikipedia.org/wiki/2017_NBA_Finals
+- league: NBA
+  year: 2018
+  date: '2018-06-08'
+  winner: Golden State Warriors
+  loser: Cleveland Cavaliers
+  source: https://en.wikipedia.org/wiki/2018_NBA_Finals
+- league: NBA
+  year: 2019
+  date: '2019-06-13'
+  winner: Toronto Raptors
+  loser: Golden State Warriors
+  source: https://en.wikipedia.org/wiki/2019_NBA_Finals
+- league: NBA
+  year: 2020
+  date: '2020-10-11'
+  winner: Los Angeles Lakers
+  loser: Miami Heat
+  source: https://en.wikipedia.org/wiki/2020_NBA_Finals
+- league: NBA
+  year: 2021
+  date: '2021-07-20'
+  winner: Milwaukee Bucks
+  loser: Phoenix Suns
+  source: https://en.wikipedia.org/wiki/2021_NBA_Finals
+- league: NBA
+  year: 2022
+  date: '2022-06-16'
+  winner: Golden State Warriors
+  loser: Boston Celtics
+  source: https://en.wikipedia.org/wiki/2022_NBA_Finals
+- league: NBA
+  year: 2023
+  date: '2023-06-12'
+  winner: Denver Nuggets
+  loser: Miami Heat
+  source: https://en.wikipedia.org/wiki/2023_NBA_Finals
