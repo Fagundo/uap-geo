@@ -1,65 +1,104 @@
 # uap-geo
 
-Do UAP reports in the contiguous US cluster around geologic features (faults, earthquakes, rivers,
-magnetic anomalies) **beyond** what observer opportunity explains (population, dark skies, air traffic,
-military activity)?
+Do UAP reports in the contiguous US cluster around geologic or environmental features (faults,
+earthquakes, rivers, lakes, terrain, natural radiation, nuclear sites) **beyond** what observer
+opportunity explains (population, dark skies, air traffic, military activity)?
 
-v1 replicates the county-level design of
-[Medina, Brewer & Kirkpatrick (2023), *Scientific Reports*](https://doi.org/10.1038/s41598-023-49527-x)
-and adds geologic covariates to the same model.
+The design extends the county-level model of
+[Medina, Brewer & Kirkpatrick (2023), *Scientific Reports*](https://doi.org/10.1038/s41598-023-49527-x).
 
-## What v1 does
+**Current answer (v1, Nov 2026):** no geologic or radiation factor holds up. Only observer effects
+replicate on held-out years: fewer reports under bright skies, more near airports and in high-relief
+terrain. A river signal is unconfirmed. See [docs/RESULTS.md](docs/RESULTS.md) and
+[docs/ROBUSTNESS.md](docs/ROBUSTNESS.md).
 
-1. **Ingest** — NUFORC reports from the [TidyTuesday 2023-06-20 extract](https://github.com/rfordatascience/tidytuesday/tree/main/data/2023/2023-06-20)
-   (city coordinates from geonames.org), cleaned to 2001–2020 in the lower 48 and deduplicated.
+## Pipeline
+
+1. **Ingest:** NUFORC reports from the
+   [TidyTuesday 2023-06-20 extract](https://github.com/rfordatascience/tidytuesday/tree/main/data/2023/2023-06-20)
+   (city coordinates from geonames.org), filtered to the study years and the lower 48, deduplicated.
    Reports without coordinates are geocoded offline against the Census Gazetteer.
-2. **Build** — one row per county: report count, 2020 population, and covariates.
-3. **Analyze**
+2. **Build:** one row per county with the report count, population, and every covariate.
+3. **Analyze:**
    - Getis-Ord Gi* hotspots on reports per 10,000 people (k = 8 nearest neighbours).
-   - Negative binomial models with a log(population) offset, covariates z-scored:
-     **A** = observer covariates, **B** = A + geology. Both fit on the same counties; compare AIC.
-   - Moran's I on model B residuals: if residuals still cluster, move to a spatial (BYM2) model.
-   - Models A → E add, in turn: observer controls, geology, state fixed effects, settlement density,
-     and other water plus terrain.
-   - Shift tests: rotate and shift a whole layer (rivers, lakes, reservoirs) many times, refit, and compare
-     the real coefficient against the shifted ones (Benjamini–Hochberg adjusted across layers).
-   - Report-level test: within each county, are Census places with reports closer to water than places without?
+   - Negative binomial rate models with a log(population) offset. Continuous covariates are
+     z-scored (rate ratio per SD); 0/1 band indicators are not. All models are fit on the same counties.
+   - Moran's I on residuals.
+   - **Shift tests:** a whole layer (rivers, lakes, reservoirs) is rotated and shifted many times
+     and the model refit; the real coefficient is compared against the shifted ones
+     (Benjamini–Hochberg adjusted across layers).
+   - **Town-level test:** within each county, are Census places with reports closer to rivers,
+     lakes, coast, roads or rail than places without? Conditional logit, sized by land area and by population.
+   - Collinearity (VIF) for the widest model.
+
+### Models
+
+| Model | Adds | Role |
+| --- | --- | --- |
+| A | Light pollution, cloud cover, airports, military area, population density | Replicates the paper |
+| B | Fault length, earthquake count, river length | Geology, national |
+| C | State fixed effects | Geology within states |
+| D | Town density, primary roads, rail | Settlement and corridor controls |
+| E | Lakes, reservoirs, coast distance, elevation relief | Other water and terrain |
+| F | Gamma-ray uranium/thorium/potassium, nuclear plant within 50 km, weapons site within 100 km | Radiation |
+| R | Light, airports, town density, roads, rail, relief, coast, rivers + state FE | Lean, pre-specified **confirmatory** model |
+
+Models A–F are exploratory. Only model R evaluated on held-out data counts as confirmation.
 
 ## Covariates
 
 | Column | Source | Status |
 | --- | --- | --- |
+| `light_pollution` | Falchi et al. (2016) World Atlas of artificial sky brightness (GFZ) | on |
+| `cloud_cover` | EarthEnv MODIS mean annual cloud frequency | on |
 | `airports_per_km2` | OurAirports (airports, heliports, seaplane bases, balloonports) | on |
 | `military_area_share` | Census TIGER 2019 military installations | on |
-| `cloud_cover` | EarthEnv MODIS mean annual cloud frequency | on |
-| `log_pop_density` | 2020 Census population / county area | on (light-pollution stand-in) |
-| `light_pollution` | Falchi et al. World Atlas (GFZ) | **off** — set a direct GeoTIFF URL in `configs/v1.yaml` |
-| `tree_canopy` | NLCD/USFS Tree Canopy Cover | **off** — multi-GB; set URL to enable |
+| `log_pop_density` | Census 2020 county population / area | on |
+| `places_per_km2` | Census Gazetteer places | on |
+| `primary_road_length_per_km2`, `rail_length_per_km2` | Census TIGER 2020 primary roads, rail | on |
 | `fault_length_per_km2` | USGS Quaternary Fault and Fold Database | on |
-| `log_quake_count`, `log_seismic_moment` | USGS ComCat, M ≥ 2.5, 2001–2020 | on |
-| `river_length_per_km2` | Natural Earth 1:10m rivers (coarse) | on |
+| `log_quake_count`, `log_seismic_moment` | USGS ComCat, M ≥ 2.5, study years | on |
+| `river_length_per_km2` | Natural Earth 1:10m rivers (major rivers only) | on |
 | `lake_area_share`, `dist_to_lake_km` | Natural Earth 1:10m lakes + North America supplement | on |
 | `reservoirs_per_km2` | USACE National Inventory of Dams (normal storage ≥ 1,000 acre-ft) | on |
 | `dist_to_coast_km` | Natural Earth 1:10m coastline | on |
 | `elevation_relief_m` | EarthEnv 1 km GMTED2010 elevation, max − min per county | on |
-| `places_per_km2` | Census Gazetteer places (settlement density) | on |
-| `magnetic_anomaly` | USGS / NAMAG magnetic grid | **off** — set URL to enable |
+| `gamma_uranium`, `gamma_thorium`, `gamma_potassium` | USGS Bayesian NURE predictions (regional point CSVs, ScienceBase) | on |
+| `nuclear_power_within_50km` | US commercial reactor sites (michaelminn.net GeoJSON) | on |
+| `weapons_site_within_100km` | 19 weapons-complex sites listed in `configs/v1.yaml` | on |
+| `tree_canopy` | NLCD/USFS Tree Canopy Cover | off: multi-GB 30 m tiles |
+| `magnetic_anomaly` | USGS / NAMAG magnetic grid | off: no direct GeoTIFF link |
 
 A source that fails to download is logged and its columns are dropped; the run continues.
 
 ## Run it
 
-**GitHub Actions (recommended):** Actions → *v1 analysis* → *Run workflow*. Results land in the job
-summary and in the `uap-geo-v1-<n>` artifact (`summary.md`, coefficient CSVs, `hotspots_gi_star.png`,
-`county_table.csv`). Raw downloads are cached between runs.
+**GitHub Actions (recommended):** Actions → *v1 analysis* → *Run workflow*. Inputs:
+
+- `stages`: `ingest build analyze` (default)
+- `permutations`: shifted copies per layer; `0` skips shift tests. Per-layer overrides (rivers: 1,000)
+  are in the config.
+- `extra_args`: anything the CLI accepts, e.g. the holdout run below.
+
+Results are printed in the job log, written to the job summary, and uploaded as the
+`uap-geo-v1-<n>` artifact. Raw downloads are cached between runs.
+
+**Holdout run** (model R on years the exploration never used):
+
+```
+--start-year 2021 --end-year 2023 --tag holdout --shift-models R_confirmatory
+```
+
+`--tag` writes interim, processed and output files to a sub-folder so a holdout never overwrites the main run.
 
 **Locally:**
 
 ```bash
 uv sync --group dev
 uv run pytest
-uv run uap-geo run --config configs/v1.yaml                    # all stages
-uv run uap-geo run --stage analyze --permutations 0             # rerun analysis only
+uv run uap-geo run --config configs/v1.yaml                         # all stages, 2001–2020
+uv run uap-geo run --stage analyze --permutations 0                  # rerun analysis only
+uv run uap-geo run --start-year 2021 --end-year 2023 --tag holdout   # holdout
 ```
 
 ## Layout
@@ -68,21 +107,27 @@ uv run uap-geo run --stage analyze --permutations 0             # rerun analysis
 src/uap_geo/
 ├── common/              # config, downloads, CRS constants, abstract base classes
 ├── data/
-│   ├── scraping/        # one DataSource per dataset + SourceRegistry
+│   ├── scraping/        # one DataSource per dataset, SourceRegistry, pure-pandas parsers
 │   ├── io/              # Parquet / GeoParquet TableStore
 │   └── preprocessing/   # report cleaning, offline geocoding (pandas only)
 ├── features/            # CovariateBuilder subclasses, CovariateRegistry, county table assembly
-├── training/            # NegBinRateModel, ModelSpec
-├── evaluation/          # Gi*, Moran's I, fault-shift permutation, report writer
+├── training/            # NegBinRateModel (robust NB fitting), ModelSpec
+├── evaluation/          # Gi*, Moran's I, shift tests, town-level test, BH/VIF helpers, report writer
 ├── pipeline.py          # V1Pipeline: ingest → build → analyze
-└── cli.py
+└── cli.py               # overrides: years, tag, shift models, per-layer permutations
+docs/
+├── RESULTS.md           # findings so far
+└── ROBUSTNESS.md        # threats to validity and planned fixes
 ```
 
 To add a covariate: write a `DataSource` (if new data) and a `CovariateBuilder`, register them in
 `data/scraping/registry.py` and `features/registry.py`, and list the column under `models` in the config.
+To shift-test a layer, add it to `ShiftLayer` factories in `pipeline.py` and to `study.shift_layers`.
 
-## Caveats
+## Limitations
 
-- NUFORC is self-reported and unverified; city-level geocoding means county is the finest honest grain.
-- The NUFORC JSON schema is not documented; `ReportCleaner` resolves likely column names and logs what it found.
-- Natural Earth rivers are coarse; swap in NHDPlus HR in phase 2.
+- NUFORC is self-reported and unverified; results describe **reporting**, not phenomena.
+- The TidyTuesday extract holds 71% of the reports the paper used for 2001–2020, and few after 2020.
+- City-level geocoding makes the county the finest honest grain for rate models.
+- Residual spatial clustering remains, so ordinary p-values are optimistic; rely on shift tests and holdouts.
+- Dependencies are not yet pinned with a lockfile. See [docs/ROBUSTNESS.md](docs/ROBUSTNESS.md) for the full list.
