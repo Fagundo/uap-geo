@@ -24,6 +24,7 @@ from uap_geo.data.scraping.other import (
     ScienceBasePointsSource,
     ScienceBaseRasterSource,
 )
+from uap_geo.data.scraping.volcanoes import HoloceneVolcanoSource
 from uap_geo.data.scraping.usgs import EarthquakeSource, QuaternaryFaultSource
 
 RASTER_SOURCES = ("light_pollution", "cloud_cover", "tree_canopy", "magnetic_anomaly")
@@ -145,6 +146,9 @@ class SourceRegistry:
         """Share of residents aged 3+ enrolled in college, undergraduate or graduate (college towns)."""
         return AcsShareSource(self._config.source("acs_college"), self._dl, "college_enrolled_share",
                               ("B14001_E008", "B14001_E009"), "B14001_E001")
+
+    def volcanoes(self) -> HoloceneVolcanoSource:
+        return HoloceneVolcanoSource(self._config.source("volcanoes"), self._dl)
 
     def launches(self, min_apogee_km: float = 100.0) -> GcatLaunchSource:
         return GcatLaunchSource(self._config.source("gcat_launches"), self._dl, min_apogee_km)

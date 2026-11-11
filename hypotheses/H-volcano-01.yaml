@@ -1,0 +1,52 @@
+# Draft for review; not yet registered. Once registered, do not edit: a changed hypothesis gets a new ID.
+id: H-volcano-01
+title: Proximity to young volcanoes
+status: draft
+claim: >
+  Counties closer to a Holocene volcano report more UAP events than the observer controls predict,
+  including terrain relief, and the real volcano locations line up with high-reporting counties
+  better than rigidly shifted copies of them.
+origin: >
+  Suggested on 2026-11-11 from the H-persist-01 watch list (Klickitat County, WA, near Mount Adams) and
+  the Mount Rainier history (Kenneth Arnold, 24 June 1947). Sedona lies near the San Francisco volcanic
+  field. Because the idea came from 2001-2020 data, the confirm split is 2021 onward.
+literature:
+  - "Persinger's tectonic strain theory (1970s-80s) links luminous phenomena to crustal stress; volcanic regions are one setting."
+  - "v1 of this project: terrain relief raises reports (1.11 per SD), so relief must be controlled."
+
+data:
+  reports: TidyTuesday 2023-06-20 NUFORC extract
+  volcanoes: Smithsonian Global Volcanism Program, Volcanoes of the World, Holocene volcanoes in the contiguous US
+  covariates: as H-persist-01 (includes terrain relief), state fixed effects
+
+unit: county x period
+outcome: events per county in the period, after removing holiday and launch nights (as H-persist-01)
+outcome_tiers: [all, filtered, high_quality]
+primary_tier: filtered
+model: >
+  negative binomial rate model, offset log(population x nights kept), controls (including terrain
+  relief), state fixed effects, standard errors clustered by state, plus closeness =
+  -log(distance to the nearest Holocene volcano + 5 km), standardized
+
+tests:
+  proximity:
+    exposure: closeness to the nearest Holocene volcano (per SD)
+    prediction: rate_ratio > 1
+    discriminating_checks:
+      - "layer-shift test: the real volcano layer's rate ratio exceeds that of rigidly rotated (up to 20
+        degrees) and shifted (up to 400 km) copies, one-sided p < 0.05 over 200 copies"
+
+splits:
+  explore: [2001, 2010]   # explore; 2011-2020 is not used (the idea came from it)
+  confirm: [2021, null]
+
+multiple_testing: none needed (one primary test)
+smallest_effect_of_interest: 1.10   # rate ratio per SD of closeness
+decision_rules:
+  confirmed: p < 0.05 and rate ratio > 1 in the filtered tier on the confirm split, and the shift test holds
+  refuted: power >= 0.80 and the upper 95% confidence limit is below 1.10
+  underpowered: power < 0.50
+
+limits: >
+  Volcanoes sit in the West, in mountains and near public land; state fixed effects, relief and the
+  shift test address this, but a confirmed effect would still not identify a mechanism.

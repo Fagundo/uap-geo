@@ -123,6 +123,9 @@ sources:
   acs_college:                # ACS 2017-2021 5-year, B14001 school enrollment by level (college undergraduate + graduate)
     urls:
       - https://www2.census.gov/programs-surveys/acs/summary_file/2021/table-based-SF/data/5YRData/acsdt5y2021-b14001.dat
+  volcanoes:                  # Smithsonian GVP Volcanoes of the World, Holocene volcanoes (WFS CSV export)
+    urls:
+      - "https://webservices.volcano.si.edu/geoserver/GVP-VOTW/ows?service=WFS&version=2.0.0&request=GetFeature&typeName=GVP-VOTW:Smithsonian_VOTW_Holocene_Volcanoes&outputFormat=csv"
   gcat_launches:              # Jonathan McDowell's GCAT (CC-BY): every launch attempt, and launch-site coordinates
     urls:
       - https://planet4589.org/space/gcat/tsv/launch/launch.tsv

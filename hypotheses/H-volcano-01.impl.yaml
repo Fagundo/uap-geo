@@ -1,0 +1,43 @@
+# Implementation choices for H-volcano-01, fixed before any confirm run.
+# Registered together with the spec and filters; a confirm run refuses to start if any changes.
+hypothesis: H-volcano-01
+notes:
+  distance: >
+    Distance from each county's centroid (equal-area projection) to the nearest site geometry
+    (polygon edge or interior for installations, point for volcanoes); closeness = -log(km + 5).
+  removals_and_controls: identical to H-persist-01 (holiday nights, twilight and night launch nights; same controls).
+  shift_test: >
+    Rotate the whole site layer about the centroid of the contiguous US by up to 20 degrees and translate
+    it by up to 400 km in x and y (uniform), recompute closeness, refit; 200 copies, seed 42. One-sided p =
+    (1 + copies with log rate ratio >= observed) / (1 + copies).
+  power: >
+    Wald approximation from this split's total primary-tier events (totals only) and the dispersion of
+    the controls-only model on the explore period.
+  verdict: >
+    Confirmed: p < 0.05 and rate ratio > 1 in the filtered tier, and the shift test holds.
+    Underpowered: power < 0.50. Refuted: power >= 0.80 and upper 95% limit < 1.10. Otherwise
+    inconclusive. Explore runs get no verdict.
+
+parameters:
+  dedup: {km: 50, hours: 3}
+  quality: {min_reports: 2, min_duration_s: 300}
+  proximity:
+    holiday_nights: ["07-03", "07-04", "07-05", "12-31", "01-01"]
+    launch_lighting_removed: [twilight, night]
+    twilight_sun_alt: [-18, -4]
+    launch_radius_km: 1200
+    launch_min_apogee_km: 100
+    covariates: [light_pollution, airports_per_km2, places_per_km2, primary_road_length_per_km2,
+                 rail_length_per_km2, elevation_relief_m, dist_to_coast_km, river_length_per_km2,
+                 seasonal_housing_share, college_enrolled_share]
+    covariate_sources: [light_pollution, airports, gazetteer_places, primary_roads, rail, elevation, coastline, rivers,
+                        acs_housing, acs_college]
+    fixed_effects: [state_fips]
+    cluster: state_fips
+    offset_km: 5
+    max_shift_km: 400
+    max_rotate_deg: 20
+    shift_trials: 200
+    seed: 42
+    bands_km: [0, 25, 50, 100, 200]
+  power: {rate_ratio: 1.10, alpha: 0.05, underpowered_below: 0.50, refute_requires: 0.80}
