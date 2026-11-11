@@ -1,5 +1,5 @@
 {
-  "git_commit": "628a601e861239b35a371239897364b9fac86171",
+  "git_commit": "628a52ba5f1cdee2938822d1dbddd5277834d118",
   "git_dirty": false,
   "inputs": {
     "data/raw/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -52,7 +52,7 @@
     "data/raw/earthquakes/quakes_2023_m3.csv": "6d0022b749feb06764d72987f34249e60abeba63ab22fdecf207e589b61c80e3",
     "data/raw/earthquakes/quakes_2024_m3.csv": "c36af70f02399e4559fa55ffa26b381164348713e3114de942bacb48ea4f838d",
     "data/raw/earthquakes/quakes_2025_m3.csv": "1f4c2fcfcf52113b8797022220facbdc761da7215d69528e714ca8d5f7d3712f",
-    "data/raw/earthquakes/quakes_2026_m3.csv": "b0230cbcb91f570ee1e36c592ebf4db04205e3e71c358d22d20c6ed5d0d4ac58",
+    "data/raw/earthquakes/quakes_2026_m3.csv": "ae9678f583be79ae65b0fa64739d5b8c564319d495c8b82e2aacba945af9d314",
     "data/raw/elevation/elevation_1KMmd_GMTEDmd.tif": "95fed346b8bb25ca67c59b9d8c8e110f4856eb51401e5cc0011b73cba7e3e02b",
     "data/raw/faults/Qfaults_GIS.zip": "447eadc5926256710d988c30e5996ba540604caa0154f9746c48bad637926893",
     "data/raw/faults/extracted/GDB/Qfaults_2020_WGS84.gdb/a00000001.TablesByName.atx": "d2e9e59a7c0f1e0fb5d20770db4bb2693ce24a956d70ae17e97a34cd71cb731b",
@@ -205,12 +205,12 @@
     "data/raw/rivers/ne_10m_rivers_north_america.zip": "7fbe85a2acbf1f3ef4361a16bb39677ad1ea86f888be1689f7a4caeafc7529e8"
   },
   "python": "3.12.16",
-  "run_id": "H-geo-01-explore-20261111T022308Z",
+  "run_id": "H-geo-01-explore-20261111T034210Z",
   "settings": {},
   "specs": {
     "filters": "8b2d4002b6f7fc9b75bc09a2f2b7179b72d7d7a42239921c5ddd2d694f6eeae9",
     "impl": "bd91649c845dfa7bd715b772eede82394b6fb2bfbacd4b2903ecc565ea547220",
     "spec": "c2f4e7ae69420ac87af41f7d1189e042e7b8ca8ebd44c3409d4c13471321b1b7"
   },
-  "started_utc": "2026-11-11T02:23:08+00:00"
+  "started_utc": "2026-11-11T03:42:10+00:00"
 }

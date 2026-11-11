@@ -1,8 +1,8 @@
 # H-geo-01 report card: Geophysical triggers (Persinger)
 
 **Split:** explore (2001–2010)  
-**Run:** H-geo-01-explore-20261111T022308Z  
-**Code:** `628a601e8612`  
+**Run:** H-geo-01-explore-20261111T034210Z  
+**Code:** `628a52ba5f1c`  
 **Spec / impl / filters SHA-256:** `c2f4e7ae6942` / `bd91649c845d` / `8b2d4002b6f7`
 
 ## Question
