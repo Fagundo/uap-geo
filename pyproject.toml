@@ -19,6 +19,7 @@ dependencies = [
     "libpysal>=4.10",
     "esda>=2.5",
     "matplotlib>=3.8",
+    "anthropic>=0.40",
 ]
 
 [project.scripts]

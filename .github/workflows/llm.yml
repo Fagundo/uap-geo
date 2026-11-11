@@ -1,0 +1,42 @@
+name: llm
+
+on:
+  workflow_dispatch:
+    inputs:
+      args:
+        description: "Arguments after 'uap-geo llm', e.g. 'extract --name sample --limit 20'"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  llm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync
+      - name: Run
+        env:
+          ARGS: ${{ inputs.args }}                     # via env, never interpolated into the script
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then echo "ANTHROPIC_API_KEY secret is not set"; exit 1; fi
+          read -r -a argv <<< "$ARGS"
+          uv run uap-geo llm "${argv[@]}"
+      - name: Commit results
+        if: always()
+        run: |
+          if [ -z "$(git status --porcelain -- results/llm)" ]; then echo "nothing to commit"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add results/llm
+          git commit -m "LLM: ${ARGS:0:60}"
+          git pull --rebase && git push
+        env:
+          ARGS: ${{ inputs.args }}

@@ -85,6 +85,13 @@ def main(argv: list[str] | None = None) -> None:
     res.add_argument("action", choices=["build"])
     res.add_argument("--settings", type=Path, default=Path("configs/residual.yaml"))
     res.add_argument("--config", type=Path, default=Path("configs/v1.yaml"))
+    llm = sub.add_parser("llm", help="LLM feature extraction (needs ANTHROPIC_API_KEY)")
+    llm.add_argument("action", choices=["sample", "extract", "validate", "submit", "collect"])
+    llm.add_argument("--settings", type=Path, default=Path("configs/llm.yaml"))
+    llm.add_argument("--per-group", type=int, default=40)
+    llm.add_argument("--residual", type=int, default=120)
+    llm.add_argument("--limit", type=int, default=None, help="extract: only the first N reports (smoke test)")
+    llm.add_argument("--name", default="sample", help="file stem for sample/extract/validate outputs")
     args = parser.parse_args(argv)
 
     configure()
@@ -97,6 +104,8 @@ def main(argv: list[str] | None = None) -> None:
         _filters(args)
     elif args.command == "residual":
         _residual(args)
+    elif args.command == "llm":
+        _llm(args)
 
 
 STUDIES = {"H-geo-01": "uap_geo.hypotheses.geo_triggers:GeoTriggerStudy",
@@ -174,6 +183,51 @@ def _residual(args: argparse.Namespace) -> None:
     root = Path.cwd()
     result = ResidualSetBuilder(Config.from_yaml(args.config), root, root / args.settings).build()
     print(write_residual(result, root / "results" / "residual", args.settings.stem).read_text())
+
+
+def _llm(args: argparse.Namespace) -> None:
+    import json
+
+    import pandas as pd
+    import yaml
+
+    from uap_geo.llm.extractor import FeatureExtractor
+    from uap_geo.llm.strangeness import feature_table
+    from uap_geo.llm.validation import stratified_sample, validation_report
+
+    root = Path.cwd()
+    s = yaml.safe_load((root / args.settings).read_text())
+    out = root / s["out_dir"]
+    out.mkdir(parents=True, exist_ok=True)
+    residual = pd.read_parquet(root / s["residual_reports"])
+    extractor = FeatureExtractor(s["model"], s["max_tokens"])
+    if args.action == "sample":
+        sample = stratified_sample(residual, args.per_group, args.residual)
+        sample.to_parquet(out / f"{args.name}_reports.parquet", index=False)
+        print(sample["group"].value_counts().to_string())
+    elif args.action == "extract":
+        rows = pd.read_parquet(out / f"{args.name}_reports.parquet")
+        rows = rows.head(args.limit) if args.limit else rows
+        raw = extractor.extract(rows[["report_id", "text", "duration_s"]])
+        raw.to_parquet(out / f"{args.name}_features_raw.parquet", index=False)
+        print(f"extracted {raw['features'].notna().sum()} of {len(raw)}; errors: {raw['error'].dropna().head(3).tolist()}")
+    elif args.action == "validate":
+        raw = pd.read_parquet(out / f"{args.name}_features_raw.parquet")
+        path = validation_report(feature_table(raw), residual, out / f"validation_{args.name}.md", args.name)
+        print(path.read_text())
+    elif args.action == "submit":
+        rows = residual.loc[residual["text"].str.len() > 0, ["report_id", "text", "duration_s"]]
+        ids = extractor.submit(rows)
+        (out / "batches.json").write_text(json.dumps({"model": s["model"], "batches": ids, "requests": len(rows)}, indent=2))
+        print(f"submitted {len(rows)} requests in {len(ids)} batches: {ids}")
+    elif args.action == "collect":
+        info = json.loads((out / "batches.json").read_text())
+        status = extractor.status(info["batches"])
+        print(status)
+        if all(v == "ended" for v in status.values()):
+            raw = extractor.collect(info["batches"])
+            raw.to_parquet(out / "features_raw.parquet", index=False, compression="zstd")
+            print(validation_report(feature_table(raw), residual, out / "validation_full.md", "full").read_text())
 
 
 if __name__ == "__main__":
