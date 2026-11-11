@@ -1,7 +1,10 @@
-# Draft for review; not yet registered. Once registered, do not edit: a changed hypothesis gets a new ID.
+# Pre-registered 2026-11-11, after the explore run (2001-2010) and before any 2021+ analysis.
+# Do not edit. A changed hypothesis gets a new ID; the registry stores this file's hash.
+# Registered knowing estimated 2021+ power is low (installations ~58%, volcanoes ~9%).
 id: H-install-01
 title: Proximity to military installations
-status: draft
+status: registered
+registered: 2026-11-11
 claim: >
   Counties closer to a military installation report more UAP events than the observer controls
   predict, and the real installation map lines up with high-reporting counties better than rigidly
