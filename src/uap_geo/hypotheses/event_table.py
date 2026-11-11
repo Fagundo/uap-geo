@@ -65,7 +65,8 @@ class EventTable:
         events = self.tiers.tier_events(tagged, labels, events)
 
         first_local = tagged.sort_values("occurred_utc").groupby("event_id")["local_time"].first()
-        events["night"] = observing_night(events["event_id"].map(first_local))
+        events["local_time"] = events["event_id"].map(first_local)
+        events["night"] = observing_night(events["local_time"])
         points = gpd.GeoDataFrame(events, geometry=gpd.points_from_xy(events["lon"], events["lat"]), crs=WGS84)
         joined = gpd.sjoin(points.to_crs(counties.crs), counties[[COUNTY_ID, "geometry"]], predicate="within")
         joined = joined.drop(columns=["geometry", "index_right"]).dropna(subset=["night"])

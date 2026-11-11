@@ -14,6 +14,7 @@ from uap_geo.common.config import Config
 from uap_geo.common.geo import COUNTY_ID, WGS84
 from uap_geo.features.county_table import prepare_counties
 from uap_geo.hypotheses.base import PRIMARY_TIER, EventStudy, TestOutcome
+from uap_geo.hypotheses.compare import fit_exposed, greater
 from uap_geo.hypotheses.designs.conditional_poisson import ConditionalPoissonTest
 from uap_geo.hypotheses.designs.launch_exposure import LaunchExposure, LaunchSettings
 from uap_geo.hypotheses.event_table import EventTable
@@ -80,14 +81,7 @@ class LaunchStudy(EventStudy):
 
     # ------------------------------------------------------------------------------ test and checks
     def _fit(self, rows: pd.DataFrame, count: str = "count") -> dict:
-        data = rows.assign(count=rows[count])
-        try:
-            r = self.test.fit(data, ["exposed", "moon"])
-        except ValueError as exc:
-            return {"note": str(exc)}
-        t = r.terms.loc["exposed"]
-        return {"rate_ratio": float(t["rate_ratio"]), "ci_low": float(t["ci_low"]), "ci_high": float(t["ci_high"]),
-                "p_value": float(t["p_value"]), "n_events": r.n_events, "log_se": _log_se(t)}
+        return fit_exposed(self.test, rows, count)
 
     def analyse(self) -> tuple[EventTable, list[TestOutcome]]:
         centroids, table, events, launches = self.load_inputs()
@@ -116,24 +110,7 @@ class LaunchStudy(EventStudy):
         near = self._fit(twilight.loc[twilight["band"] == 0])
         far = self._fit(twilight.loc[twilight["band"] == twilight["band"].max()])
         return {
-            "window_90min": _greater(window, night_rr, "90-minute window", "whole night"),
-            "twilight_vs_day": _greater(night_rr, day, "twilight", "day"),
-            "near_vs_far": _greater(near, far, "within 400 km", "800-1,200 km"),
+            "window_90min": greater(window, night_rr, "90-minute window", "whole night"),
+            "twilight_vs_day": greater(night_rr, day, "twilight", "day"),
+            "near_vs_far": greater(near, far, "within 400 km", "800-1,200 km"),
         }
-
-
-def _log_se(t: pd.Series) -> float:
-    return float((np.log(t["ci_high"]) - np.log(t["ci_low"])) / (2 * 1.959964))
-
-
-def _greater(a: dict, b: dict, a_name: str, b_name: str) -> dict:
-    """Holds when a's rate ratio exceeds 1 (p < 0.05) and exceeds b's (one-sided z on log rate ratios, p < 0.05)."""
-    if "note" in a or "note" in b:
-        return {"holds": False, "note": a.get("note") or b.get("note")}
-    from statistics import NormalDist
-
-    z = (np.log(a["rate_ratio"]) - np.log(b["rate_ratio"])) / np.hypot(a["log_se"], b["log_se"])
-    p_diff = 1 - NormalDist().cdf(z)
-    holds = bool(a["rate_ratio"] > 1 and a["p_value"] < 0.05 and p_diff < 0.05)
-    return {"strong_rate_ratio": a["rate_ratio"], "strong_p": a["p_value"], "weak_rate_ratio": b["rate_ratio"],
-            "weak_p": b["p_value"], "difference_p": float(p_diff), "labels": [a_name, b_name], "holds": holds}

@@ -1,0 +1,68 @@
+# Draft for review; not yet registered. Once registered, do not edit: a changed hypothesis gets a new ID.
+id: H-celebrate-01
+title: Celebration nights
+status: draft
+claim: >
+  Celebration nights raise UAP reports that the filters leave unexplained: reports with no lantern or
+  fireworks wording rise on the Fourth of July and New Year's Eve in every county, and on the night of a
+  championship win in the counties around the winner's home city, compared with the same counties on
+  comparable nights.
+why: >
+  Celebrations put many people outdoors looking at the sky while lanterns, fireworks and drones fly.
+  A rise in lantern or fireworks reports is expected. A rise that survives removing them means either
+  that the filters miss much of what celebrations put in the sky, or that more people watching finds
+  more of something else. The timing check and the winner-loser comparison narrow which.
+
+data:
+  reports: TidyTuesday 2023-06-20 NUFORC extract (event timestamps, city coordinates)
+  championships: >
+    configs/celebrations/championships.yaml: deciding-game dates, champions and runners-up of the
+    Super Bowl, World Series, NBA Finals and Stanley Cup Final, 2001-2023 (91 finals; no NHL final in
+    2005), read from Wikipedia infoboxes by scripts/build_championships.py. Team home cities in
+    configs/celebrations/teams.yaml; Canadian cities are skipped.
+
+unit: county-night (local observing night, 06:00 rollover)
+outcome: events per county-night (reports within 50 km and 3 hours merged into one event)
+outcome_tiers: [all, filtered, unexplained, high_quality]
+primary_tier: unexplained   # filtered, and no report in the event has lantern or fireworks wording
+filters_disabled: [sky_lantern, fireworks]   # both key on holiday dates; replaced by wording matched the same way on every night
+model: conditional Poisson, county-nights as exposure time
+adjust: [moon_illumination]
+
+tests:
+  july4:
+    exposure: the night of July 4, every county (strata year x state)
+    prediction: rate_ratio > 1
+    discriminating_checks:
+      - the rise is concentrated in 21:00-02:00 local time (rate ratio for that window above the whole-night rate ratio)
+  new_year:
+    exposure: the night of December 31, every county (strata year x state)
+    prediction: rate_ratio > 1
+    discriminating_checks:
+      - the rise is concentrated in 21:00-02:00 local time
+  championship:
+    exposure: the night of the deciding game, counties whose centroid is within 50 km of the winner's home city (strata final)
+    prediction: rate_ratio > 1
+    discriminating_checks:
+      - the rise is concentrated in 21:00-02:00 local time
+      - the rise is larger in the winner's city than in the loser's city (same game watched, only one celebrated)
+controls: >
+  same county, same weekday, offsets of +-7, +-14, +-21, +-28 days; county-nights that are July 3-5,
+  December 24-25, December 31, January 1, or a championship night for that county are never controls
+
+splits:
+  explore: [2001, 2010]   # pipeline checks and power only; nothing above is tuned
+  confirm: [2011, 2020]
+  holdout: [2021, null]
+
+multiple_testing: Benjamini-Hochberg across the three tests (primary tier)
+smallest_effect_of_interest: 1.10   # rate ratio
+decision_rules:
+  confirmed: BH-adjusted p < 0.05 and rate ratio > 1 in the unexplained tier on the confirm split, and at least one discriminating check holds
+  refuted: power >= 0.80 and the upper 95% confidence limit is below 1.10
+  underpowered: power < 0.50; reported as underpowered, not as a null
+
+limits: >
+  A confirmed effect shows more reports when more people are outside looking up; on its own it cannot
+  separate filter misses from other objects. The lantern-wording estimate and the timing check are the
+  evidence on that question.

@@ -36,6 +36,8 @@ class TestOutcome:
 
 class EventStudy(ABC):
     HYPOTHESIS_ID: str = ""
+    PRIMARY: str = PRIMARY_TIER          # outcome tier the verdict uses
+    TIERS: tuple[str, ...] = ("all", "filtered", "high_quality")
     TEST_LABELS: dict[str, str] = {}
     CHECK_LABELS: dict[str, str] = {}
 
@@ -88,7 +90,7 @@ class EventStudy(ABC):
         return {"rate_ratio": rr, "p_value": p, "n_events": result.n_events, "holds": bool(rr > 1 and p < 0.05)}
 
     def _verdicts(self, outcomes: list[TestOutcome]) -> None:
-        p_primary = pd.Series({o.name: o.by_tier[PRIMARY_TIER].p_value() for o in outcomes})
+        p_primary = pd.Series({o.name: o.by_tier[self.PRIMARY].p_value() for o in outcomes})
         adjusted = benjamini_hochberg(p_primary)
         p = self.impl["parameters"]["power"]
         for o in outcomes:
@@ -96,7 +98,7 @@ class EventStudy(ABC):
             if self.split == "explore":
                 o.verdict = "exploration (no verdict)"
                 continue
-            main = o.by_tier[PRIMARY_TIER].terms.loc["exposed"]
+            main = o.by_tier[self.PRIMARY].terms.loc["exposed"]
             # Power describes the ability to detect the smallest effect of interest, so it governs how a
             # null is read; a significant effect that passes a check is confirmed whatever the power.
             if o.p_bh < 0.05 and main["rate_ratio"] > 1 and any(c.get("holds") for c in o.checks.values()):
@@ -113,6 +115,10 @@ class EventStudy(ABC):
         """Hypothesis-specific markdown appended to the report card (none by default)."""
         return []
 
+    def input_files(self) -> list[Path]:
+        """Committed input files (beyond raw downloads) whose hashes the manifest records."""
+        return []
+
     @abstractmethod
     def analyse(self) -> tuple[object, list[TestOutcome]]:
         """Run the registered tests for this split. Returns (event table, outcomes)."""
@@ -127,12 +133,14 @@ class EventStudy(ABC):
         table, outcomes = self.analyse()
         self._verdicts(outcomes)
         manifest.add_input_dir(self.root, self.config.paths.raw)
+        manifest.add_inputs(self.root, self.input_files())
         out_dir.mkdir(parents=True, exist_ok=True)
         manifest.write(out_dir / "manifest.json")
         from uap_geo.reporting.report_card import ReportCard
 
-        card = ReportCard(self.HYPOTHESIS_ID, self.split, self.spec, self.impl, manifest, table, outcomes, PRIMARY_TIER,
-                          test_labels=self.TEST_LABELS, check_labels=self.CHECK_LABELS, extra=self.extra_report_lines())
+        card = ReportCard(self.HYPOTHESIS_ID, self.split, self.spec, self.impl, manifest, table, outcomes, self.PRIMARY,
+                          test_labels=self.TEST_LABELS, check_labels=self.CHECK_LABELS, extra=self.extra_report_lines(),
+                          tiers=self.TIERS)
         path = card.write(out_dir)
         (out_dir / "results.json").write_text(json.dumps(card.as_dict(), indent=2, default=float))
         return path

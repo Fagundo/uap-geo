@@ -1,0 +1,38 @@
+# Implementation choices for H-celebrate-01, fixed before any confirm run.
+# Registered together with the spec and filters; a confirm run refuses to start if any changes.
+hypothesis: H-celebrate-01
+notes:
+  unexplained_tier: >
+    Filtered tier (sky_lantern and fireworks rules disabled), minus events where any report matches
+    lantern wording (all three sky_lantern text groups: orange or red; orb or ball; drifting, floating,
+    slow, silent or rising) or fireworks wording (firework, burst, colored flashes), on any date.
+  national_strata: year x state; all counties in a state share the night, so summing them is exact.
+  championship_cities: >
+    Counties whose centroid lies within 50 km of the team's home city. The night is the deciding game's
+    date as a local observing night, wherever the game was played. Winner and loser cities enter as
+    separate strata; only winner strata form the test.
+  window_check: >
+    Events whose first report's local clock time is 21:00-01:59, counted on the same rows; a check holds
+    when the window rate ratio exceeds 1 (p < 0.05) and exceeds the whole-night rate ratio (one-sided z
+    on log rate ratios, p < 0.05).
+  winner_vs_loser: same comparison, winner-city rate ratio against loser-city rate ratio.
+  championship_list: >
+    configs/celebrations/championships.yaml as committed before registration; its SHA-256 is recorded
+    in each run manifest (inputs) and must match the value below.
+  verdict: >
+    Confirmed: BH-adjusted p < 0.05 and rate ratio > 1 in the unexplained tier, and at least one check
+    holds. Underpowered: power < 0.50. Refuted: power >= 0.80 and upper 95% limit < 1.10. Otherwise
+    inconclusive. Explore runs get no verdict.
+
+parameters:
+  dedup: {km: 50, hours: 3}
+  quality: {min_reports: 2, min_duration_s: 300}
+  celebration:
+    offsets_days: [-28, -21, -14, -7, 7, 14, 21, 28]
+    window_hours: [21, 2]
+    metro_radius_km: 50
+    holiday_nights: ["07-03", "07-04", "07-05", "12-24", "12-25", "12-31", "01-01"]
+    championships: configs/celebrations/championships.yaml
+    championships_sha256: 45bb290fad29ac3f78c8bc9aaa09d10a192000d3afb379eb0584d0e3c7780cee
+    teams: configs/celebrations/teams.yaml
+  power: {rate_ratio: 1.10, alpha: 0.05, underpowered_below: 0.50, refute_requires: 0.80}

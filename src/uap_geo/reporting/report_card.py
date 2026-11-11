@@ -7,7 +7,8 @@ from pathlib import Path
 
 from uap_geo.classify.tiers import TIERS
 
-TIER_LABEL = {"all": "All events", "filtered": "Filtered (explainable removed)", "high_quality": "High quality"}
+TIER_LABEL = {"all": "All events", "filtered": "Filtered (explainable removed)", "high_quality": "High quality",
+              "unexplained": "Unexplained (filtered, no lantern or fireworks description)"}
 CHECK_LABEL = {
     "south_of_37N": "Effect present south of 37 N (aurora rarely visible)",
     "kp8_vs_kp6_7": "Stronger for Kp >= 8 than Kp 6-7",
@@ -23,7 +24,9 @@ def _fmt_p(p: float) -> str:
 
 class ReportCard:
     def __init__(self, hypothesis_id, split, spec, impl, manifest, table, outcomes, primary_tier,
-                 test_labels: dict | None = None, check_labels: dict | None = None, extra: list[str] | None = None) -> None:
+                 test_labels: dict | None = None, check_labels: dict | None = None, extra: list[str] | None = None,
+                 tiers: tuple[str, ...] = TIERS) -> None:
+        self.tiers = tuple(tiers)
         self.extra = list(extra or [])
         self.test_labels = {**TEST_LABEL, **(test_labels or {})}
         self.check_labels = {**CHECK_LABEL, **(check_labels or {})}
@@ -84,10 +87,10 @@ class ReportCard:
         for o in self.outcomes:
             lines += ["", f"## {self.test_labels.get(o.name, o.name)}", "", "| Tier | Rate ratio | 95% CI | p | Strata | Events |",
                       "| --- | --- | --- | --- | --- | --- |"]
-            for tier in TIERS:
+            for tier in self.tiers:
                 res = o.by_tier[tier]
                 r = res.terms.loc["exposed"]
-                lines.append(f"| {TIER_LABEL[tier]} | {r['rate_ratio']:.3f} | {r['ci_low']:.3f}–{r['ci_high']:.3f} "
+                lines.append(f"| {TIER_LABEL.get(tier, tier)} | {r['rate_ratio']:.3f} | {r['ci_low']:.3f}–{r['ci_high']:.3f} "
                              f"| {_fmt_p(r['p_value'])} | {res.n_strata:,} | {res.n_events:,} |")
             moon = o.by_tier[self.primary].terms
             if "moon" in moon.index:
