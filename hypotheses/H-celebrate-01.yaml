@@ -1,7 +1,11 @@
-# Draft for review; not yet registered. Once registered, do not edit: a changed hypothesis gets a new ID.
+# Pre-registered 2026-11-11, after the explore run (2001-2010) and before any confirm-split analysis.
+# Do not edit. A changed hypothesis gets a new ID; the registry stores this file's hash.
+# The championship test is kept as registered although explore power was about 5%; an underpowered
+# verdict is the expected outcome and is reported as such.
 id: H-celebrate-01
 title: Celebration nights
-status: draft
+status: registered
+registered: 2026-11-11
 claim: >
   Celebration nights raise UAP reports that the filters leave unexplained: reports with no lantern,
   fireworks or fire-coloured-light wording rise on the Fourth of July and New Year's Eve in every county, and on the night of a
