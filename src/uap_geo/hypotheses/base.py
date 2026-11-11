@@ -97,10 +97,12 @@ class EventStudy(ABC):
                 o.verdict = "exploration (no verdict)"
                 continue
             main = o.by_tier[PRIMARY_TIER].terms.loc["exposed"]
-            if o.power < p["underpowered_below"]:
-                o.verdict = "underpowered"
-            elif o.p_bh < 0.05 and main["rate_ratio"] > 1 and any(c.get("holds") for c in o.checks.values()):
+            # Power describes the ability to detect the smallest effect of interest, so it governs how a
+            # null is read; a significant effect that passes a check is confirmed whatever the power.
+            if o.p_bh < 0.05 and main["rate_ratio"] > 1 and any(c.get("holds") for c in o.checks.values()):
                 o.verdict = "confirmed"
+            elif o.power < p["underpowered_below"]:
+                o.verdict = "underpowered"
             elif o.power >= p["refute_requires"] and main["ci_high"] < p["rate_ratio"]:
                 o.verdict = "refuted"
             else:
