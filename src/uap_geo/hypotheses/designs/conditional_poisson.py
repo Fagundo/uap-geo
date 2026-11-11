@@ -55,9 +55,10 @@ class ConditionalPoissonTest:
             raise ValueError("No informative strata with both exposed and control rows")
         exog = data[terms].astype(float)
         varying = [t for t in terms if exog[t].std() > 0]
-        offset = np.log(data[self.exposure_time].to_numpy(dtype=float)) if self.exposure_time else None
-        model = ConditionalPoisson(data[self.count].to_numpy(dtype=float), exog[varying].to_numpy(),
-                                   groups=data[self.group].to_numpy(), offset=offset)
+        kwargs = {"groups": data[self.group].to_numpy()}
+        if self.exposure_time:  # statsmodels breaks if offset=None is passed explicitly
+            kwargs["offset"] = np.log(data[self.exposure_time].to_numpy(dtype=float))
+        model = ConditionalPoisson(data[self.count].to_numpy(dtype=float), exog[varying].to_numpy(), **kwargs)
         result = model.fit(disp=False)
         params = np.asarray(result.params)
         conf = np.asarray(result.conf_int())
