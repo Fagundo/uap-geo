@@ -65,3 +65,26 @@ class KnownCauseGate:
         lines += ["", f"**Gate {'passed' if passed else 'failed'}.**"]
         out.write_text("\n".join(lines) + "\n")
         return out
+
+
+def describe_twilight_launch_reports(root: Path, settings: Path, launches: pd.DataFrame, n: int = 60, seed: int = 3) -> str:
+    """Descriptive look at twilight launch-window reports: what the model named, strangeness, and a random sample of texts."""
+    gate = KnownCauseGate(root, settings)
+    s = gate.s
+    reports = pd.read_parquet(root / s["residual"])
+    features = feature_table(pd.read_parquet(root / s["features"]))
+    overlap = [c for c in features.columns if c != "report_id" and c in reports.columns]
+    data = reports.drop(columns=overlap).merge(features, on="report_id", how="inner")
+    mask = LaunchWindowCheck({"minutes_after": 90, "radius_km": 1200, "lighting": ["twilight"],
+                              "twilight_sun_alt": [-18, -4]}, launches).match(data)
+    g = data.loc[mask]
+    lines = [f"Twilight launch-window reports: {len(g):,}", "",
+             "Most likely cause named: " + ", ".join(f"{k} {v:.0%}" for k, v in g["top_conventional"].value_counts(normalize=True).head(8).items()),
+             f"High strangeness: {g['high_strangeness'].mean():.1%}; mean p(rocket_launch) {g['p_rocket_launch'].mean():.2f}", "",
+             "Random sample (text | named cause | strangeness):"]
+    for r in g.sample(min(n, len(g)), random_state=seed).itertuples():
+        lines.append(f"- {r.text[:150]} | {r.top_conventional} | {r.strangeness}")
+    hs = g.loc[g["high_strangeness"]]
+    lines += ["", f"All high-strangeness twilight launch-window reports ({len(hs)}):"]
+    lines += [f"- {r.text[:200]}" for r in hs.itertuples()]
+    return "\n".join(lines)
