@@ -15,6 +15,7 @@ from uap_geo.features.covariates import (
     EarthquakeBuilder,
     LineDensityBuilder,
     PointDensityBuilder,
+    PointMeanBuilder,
     PopulationDensityBuilder,
     RasterMeanBuilder,
     RasterReliefBuilder,
@@ -69,7 +70,7 @@ class CovariateRegistry:
         return builders
 
     def _gamma_builders(self) -> list[CovariateBuilder]:
-        return [RasterMeanBuilder(column, path) for column, path in self._sources.gamma_rays().load().items()]
+        return [PointMeanBuilder(column, points) for column, points in self._sources.gamma_rays().load().items()]
 
     @staticmethod
     def _polygon_water_builders(prefix: str, polygons) -> list[CovariateBuilder]:

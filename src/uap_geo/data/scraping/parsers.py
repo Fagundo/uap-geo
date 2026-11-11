@@ -108,3 +108,51 @@ def parse_place_population(content: bytes) -> pd.DataFrame:
         }
     )
     return out.dropna().drop_duplicates("place_geoid").reset_index(drop=True)
+
+
+def select_sciencebase_file_groups(
+    items: list[dict], patterns: dict[str, str], exclude: str, extension: str
+) -> dict[str, list[tuple[str, str]]]:
+    """Every file with `extension` matching each column's pattern, e.g. one CSV per region."""
+    import re
+
+    groups: dict[str, list[tuple[str, str]]] = {column: [] for column in patterns}
+    for item in items:
+        for entry in item.get("files") or []:
+            name = entry.get("name") or ""
+            url = entry.get("downloadUri") or entry.get("url")
+            if not url or not name.lower().endswith(extension.lower()) or re.search(exclude, name):
+                continue
+            for column, pattern in patterns.items():
+                if re.search(pattern, name):
+                    groups[column].append((name, url))
+    return {column: files for column, files in groups.items() if files}
+
+
+def detect_point_columns(columns: list[str]) -> tuple[str, str, str]:
+    """(lon, lat, value) column names in a point-prediction table, chosen by name.
+
+    The value column prefers a central estimate (median / mean / prediction) and skips spread
+    columns (sd, quantiles, lower/upper bounds)."""
+    import re
+
+    lowered = {c: c.lower().strip() for c in columns}
+
+    def first(*names: str) -> str | None:
+        for name in names:
+            for col, low in lowered.items():
+                if low == name:
+                    return col
+        return None
+
+    lon = first("longitude", "lon", "long", "x")
+    lat = first("latitude", "lat", "y")
+    if lon is None or lat is None:
+        raise KeyError(f"No longitude/latitude columns in {columns}")
+    spread = re.compile(r"(sd|std|stdev|var|lower|upper|q\d|quantile|percentile|ci|se)(?![a-z])")
+    candidates = [c for c in columns if c not in (lon, lat) and not spread.search(lowered[c])]
+    for key in ("median", "mean", "pred", "estimate", "est", "value"):
+        for col in candidates:
+            if key in lowered[col]:
+                return lon, lat, col
+    raise KeyError(f"No central-estimate column in {columns}")

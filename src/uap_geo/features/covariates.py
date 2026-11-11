@@ -180,6 +180,27 @@ class RasterMeanBuilder(CovariateBuilder):
         return out
 
 
+class PointMeanBuilder(CovariateBuilder):
+    """Mean of a point layer's `value` within each county (e.g. gridded gamma-ray predictions)."""
+
+    def __init__(self, column: str, points: gpd.GeoDataFrame) -> None:
+        self._column = column
+        self._points = points
+
+    @property
+    def columns(self) -> tuple[str, ...]:
+        return (self._column,)
+
+    def build(self, counties: gpd.GeoDataFrame) -> pd.DataFrame:
+        points = self._points.to_crs(counties.crs)
+        joined = gpd.sjoin(points[["value", "geometry"]], counties[[COUNTY_ID, "geometry"]], predicate="within")
+        means = joined.groupby(COUNTY_ID)["value"].mean()
+        out = _empty(counties, self.columns, fill=np.nan)
+        out[self._column] = means.reindex(out.index)
+        log.info("%s: %d of %d counties have points", self._column, int(out[self._column].notna().sum()), len(out))
+        return out
+
+
 class WithinDistanceBuilder(CovariateBuilder):
     """1 if the county centroid is within `km` of any site, else 0 (a distance-band indicator)."""
 

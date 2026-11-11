@@ -135,7 +135,7 @@ sources:
   elevation:                  # EarthEnv 1 km median elevation (GMTED2010); per-county relief = max - min
     urls:
       - https://data.earthenv.org/topography/elevation_1KMmd_GMTEDmd.tif
-  gamma_rays:                 # USGS Bayesian NURE grids (eU, eTh, K); files discovered via the ScienceBase API
+  gamma_rays:                 # USGS Bayesian NURE predictions (eU, eTh, K): four regional point CSVs per element
     urls:
       - "https://www.sciencebase.gov/catalog/item/5dd2f264e4b0695797628351?format=json"
     options:
@@ -144,7 +144,8 @@ sources:
         gamma_uranium: '(?i)(?<![a-z])eu(?![a-z])|uranium'
         gamma_thorium: '(?i)(?<![a-z])eth(?![a-z])|thorium'
         gamma_potassium: '(?i)(?<![a-z])k(?![a-z])|potassium'
-      exclude: '(?i)(?<![a-z])(sd|std|stdev|var|uncert[a-z]*|lower|upper|ci|q\d+)(?![a-z])|\.xml$|metadata'
+      exclude: '(?i)(?<![a-z])(sd|std|stdev|var|uncert[a-z]*|lower|upper|ci|q\d+)(?![a-z])|\.xml$|metadata|dictionary'
+      extension: .csv
   nuclear_power:              # US commercial reactor units (operating or since shut down)
     urls:
       - https://michaelminn.net/tutorials/data/2018-nuclear-plants.geojson

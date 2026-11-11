@@ -142,3 +142,57 @@ class ConfiguredSitesSource(DataSource):
     def load(self) -> gpd.GeoDataFrame:
         sites = pd.DataFrame(self.config.options["sites"], columns=["name", "lat", "lon"])
         return gpd.GeoDataFrame(sites, geometry=gpd.points_from_xy(sites["lon"], sites["lat"]), crs=WGS84)
+
+
+class ScienceBasePointsSource(DataSource):
+    """Point-prediction tables from a ScienceBase release (e.g. regional gamma-ray CSVs).
+
+    All files matching each target pattern are merged (one per region). Column names are detected
+    and logged, together with the release's data dictionary when it has one.
+    Returns {column: GeoDataFrame with a `value` column, WGS84}.
+    """
+
+    API = "https://www.sciencebase.gov/catalog"
+
+    def load(self) -> dict[str, gpd.GeoDataFrame]:
+        import json
+        import logging
+        import re
+
+        from uap_geo.data.scraping.parsers import detect_point_columns, select_sciencebase_file_groups
+
+        log = logging.getLogger(__name__)
+        options = self.config.options
+        item_id = options["item_id"]
+        item_path = self.downloader.fetch_url(self.name, f"{self.API}/item/{item_id}", "item.json",
+                                              params={"format": "json"})
+        items = [json.loads(item_path.read_text())]
+        files = [f for it in items for f in (it.get("files") or [])]
+        dictionary = next((f for f in files if re.search(r"(?i)dictionary", f.get("name") or "")), None)
+        if dictionary:
+            url = dictionary.get("downloadUri") or dictionary.get("url")
+            text = self.downloader.fetch_url(self.name, url, dictionary["name"]).read_text(errors="replace")
+            log.info("ScienceBase %s data dictionary:\n%s", item_id, "\n".join(text.splitlines()[:60]))
+        groups = select_sciencebase_file_groups(items, options["patterns"], options["exclude"],
+                                                options.get("extension", ".csv"))
+        log.info("ScienceBase %s: files per column %s", item_id, {k: [n for n, _ in v] for k, v in groups.items()})
+        out: dict[str, gpd.GeoDataFrame] = {}
+        for column, members in groups.items():
+            frames = []
+            for name, url in members:
+                path = self.downloader.fetch_url(self.name, url, name)
+                header = list(pd.read_csv(path, nrows=0).columns)
+                lon, lat, value = detect_point_columns(header)
+                frame = pd.read_csv(path, usecols=[lon, lat, value]).rename(
+                    columns={lon: "lon", lat: "lat", value: "value"}
+                )
+                log.info("%s: %s rows; columns %s -> lon=%s lat=%s value=%s; lon range %.1f..%.1f",
+                         name, len(frame), header, lon, lat, value, frame["lon"].min(), frame["lon"].max())
+                frames.append(frame)
+            points = pd.concat(frames, ignore_index=True).dropna()
+            if points["lon"].abs().max() > 180 or points["lat"].abs().max() > 90:
+                raise ValueError(f"{column}: coordinates are projected, not lon/lat; set options.crs for this source")
+            out[column] = gpd.GeoDataFrame(
+                points[["value"]], geometry=gpd.points_from_xy(points["lon"], points["lat"]), crs=WGS84
+            )
+        return out

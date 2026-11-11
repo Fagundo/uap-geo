@@ -19,6 +19,7 @@ from uap_geo.data.scraping.other import (
     NuclearPlantSource,
     RasterSource,
     ReservoirSource,
+    ScienceBasePointsSource,
     ScienceBaseRasterSource,
 )
 from uap_geo.data.scraping.usgs import EarthquakeSource, QuaternaryFaultSource
@@ -120,8 +121,8 @@ class SourceRegistry:
     def reservoirs(self) -> ReservoirSource:
         return ReservoirSource(self._config.source("reservoirs"), self._dl, self._config.study.min_reservoir_acre_ft)
 
-    def gamma_rays(self) -> ScienceBaseRasterSource:
-        return ScienceBaseRasterSource(self._config.source("gamma_rays"), self._dl)
+    def gamma_rays(self) -> ScienceBasePointsSource:
+        return ScienceBasePointsSource(self._config.source("gamma_rays"), self._dl)
 
     def nuclear_power(self) -> NuclearPlantSource:
         return NuclearPlantSource(self._config.source("nuclear_power"), self._dl)

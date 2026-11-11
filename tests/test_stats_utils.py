@@ -75,3 +75,30 @@ def test_parse_place_population_keeps_incorporated_places():
         {"place_geoid": "5363000", "place_population": 738172},
         {"place_geoid": "0644000", "place_population": 3895848},
     ]
+
+
+def test_select_sciencebase_file_groups_collects_all_regions():
+    from uap_geo.data.scraping.parsers import select_sciencebase_file_groups
+
+    items = [{"files": [{"name": f"Predictions_{v}_{r}.csv", "url": f"{v}/{r}"}
+                        for v in ("eU", "eTh", "K") for r in ("WesternUS", "EasternUS")]
+                       + [{"name": "Predictions_eU_WesternUS.zip", "url": "zip"},
+                          {"name": "rad_BMNUS_DataDictionary.csv", "url": "dict"}]}]
+    patterns = {"gamma_uranium": "(?i)(?<![a-z])eu(?![a-z])", "gamma_potassium": "(?i)(?<![a-z])k(?![a-z])"}
+    groups = select_sciencebase_file_groups(items, patterns, "(?i)dictionary", ".csv")
+    assert sorted(n for n, _ in groups["gamma_uranium"]) == ["Predictions_eU_EasternUS.csv", "Predictions_eU_WesternUS.csv"]
+    assert len(groups["gamma_potassium"]) == 2
+
+
+@pytest.mark.parametrize(
+    ("columns", "expected"),
+    [
+        (["Longitude", "Latitude", "Median", "Q05", "Q95", "SD"], ("Longitude", "Latitude", "Median")),
+        (["lon", "lat", "pred_sd", "pred_mean"], ("lon", "lat", "pred_mean")),
+        (["X", "Y", "estimate"], ("X", "Y", "estimate")),
+    ],
+)
+def test_detect_point_columns(columns, expected):
+    from uap_geo.data.scraping.parsers import detect_point_columns
+
+    assert detect_point_columns(columns) == expected
