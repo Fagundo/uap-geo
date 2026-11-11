@@ -17,7 +17,10 @@ for url in sys.argv[1:]:
         resp = requests.get(url, headers=HEADERS, timeout=60)
         print(f"status {resp.status_code}, {len(resp.content):,} bytes")
         lines = resp.text.splitlines()
-        for line in lines[:12]:
+        if "action=raw" in url:  # wikitext: show the infobox only
+            end = next((i for i, l in enumerate(lines) if l.strip() == "}}"), 40)
+            lines = lines[:min(end + 1, 60)]
+        for line in lines[:60 if "action=raw" in url else 12]:
             print(line[:400])
         if len(lines) > 12:
             print(f"... {len(lines):,} lines; last: {lines[-1][:400]}")
