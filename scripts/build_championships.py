@@ -66,6 +66,10 @@ def clean(value: str) -> str:
     value = re.sub(r"<ref.*?</ref>", "", value)
     value = re.sub(r"<ref.*$", "", value)
     value = re.sub(r"\{\{nowrap\|([^}]*)\}\}", r"\1", value, flags=re.I)
+    # {{start date|2001|1|28}} -> January 28, 2001; {{start-date|January 28, 2001}} -> January 28, 2001
+    value = re.sub(r"\{\{start[ -]date\|(\d{4})\|(\d{1,2})\|(\d{1,2})[^}]*\}\}",
+                   lambda m: f"{list(MONTHS)[int(m.group(2)) - 1]} {int(m.group(3))}, {m.group(1)}", value, flags=re.I)
+    value = re.sub(r"\{\{start[ -]date\|([^}|]*)[^}]*\}\}", r"\1", value, flags=re.I)
     value = re.sub(r"\{\{[^}]*\}\}", "", value)
     value = value.replace("&nbsp;", " ").replace("<br />", " ").replace("<br>", " ")
     return value.strip()
@@ -117,6 +121,13 @@ def main() -> int:
             raw_date = field(text, "date", "dates")
             if league == "NFL":
                 winner, loser = SUPER_BOWL[year]
+            elif league == "NHL":
+                teams = [link_text(field(text, f"team{i}") or "").strip("'") for i in (1, 2)]
+                totals = [int(re.sub(r"\D", "", clean(field(text, f"team{i}_tot") or "0")) or 0) for i in (1, 2)]
+                if not all(teams) or max(totals) != 4:
+                    problems.append(f"NHL {year}: teams {teams} totals {totals}")
+                    continue
+                winner, loser = (teams[0], teams[1]) if totals[0] == 4 else (teams[1], teams[0])
             else:
                 champ, runner = field(text, "champion", "winner"), field(text, "runnerup", "runner-up", "runner_up", "loser")
                 if not champ or not runner:
