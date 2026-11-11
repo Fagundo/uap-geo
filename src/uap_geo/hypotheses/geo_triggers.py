@@ -98,6 +98,7 @@ class EventTable:
         joined = joined.drop(columns=["geometry", "index_right"]).dropna(subset=["night"])
         log.info("Events: %d total, %d in counties; filtered %d, high quality %d",
                  len(events), len(joined), int(joined["in_filtered"].sum()), int(joined["in_high_quality"].sum()))
+        self.reports = tagged
         self.summary = {"reports": len(reports), "events": len(events), "events_in_counties": len(joined),
                         "cleaning": cleaning.__dict__}
         return pd.DataFrame(joined)
@@ -190,11 +191,8 @@ class GeoTriggerStudy:
 
     # ------------------------------------------------------------------------------ quake test
     def quake_test(self, events: pd.DataFrame, centroids: pd.DataFrame) -> TestOutcome:
-        years = self._all_years()
         q = self.impl["parameters"]["quake"]
-        source = EarthquakeSource(self.config.source("earthquakes"), self.sources.downloader, years[0], years[1], q["catalog_min_mag"])
-        quakes = pd.DataFrame(source.load().drop(columns="geometry"))
-        mainshocks = MainshockFilter(**q["decluster"]).apply(quakes)
+        quakes, mainshocks = self.load_quakes()
         log.info("Earthquakes M>=%.1f: %d; mainshocks: %d; mainshocks M>=%.1f: %d", q["catalog_min_mag"], len(quakes),
                  len(mainshocks), q["min_mag"], int((mainshocks["mag"] >= q["min_mag"]).sum()))
         design = QuakeExposure(centroids, mainshocks, quakes, self.quake_settings).design()
@@ -271,6 +269,24 @@ class GeoTriggerStudy:
                 o.verdict = "inconclusive"
 
     # ------------------------------------------------------------------------------ run
+    def load_inputs(self) -> tuple[pd.Series, pd.DataFrame, EventTable, pd.DataFrame]:
+        """Daily Kp, county centroids, the event table and the events in counties."""
+        kp = KpSource(self.config.source("kp"), self.sources.downloader).load()
+        counties = prepare_counties(self.sources.counties().load(), self.config.study.crs)
+        cent = counties.geometry.centroid.to_crs(WGS84)
+        centroids = pd.DataFrame({COUNTY_ID: counties[COUNTY_ID].to_numpy(), "lat": cent.y.to_numpy(), "lon": cent.x.to_numpy()})
+        table = EventTable(self.config, self.sources, self.filters, self.impl, self._all_years())
+        events = table.build(kp, counties)
+        return kp, centroids, table, events
+
+    def load_quakes(self) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """All catalogue quakes (>= catalog_min_mag) and declustered mainshocks."""
+        years = self._all_years()
+        q = self.impl["parameters"]["quake"]
+        source = EarthquakeSource(self.config.source("earthquakes"), self.sources.downloader, years[0], years[1], q["catalog_min_mag"])
+        quakes = pd.DataFrame(source.load().drop(columns="geometry"))
+        return quakes, MainshockFilter(**q["decluster"]).apply(quakes)
+
     def run(self) -> Path:
         if self.split != "explore":
             HypothesisRegistry(self.root).check(self.HYPOTHESIS_ID)
@@ -279,13 +295,7 @@ class GeoTriggerStudy:
         for name, path in (("spec", self.files.spec), ("impl", self.files.impl), ("filters", self.files.filters)):
             manifest.add_spec(name, path)
 
-        kp = KpSource(self.config.source("kp"), self.sources.downloader).load()
-        counties = prepare_counties(self.sources.counties().load(), self.config.study.crs)
-        cent = counties.geometry.centroid.to_crs(WGS84)
-        centroids = pd.DataFrame({COUNTY_ID: counties[COUNTY_ID].to_numpy(), "lat": cent.y.to_numpy(), "lon": cent.x.to_numpy()})
-
-        table = EventTable(self.config, self.sources, self.filters, self.impl, self._all_years())
-        events = table.build(kp, counties)
+        kp, centroids, table, events = self.load_inputs()
         outcomes = [self.storm_test(events, kp, centroids), self.quake_test(events, centroids)]
         self._verdicts(outcomes)
 

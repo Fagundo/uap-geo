@@ -55,3 +55,12 @@ def test_power_grows_with_events():
     small = conditional_poisson_power(200, 1 / 9)
     large = conditional_poisson_power(20000, 1 / 9)
     assert small < 0.2 and large > 0.9
+
+
+def test_quake_local_night_uses_longitude_and_morning_rollover():
+    from uap_geo.hypotheses.designs.exposures import quake_local_night
+    # 04:00 UTC at 120 W is 20:00 local solar the previous day -> that day's night.
+    # 15:00 UTC at 120 W is 07:00 local -> that day's night (after the 06:00 rollover).
+    times = pd.Series(pd.to_datetime(["2015-03-18 04:00", "2015-03-18 15:00"]))
+    nights = quake_local_night(times, pd.Series([-120.0, -120.0]))
+    assert nights.dt.strftime("%Y-%m-%d").tolist() == ["2015-03-17", "2015-03-18"]

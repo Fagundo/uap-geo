@@ -70,7 +70,7 @@ def main(argv: list[str] | None = None) -> None:
     run.add_argument("--layer-permutations", nargs="*", default=None, help="Per-layer counts, e.g. rivers=1000")
 
     hyp = sub.add_parser("hypothesis", help="Pre-registered hypothesis tests")
-    hyp.add_argument("action", choices=["run", "register"])
+    hyp.add_argument("action", choices=["run", "register", "diagnose"])
     hyp.add_argument("hypothesis_id")
     hyp.add_argument("--split", choices=["explore", "confirm", "holdout"], default="explore")
     hyp.add_argument("--config", type=Path, default=Path("configs/v1.yaml"))
@@ -94,6 +94,7 @@ def main(argv: list[str] | None = None) -> None:
 
 
 STUDIES = {"H-geo-01": "uap_geo.hypotheses.geo_triggers:GeoTriggerStudy"}
+DIAGNOSTICS = {"H-geo-01": "uap_geo.hypotheses.diagnostics:DiagnosticsReport"}
 
 
 def _hypothesis(args: argparse.Namespace) -> None:
@@ -110,7 +111,13 @@ def _hypothesis(args: argparse.Namespace) -> None:
         raise SystemExit(f"No study implemented for {args.hypothesis_id}; known: {sorted(STUDIES)}")
     module, cls = STUDIES[args.hypothesis_id].split(":")
     study = getattr(importlib.import_module(module), cls)(Config.from_yaml(args.config), root, args.split)
-    path = study.run()
+    if args.action == "diagnose":
+        if args.hypothesis_id not in DIAGNOSTICS:
+            raise SystemExit(f"No diagnostics for {args.hypothesis_id}")
+        dmod, dcls = DIAGNOSTICS[args.hypothesis_id].split(":")
+        path = getattr(importlib.import_module(dmod), dcls)(study).run()
+    else:
+        path = study.run()
     print(path.read_text())
 
 

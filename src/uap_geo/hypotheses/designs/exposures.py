@@ -65,6 +65,12 @@ class StormExposure:
 
 
 # --------------------------------------------------------------------------------------- quakes
+def quake_local_night(utc_times: pd.Series, longitude: pd.Series) -> pd.Series:
+    """Observing night (06:00 rollover) in local solar time, from UTC time and longitude."""
+    solar = pd.to_datetime(utc_times) + pd.to_timedelta(longitude.astype(float) / 15.0, unit="h")
+    return (solar - pd.Timedelta(hours=6)).dt.normalize()
+
+
 @dataclass(frozen=True)
 class QuakeSettings:
     min_mag: float = 4.0
@@ -73,6 +79,7 @@ class QuakeSettings:
     window: tuple[int, int] = (-14, 0)          # nights relative to the quake night
     control_offsets_days: tuple[int, ...] = (-56, -28, 28, 56)
     contamination_mag: float = 3.0
+    night: str = "utc"   # "utc": the quake's UTC date (registered H-geo-01); "local": its local observing night
 
 
 class QuakeExposure:
@@ -85,9 +92,11 @@ class QuakeExposure:
         self.all_quakes = all_quakes      # every event >= contamination_mag (for control exclusion)
         self.settings = settings
 
-    @staticmethod
-    def _night(times: pd.Series) -> pd.Series:
-        return pd.to_datetime(times).dt.normalize()
+    def _night(self, quakes: pd.DataFrame) -> pd.Series:
+        times = pd.to_datetime(quakes["time"])
+        if self.settings.night == "local":
+            return quake_local_night(times, quakes["longitude"])
+        return times.dt.normalize()
 
     def _nearby(self, quakes: pd.DataFrame) -> pd.DataFrame:
         """(geoid, night, mag) for every county within radius_km of each quake."""
@@ -95,7 +104,7 @@ class QuakeExposure:
         c_lat = self.counties["lat"].to_numpy()
         c_lon = self.counties["lon"].to_numpy()
         geoids = self.counties["geoid"].to_numpy()
-        nights = self._night(quakes["time"]).to_numpy()
+        nights = self._night(quakes).to_numpy()
         for q_lat, q_lon, mag, night in zip(quakes["latitude"], quakes["longitude"], quakes["mag"], nights):
             near = haversine_km(q_lat, q_lon, c_lat, c_lon) <= self.settings.radius_km
             for geoid in geoids[near]:
