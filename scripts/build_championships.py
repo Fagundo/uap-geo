@@ -40,6 +40,11 @@ SUPER_BOWL = {  # year: (winner, loser)
     2021: ("Tampa Bay Buccaneers", "Kansas City Chiefs"), 2022: ("Los Angeles Rams", "Cincinnati Bengals"),
     2023: ("Kansas City Chiefs", "Philadelphia Eagles"),
 }
+# Dates used when a Super Bowl infobox date is in a format the parser does not read; from Wikipedia's
+# "List of Super Bowl champions".
+SUPER_BOWL_DATES = {2002: "2002-02-03", 2003: "2003-01-26", 2006: "2006-02-05", 2007: "2007-02-04",
+                    2008: "2008-02-03", 2009: "2009-02-01"}
+NO_FINAL = {("NHL", 2005)}  # NHL lockout season
 MONTHS = {m: i for i, m in enumerate(["January", "February", "March", "April", "May", "June", "July", "August",
                                       "September", "October", "November", "December"], start=1)}
 
@@ -115,8 +120,11 @@ def main() -> int:
                 text = fetch(title)
                 if text:
                     break
+            if (league, year) in NO_FINAL:
+                print(f"{league} {year}: no final (skipped)")
+                continue
             if not text:
-                print(f"{league} {year}: no page ({titles(league, year)})")
+                problems.append(f"{league} {year}: no page ({titles(league, year)})")
                 continue
             raw_date = field(text, "date", "dates")
             if league == "NFL":
@@ -136,7 +144,10 @@ def main() -> int:
                 winner, loser = link_text(champ), link_text(runner)
                 winner, loser = (re.sub(r"\s*\(\d\)$", "", t) for t in (winner, loser))
             try:
-                deciding = end_date(raw_date, year)
+                if league == "NFL" and year in SUPER_BOWL_DATES and not (raw_date and clean(raw_date)):
+                    deciding = date.fromisoformat(SUPER_BOWL_DATES[year])
+                else:
+                    deciding = end_date(raw_date, year)
             except Exception as exc:
                 problems.append(f"{league} {year}: date '{raw_date}' not parsed ({exc})")
                 continue
