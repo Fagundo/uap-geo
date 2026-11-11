@@ -1,7 +1,7 @@
 # Draft for review; not yet registered. Once registered, do not edit: a changed hypothesis gets a new ID.
 id: H-anomaly-01
 title: Structure in high-strangeness residual reports
-status: draft
+status: draft (gate failed 2026-11-11 on features-v1 / strangeness-v1; see results/llm/validation_sample.md)
 claim: >
   Among reports left after removing known explanations (residual set v1), events whose reports describe
   high-strangeness features (LLM-extracted, validated on known causes) show structure that reporting habits

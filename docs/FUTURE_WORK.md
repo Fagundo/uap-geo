@@ -38,3 +38,11 @@ named for the city while nearby residents are counted in the surrounding county.
 visitor-volume control (lodging tax or hotel occupancy by county), merging Virginia independent
 cities into their surrounding counties, the 2011-2020 -> 2021-2023 holdout check, and a forecasting
 version that scores counties by prior excess and measures ranking accuracy on later years.
+
+## Anomaly track (from the H-anomaly-01 gate)
+
+The features-v1 / strangeness-v1 gate failed on the 399-report sample: launch-window reports score as
+strange as the residual and are recognised as launches only 4% of the time; high strangeness is about 1%
+everywhere because summaries average 88 characters. Options: full narratives (NUFORC request), or a revised
+prompt and score (features-v2) checked on a fresh validation sample. Meanwhile the extractor recognises
+Starlink trains (88%) and meteors (90%), so it can serve as an extra explainer for the residual set.
