@@ -15,7 +15,7 @@ from uap_geo.data.preprocessing.mainshocks import haversine_km
 from uap_geo.events import planets
 from uap_geo.events.sun import lighting_class, solar_altitude
 
-NOTE = re.compile(r"\(\([^)]*\)\)")
+NOTE = re.compile(r"\(\(.*?\)\)", re.DOTALL)   # non-greedy: notes can hold their own parentheses, e.g. "(EDT)"
 
 
 def strip_notes(text: pd.Series) -> pd.Series:

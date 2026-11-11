@@ -17,8 +17,9 @@ def _reports(rows):
 
 
 def test_strip_notes():
-    s = pd.Series(["Bright orb ((NUFORC Note: Venus. PD)) over hills", "plain"])
-    assert strip_notes(s).tolist() == ["Bright orb over hills", "plain"]
+    s = pd.Series(["Bright orb ((NUFORC Note: Venus. PD)) over hills", "plain",
+                   "((NUFORC Note: Missile launch at 2055 hrs (EDT). PD)) bright object exploded"])
+    assert strip_notes(s).tolist() == ["Bright orb over hills", "plain", "bright object exploded"]
 
 
 def test_launch_window_uses_time_and_distance():
