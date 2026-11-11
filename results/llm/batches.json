@@ -1,0 +1,11 @@
+{
+  "model": "claude-haiku-5-5",
+  "schema": "features-v2",
+  "batches": [
+    "msgbatch_013pBU2CFFgaQuGmx7Lb3i22",
+    "msgbatch_01S4emhNcPxiqow2evst4ukx",
+    "msgbatch_01CFvKrZkqCt4XoRcDVmb7ZW",
+    "msgbatch_01Gojxoww64qZzfzPiYqnUde"
+  ],
+  "requests": 74598
+}
