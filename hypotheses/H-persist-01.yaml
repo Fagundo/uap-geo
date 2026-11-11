@@ -1,7 +1,9 @@
-# Draft for review; not yet registered. Once registered, do not edit: a changed hypothesis gets a new ID.
+# Pre-registered 2026-11-11, after three explore runs (prior 2001-2005, outcome 2006-2010) and before any
+# confirm-split analysis. Do not edit. A changed hypothesis gets a new ID; the registry stores this file's hash.
 id: H-persist-01
 title: Persistent county hotspots
-status: draft
+status: registered
+registered: 2026-11-11
 claim: >
   Counties that report more UAP events than expected in one period, after observer controls, keep
   reporting more than expected in the next period, once nights with known time-specific causes
