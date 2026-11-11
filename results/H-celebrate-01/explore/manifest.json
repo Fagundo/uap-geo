@@ -1,5 +1,5 @@
 {
-  "git_commit": "d85722b679926ec2a54ad27110a22403b7ef7336",
+  "git_commit": "d903b462f592b0ad3bbe5d28b25c0ffdfb638e07",
   "git_dirty": false,
   "inputs": {
     "configs/celebrations/championships.yaml": "45bb290fad29ac3f78c8bc9aaa09d10a192000d3afb379eb0584d0e3c7780cee",
@@ -207,12 +207,12 @@
     "data/raw/rivers/ne_10m_rivers_north_america.zip": "7fbe85a2acbf1f3ef4361a16bb39677ad1ea86f888be1689f7a4caeafc7529e8"
   },
   "python": "3.12.16",
-  "run_id": "H-celebrate-01-explore-20261111T115138Z",
+  "run_id": "H-celebrate-01-explore-20261111T115351Z",
   "settings": {},
   "specs": {
     "filters": "8b2d4002b6f7fc9b75bc09a2f2b7179b72d7d7a42239921c5ddd2d694f6eeae9",
-    "impl": "1f30d2b960eac256e2e7de77c6358620300cc871717c24753b306ffad7a45c14",
-    "spec": "be079322eaf1268b002c274b9a834c7925522375545d2ae6dd164bc1cb4013a0"
+    "impl": "99e4e849525f02e0424772535cc3d51d5cf16a7068f304516a64677d063c3692",
+    "spec": "25d526fdc80ae16309c2d91b1dce4fbffc98c2403ded0f25b7797deb47c17c6f"
   },
-  "started_utc": "2026-11-11T11:51:38+00:00"
+  "started_utc": "2026-11-11T11:53:51+00:00"
 }
