@@ -1,9 +1,9 @@
 # H-persist-01 report card: Persistent county hotspots
 
 **Split:** explore (2006–2010)  
-**Run:** H-persist-01-explore-20261111T130357Z  
-**Code:** `0a36aee2445d`  
-**Spec / impl / filters SHA-256:** `ec9683a0472e` / `5c15a169c5c1` / `8b2d4002b6f7`
+**Run:** H-persist-01-explore-20261111T133426Z  
+**Code:** `b56884b671ac`  
+**Spec / impl / filters SHA-256:** `7947b086955f` / `5c15a169c5c1` / `8b2d4002b6f7`
 
 ## Question
 
