@@ -30,7 +30,8 @@ class CovariateRegistry:
         self._sources = sources
         self._population = population
 
-    def builders(self) -> list[CovariateBuilder]:
+    def builders(self, only: set[str] | None = None) -> list[CovariateBuilder]:
+        """Builders for every configured source, or only the named sources when `only` is given."""
         factories: dict[str, Callable[[], list[CovariateBuilder]]] = {
             "airports": lambda: [PointDensityBuilder("airports_per_km2", self._sources.airports().load())],
             "military": lambda: [AreaShareBuilder("military_area_share", self._sources.military().load())],
@@ -60,6 +61,8 @@ class CovariateRegistry:
 
         builders: list[CovariateBuilder] = [PopulationDensityBuilder(self._population)]
         for name, factory in factories.items():
+            if only is not None and name not in only:
+                continue
             if not self._sources.is_active(name):
                 log.info("Source '%s' not configured; skipping its covariates", name)
                 continue

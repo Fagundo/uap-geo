@@ -66,6 +66,7 @@ class FitResult:
     n: int
     pearson_residuals: pd.Series  # indexed like the fitted rows of the table
     used_index: pd.Index
+    fitted: pd.Series | None = None  # expected counts, indexed like the fitted rows
 
     def rate_ratio(self, covariate: str) -> float:
         return float(self.coefficients.loc[covariate, "rate_ratio"])
@@ -74,15 +75,17 @@ class FitResult:
 class NegBinRateModel:
     """log E[reports] = log(population) + β0 + Σ βk·z(xk) [+ fixed effects]; overdispersion α estimated."""
 
-    def __init__(self, spec: ModelSpec, quiet: bool = False) -> None:
+    def __init__(self, spec: ModelSpec, quiet: bool = False, cluster: str | None = None) -> None:
         self.spec = spec
         self.quiet = quiet
+        self.cluster = cluster  # column for cluster-robust standard errors (e.g. state); None = model-based
 
     def fit(self, table: pd.DataFrame) -> FitResult:
         spec = self.spec.available_in(table) if not self.quiet else self._quiet_available(table)
         cols = list(spec.covariates)
         fe = list(spec.fixed_effects)
-        data = table.loc[table["population"] > 0, ["report_count", "population", *cols, *fe]].dropna()
+        extra = [self.cluster] if self.cluster and self.cluster not in (*cols, *fe) else []
+        data = table.loc[table["population"] > 0, ["report_count", "population", *cols, *fe, *extra]].dropna()
         # Continuous covariates are z-scored (rate ratio per +1 SD); 0/1 indicators are left as-is
         # (rate ratio = inside vs outside the band).
         binary = [c for c in cols if set(data[c].dropna().unique()) <= {0, 1}]
@@ -95,7 +98,10 @@ class NegBinRateModel:
             dummies = pd.get_dummies(groups, prefix=fe, drop_first=True, dtype=float)
             exog = exog.join(dummies)
         offset = np.log(data["population"].to_numpy(dtype=float))
-        result = self._robust_fit(data["report_count"], exog, offset)
+        groups = None
+        if self.cluster:
+            groups = pd.factorize(data[self.cluster].astype(str))[0]
+        result = self._robust_fit(data["report_count"], exog, offset, groups)
         params = result.params
         conf = result.conf_int()
         alpha = float(params["alpha"])
@@ -115,12 +121,13 @@ class NegBinRateModel:
         if not self.quiet:
             log.info("%s: n=%d AIC=%.1f alpha=%.3f converged=%s", spec.name, len(data), result.aic, alpha,
                      result.mle_retvals.get("converged"))
-        return FitResult(spec, coefficients, float(result.aic), alpha, len(data), residuals, data.index)
+        return FitResult(spec, coefficients, float(result.aic), alpha, len(data), residuals, data.index,
+                         pd.Series(mu, index=data.index, name="fitted"))
 
     MIN_GROUP_SIZE = 5
 
     @staticmethod
-    def _robust_fit(y: pd.Series, exog: pd.DataFrame, offset: np.ndarray):
+    def _robust_fit(y: pd.Series, exog: pd.DataFrame, offset: np.ndarray, groups: np.ndarray | None = None):
         """Newton from a Poisson warm start, then BFGS if that fails; never returns non-finite estimates.
 
         Newton from zeros overflows on this data (large counts, many dummies), so the Poisson
@@ -133,7 +140,8 @@ class NegBinRateModel:
         for method, maxiter in (("newton", 100), ("bfgs", 2000), ("nm", 20000)):
             try:
                 with np.errstate(all="ignore"):
-                    result = model.fit(start_params=start, method=method, maxiter=maxiter, disp=0)
+                    cov = {"cov_type": "cluster", "cov_kwds": {"groups": groups}} if groups is not None else {}
+                    result = model.fit(start_params=start, method=method, maxiter=maxiter, disp=0, **cov)
                 if np.all(np.isfinite(result.params)) and np.isfinite(result.llf) and np.all(np.isfinite(result.bse)):
                     return result
             except Exception as exc:  # numerical failure in one optimizer: try the next

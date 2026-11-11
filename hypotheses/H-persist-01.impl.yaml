@@ -1,0 +1,41 @@
+# Implementation choices for H-persist-01, fixed before any confirm run.
+# Registered together with the spec and filters; a confirm run refuses to start if any changes.
+hypothesis: H-persist-01
+notes:
+  shrinkage: >
+    Prior excess = log((y + 1/a) / (mu + 1/a)), the posterior mean of a gamma frailty with the model's
+    dispersion a, so counties with few expected events are pulled toward no excess. Explained-report
+    excess uses the same formula on the events the primary tier drops (filtered out or on removed nights).
+  neighbours: 8 nearest county centroids (equal-area projection), excluding the county itself.
+  exposure: >
+    population x nights kept, scaled per decade. Removed launch county-nights that fall on holiday
+    nights are counted once.
+  launches: GCAT, as H-launch-01; lighting from solar altitude at the pad; twilight and night removed, day kept.
+  power: >
+    Wald approximation from the prior period's event total scaled to the outcome period's nights and
+    the prior model's dispersion; never uses outcome-period counts.
+  verdict: >
+    Confirmed: p < 0.05 and rate ratio > 1 in the filtered tier, and at least one check holds.
+    Underpowered: power < 0.50. Refuted: power >= 0.80 and upper 95% limit < 1.10. Otherwise
+    inconclusive. Explore runs get no verdict.
+
+parameters:
+  dedup: {km: 50, hours: 3}
+  quality: {min_reports: 2, min_duration_s: 300}
+  persistence:
+    prior_periods: {explore: [2001, 2005], confirm: [2001, 2010], holdout: [2011, 2020]}
+    holiday_nights: ["07-03", "07-04", "07-05", "12-31", "01-01"]
+    launch_lighting_removed: [twilight, night]
+    twilight_sun_alt: [-18, -4]
+    launch_radius_km: 1200
+    launch_min_apogee_km: 100
+    covariates: [light_pollution, airports_per_km2, places_per_km2, primary_road_length_per_km2,
+                 rail_length_per_km2, elevation_relief_m, dist_to_coast_km, river_length_per_km2]
+    covariate_sources: [light_pollution, airports, gazetteer_places, primary_roads, rail, elevation, coastline, rivers]
+    fixed_effects: [state_fips]
+    cluster: state_fips
+    neighbours: 8
+    pad_points:
+      Cape Canaveral: [28.49, -80.58]
+      Vandenberg: [34.74, -120.57]
+  power: {rate_ratio: 1.10, alpha: 0.05, underpowered_below: 0.50, refute_requires: 0.80}

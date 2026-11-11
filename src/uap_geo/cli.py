@@ -95,7 +95,8 @@ def main(argv: list[str] | None = None) -> None:
 
 STUDIES = {"H-geo-01": "uap_geo.hypotheses.geo_triggers:GeoTriggerStudy",
            "H-launch-01": "uap_geo.hypotheses.launches:LaunchStudy",
-           "H-celebrate-01": "uap_geo.hypotheses.celebrations:CelebrationStudy"}
+           "H-celebrate-01": "uap_geo.hypotheses.celebrations:CelebrationStudy",
+           "H-persist-01": "uap_geo.hypotheses.persistence:PersistenceStudy"}
 DIAGNOSTICS = {"H-geo-01": "uap_geo.hypotheses.diagnostics:DiagnosticsReport"}
 
 

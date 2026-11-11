@@ -1,0 +1,63 @@
+# Draft for review; not yet registered. Once registered, do not edit: a changed hypothesis gets a new ID.
+id: H-persist-01
+title: Persistent county hotspots
+status: draft
+claim: >
+  Counties that report more UAP events than expected in one period, after observer controls, keep
+  reporting more than expected in the next period, once nights with known time-specific causes
+  (holidays, rocket launches) are removed.
+why: >
+  If excess reporting is a stable property of a place, a prior period's excess can point to where to
+  watch. Persistence alone cannot say whether the place or its people are the cause; the two checks
+  separate a reporting culture (counties that also report many explainable things) and a regional
+  pattern (neighbouring counties) from a local, place-specific excess.
+
+data:
+  reports: TidyTuesday 2023-06-20 NUFORC extract (event timestamps, city coordinates)
+  launches: GCAT launch list (as in H-launch-01), to remove launch nights
+  covariates: >
+    v1 confirmatory controls (light pollution, airports, places, primary roads, rail, terrain relief,
+    distance to coast, river density) with state fixed effects; 2020 county population as exposure.
+
+unit: county x period
+outcome: events per county in the outcome period, after removals (reports within 50 km and 3 hours merged into one event)
+outcome_tiers: [all, filtered, high_quality]
+primary_tier: filtered
+removals: >
+  Nights of July 3-5, December 31 and January 1, in every county; nights with a twilight or night-time
+  launch (Sun below -4 degrees at the pad) in counties within 1,200 km of the pad. Removed nights are
+  taken out of both the counts and each county's number of nights.
+model: >
+  negative binomial rate model, offset log(population x nights), observer controls, state fixed effects,
+  standard errors clustered by state. Prior excess: the shrunken log ratio of observed to expected
+  events in the prior period (same model without the prior term), standardized.
+
+tests:
+  persistence:
+    exposure: prior-period county excess (per SD)
+    prediction: rate_ratio > 1
+    discriminating_checks:
+      - persistence holds (rate ratio > 1, p < 0.05) with the county's prior-period excess of explained reports as a control (reporting culture)
+      - persistence holds with the mean prior excess of the 8 nearest counties as a control (local, not regional)
+
+splits:   # outcome periods; prior periods are in the implementation notes
+  explore: [2006, 2010]   # prior 2001-2005
+  confirm: [2011, 2020]   # prior 2001-2010
+  holdout: [2021, null]   # prior 2011-2020
+
+multiple_testing: none needed (one primary test)
+smallest_effect_of_interest: 1.10   # rate ratio per SD of prior excess
+decision_rules:
+  confirmed: p < 0.05 and rate ratio > 1 in the filtered tier on the confirm split, and at least one discriminating check holds
+  refuted: power >= 0.80 and the upper 95% confidence limit is below 1.10
+  underpowered: power < 0.50
+
+reported_alongside: >
+  the same estimate with no removals; the 25 counties with the largest combined excess (a watch list,
+  descriptive only); the ranks of the counties containing the Cape Canaveral and Vandenberg pads with
+  and without removals.
+
+limits: >
+  Persistence is expected from any stable county trait the controls miss (reporting culture,
+  demographics, outdoor recreation), so a confirmed result supports using past excess for forecasting,
+  not any particular cause. Population is the 2020 estimate for both periods.
