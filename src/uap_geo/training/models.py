@@ -60,7 +60,7 @@ class ModelSpec:
 @dataclass
 class FitResult:
     spec: ModelSpec
-    coefficients: pd.DataFrame  # covariates only: rate ratio per +1 SD, 95% CI, p-value
+    coefficients: pd.DataFrame  # rate ratio per +1 SD (or 0→1 for indicators), 95% CI, p-value
     aic: float
     alpha: float
     n: int
@@ -83,7 +83,12 @@ class NegBinRateModel:
         cols = list(spec.covariates)
         fe = list(spec.fixed_effects)
         data = table.loc[table["population"] > 0, ["report_count", "population", *cols, *fe]].dropna()
-        z = (data[cols] - data[cols].mean()) / data[cols].std(ddof=0)
+        # Continuous covariates are z-scored (rate ratio per +1 SD); 0/1 indicators are left as-is
+        # (rate ratio = inside vs outside the band).
+        binary = [c for c in cols if set(data[c].dropna().unique()) <= {0, 1}]
+        scaled = [c for c in cols if c not in binary]
+        z = (data[scaled] - data[scaled].mean()) / data[scaled].std(ddof=0)
+        z = z.join(data[binary])[cols]
         exog = sm.add_constant(z, has_constant="add")
         if fe:
             groups = data[fe].astype(str).apply(lambda col: pool_small_groups(col, self.MIN_GROUP_SIZE))

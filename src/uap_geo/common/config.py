@@ -59,6 +59,7 @@ class ModelsConfig:
     region_effects: tuple[str, ...] = ()
     settlement_controls: tuple[str, ...] = ()
     water_terrain: tuple[str, ...] = ()
+    radiation: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -90,6 +91,7 @@ class Config:
                 region_effects=tuple(raw["models"].get("region_effects") or ()),
                 settlement_controls=tuple(raw["models"].get("settlement_controls") or ()),
                 water_terrain=tuple(raw["models"].get("water_terrain") or ()),
+                radiation=tuple(raw["models"].get("radiation") or ()),
             ),
             sources=sources,
         )

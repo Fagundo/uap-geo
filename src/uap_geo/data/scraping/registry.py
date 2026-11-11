@@ -12,7 +12,15 @@ from uap_geo.data.scraping.census import (
     PopulationSource,
 )
 from uap_geo.data.scraping.nuforc import JsonNuforcSource, TidyTuesdayNuforcSource
-from uap_geo.data.scraping.other import AirportSource, NaturalEarthSource, RasterSource, ReservoirSource
+from uap_geo.data.scraping.other import (
+    AirportSource,
+    ConfiguredSitesSource,
+    NaturalEarthSource,
+    NuclearPlantSource,
+    RasterSource,
+    ReservoirSource,
+    ScienceBaseRasterSource,
+)
 from uap_geo.data.scraping.usgs import EarthquakeSource, QuaternaryFaultSource
 
 RASTER_SOURCES = ("light_pollution", "cloud_cover", "tree_canopy", "magnetic_anomaly")
@@ -81,6 +89,15 @@ class SourceRegistry:
 
     def reservoirs(self) -> ReservoirSource:
         return ReservoirSource(self._config.source("reservoirs"), self._dl, self._config.study.min_reservoir_acre_ft)
+
+    def gamma_rays(self) -> ScienceBaseRasterSource:
+        return ScienceBaseRasterSource(self._config.source("gamma_rays"), self._dl)
+
+    def nuclear_power(self) -> NuclearPlantSource:
+        return NuclearPlantSource(self._config.source("nuclear_power"), self._dl)
+
+    def weapons_sites(self) -> ConfiguredSitesSource:
+        return ConfiguredSitesSource(self._config.source("weapons_sites"), self._dl)
 
     def raster(self, name: str) -> RasterSource:
         return RasterSource(self._config.source(name), self._dl)

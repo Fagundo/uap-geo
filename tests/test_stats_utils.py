@@ -36,3 +36,25 @@ def test_variance_inflation_flags_collinear_columns():
 def test_parse_nid_finds_header_and_filters_small_dams(csv):
     out = parse_nid(csv.encode(), min_storage_acre_ft=1000)
     assert out.to_dict("records") == [{"lat": 45.1, "lon": -122.3, "storage_acre_ft": 4000.0}]
+
+
+def test_select_sciencebase_files_prefers_tif_and_skips_uncertainty():
+    from uap_geo.data.scraping.parsers import select_sciencebase_files
+
+    items = [
+        {"files": [
+            {"name": "eU_mean.zip", "url": "u/zip", "size": 900},
+            {"name": "eU_mean.tif", "url": "u/tif", "size": 800},
+            {"name": "eU_sd.tif", "url": "u/sd", "size": 999},
+            {"name": "readme.xml", "url": "u/xml", "size": 5},
+        ]},
+        {"files": [{"name": "K_mean.tif", "downloadUri": "k/tif", "size": 10}]},
+    ]
+    patterns = {
+        "gamma_uranium": "(?i)(?<![a-z])eu(?![a-z])|uranium",
+        "gamma_potassium": "(?i)(?<![a-z])k(?![a-z])|potassium",
+        "gamma_thorium": "(?i)(?<![a-z])eth(?![a-z])|thorium",
+    }
+    exclude = "(?i)(?<![a-z])(sd|std)(?![a-z])|\\.xml$"
+    chosen = select_sciencebase_files(items, patterns, exclude)
+    assert chosen == {"gamma_uranium": ("eU_mean.tif", "u/tif"), "gamma_potassium": ("K_mean.tif", "k/tif")}

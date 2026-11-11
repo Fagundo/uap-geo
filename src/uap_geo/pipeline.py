@@ -90,7 +90,10 @@ class V1Pipeline:
         spec_e = ModelSpec(
             "E_plus_water_and_terrain", spec_d.covariates + models.water_terrain, models.region_effects
         ).available_in(table)
-        specs = _distinct([spec_a, spec_b, spec_c, spec_d, spec_e])
+        spec_f = ModelSpec(
+            "F_plus_radiation", spec_e.covariates + models.radiation, models.region_effects
+        ).available_in(table)
+        specs = _distinct([spec_a, spec_b, spec_c, spec_d, spec_e, spec_f])
         # Fit every model on the same counties so their AICs are comparable.
         needed = ["report_count", "population", *specs[-1].covariates, *spec_c.fixed_effects]
         complete = table.dropna(subset=needed)

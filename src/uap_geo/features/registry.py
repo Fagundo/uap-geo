@@ -18,6 +18,7 @@ from uap_geo.features.covariates import (
     PopulationDensityBuilder,
     RasterMeanBuilder,
     RasterReliefBuilder,
+    WithinDistanceBuilder,
 )
 
 log = logging.getLogger(__name__)
@@ -39,6 +40,13 @@ class CovariateRegistry:
             "coastline": lambda: [DistanceToLinesBuilder("dist_to_coast_km", self._sources.coastline().load())],
             "reservoirs": lambda: [PointDensityBuilder("reservoirs_per_km2", self._sources.reservoirs().load())],
             "elevation": lambda: [RasterReliefBuilder("elevation_relief_m", self._sources.raster("elevation").load())],
+            "gamma_rays": self._gamma_builders,
+            "nuclear_power": lambda: [
+                WithinDistanceBuilder("nuclear_power_within_50km", self._sources.nuclear_power().load(), 50.0)
+            ],
+            "weapons_sites": lambda: [
+                WithinDistanceBuilder("weapons_site_within_100km", self._sources.weapons_sites().load(), 100.0)
+            ],
             # Settlement density: reports are placed at town points, and towns cluster on rivers.
             "gazetteer_places": lambda: [PointDensityBuilder("places_per_km2", self._sources.place_points())],
         }
@@ -55,6 +63,9 @@ class CovariateRegistry:
             except Exception:
                 log.exception("Could not load source '%s'; skipping its covariates", name)
         return builders
+
+    def _gamma_builders(self) -> list[CovariateBuilder]:
+        return [RasterMeanBuilder(column, path) for column, path in self._sources.gamma_rays().load().items()]
 
     @staticmethod
     def _polygon_water_builders(prefix: str, polygons) -> list[CovariateBuilder]:

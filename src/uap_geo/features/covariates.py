@@ -180,6 +180,32 @@ class RasterMeanBuilder(CovariateBuilder):
         return out
 
 
+class WithinDistanceBuilder(CovariateBuilder):
+    """1 if the county centroid is within `km` of any site, else 0 (a distance-band indicator)."""
+
+    def __init__(self, column: str, points: gpd.GeoDataFrame, km: float) -> None:
+        self._column = column
+        self._points = points
+        self._km = km
+
+    @property
+    def columns(self) -> tuple[str, ...]:
+        return (self._column,)
+
+    def build(self, counties: gpd.GeoDataFrame) -> pd.DataFrame:
+        sites = self._points.to_crs(counties.crs)
+        centroids = gpd.GeoDataFrame(
+            {COUNTY_ID: counties[COUNTY_ID].values}, geometry=counties.geometry.centroid.values, crs=counties.crs
+        )
+        nearest = gpd.sjoin_nearest(centroids, sites[["geometry"]], distance_col="dist_m")
+        dist_km = nearest.groupby(COUNTY_ID)["dist_m"].min() / M_PER_KM
+        out = _empty(counties, self.columns)
+        out[self._column] = (dist_km.reindex(out.index) <= self._km).astype(float)
+        n_in = int(out[self._column].sum())
+        log.info("%s: %d counties within %.0f km of %d sites", self._column, n_in, self._km, len(sites))
+        return out
+
+
 class RasterReliefBuilder(CovariateBuilder):
     """Elevation relief (max − min, metres) within each county: a terrain / valley control."""
 

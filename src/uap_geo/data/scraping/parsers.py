@@ -60,3 +60,33 @@ def parse_nid(content: bytes, min_storage_acre_ft: float) -> pd.DataFrame:
         }
     ).dropna()
     return out.loc[out["storage_acre_ft"] >= min_storage_acre_ft].reset_index(drop=True)
+
+
+def select_sciencebase_files(
+    items: list[dict], patterns: dict[str, str], exclude: str
+) -> dict[str, tuple[str, str]]:
+    """Pick one file per target column from ScienceBase item JSON (an item and its children).
+
+    Returns {column: (file name, download url)}. GeoTIFFs beat zips; among equals the largest wins,
+    since a full national grid is larger than a clipped preview.
+    """
+    import re
+
+    files = []
+    for item in items:
+        for entry in item.get("files") or []:
+            name = entry.get("name") or ""
+            url = entry.get("downloadUri") or entry.get("url")
+            if not url or not re.search(r"\.(tif|tiff|zip)$", name, re.IGNORECASE):
+                continue
+            if re.search(exclude, name):
+                continue
+            files.append((name, url, int(entry.get("size") or 0)))
+    chosen: dict[str, tuple[str, str]] = {}
+    for column, pattern in patterns.items():
+        matches = [f for f in files if re.search(pattern, f[0])]
+        if not matches:
+            continue
+        best = max(matches, key=lambda f: (f[0].lower().endswith((".tif", ".tiff")), f[2]))
+        chosen[column] = (best[0], best[1])
+    return chosen

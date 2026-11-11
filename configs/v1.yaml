@@ -48,6 +48,12 @@ models:
     - reservoirs_per_km2
     - dist_to_coast_km
     - elevation_relief_m
+  radiation:                  # model F = model E + these. Binary band columns are not standardized.
+    - gamma_uranium
+    - gamma_thorium
+    - gamma_potassium
+    - nuclear_power_within_50km
+    - weapons_site_within_100km
 
 sources:
   nuforc:                     # TidyTuesday 2023-06-20 NUFORC extract (sightings, then places)
@@ -102,6 +108,44 @@ sources:
   elevation:                  # EarthEnv 1 km median elevation (GMTED2010); per-county relief = max - min
     urls:
       - https://data.earthenv.org/topography/elevation_1KMmd_GMTEDmd.tif
+  gamma_rays:                 # USGS Bayesian NURE grids (eU, eTh, K); files discovered via the ScienceBase API
+    urls:
+      - "https://www.sciencebase.gov/catalog/item/5dd2f264e4b0695797628351?format=json"
+    options:
+      item_id: 5dd2f264e4b0695797628351
+      patterns:               # regex on file names; files matching `exclude` (uncertainty grids) are skipped
+        gamma_uranium: '(?i)(?<![a-z])eu(?![a-z])|uranium'
+        gamma_thorium: '(?i)(?<![a-z])eth(?![a-z])|thorium'
+        gamma_potassium: '(?i)(?<![a-z])k(?![a-z])|potassium'
+      exclude: '(?i)(?<![a-z])(sd|std|stdev|var|uncert[a-z]*|lower|upper|ci|q\d+)(?![a-z])|\.xml$|metadata'
+  nuclear_power:              # US commercial reactor units (operating or since shut down)
+    urls:
+      - https://michaelminn.net/tutorials/data/2018-nuclear-plants.geojson
+    options:
+      exclude_status: [Planned, Under Construction, Unfinished, Cancelled]
+  weapons_sites:              # nuclear weapons complex: DOE labs/plants, ICBM wings, bomber/SSBN bases (approximate centres)
+    urls: [config]            # no download: the sites are listed below
+    options:
+      sites:
+        - [Hanford Site, 46.55, -119.49]
+        - [Idaho National Laboratory, 43.52, -112.95]
+        - [Los Alamos National Laboratory, 35.88, -106.30]
+        - [Kirtland AFB / Sandia, 35.05, -106.55]
+        - [Nevada National Security Site, 37.10, -116.05]
+        - [Pantex Plant, 35.32, -101.56]
+        - [Oak Ridge / Y-12, 35.99, -84.25]
+        - [Savannah River Site, 33.28, -81.68]
+        - [Rocky Flats, 39.89, -105.20]
+        - [Lawrence Livermore National Laboratory, 37.69, -121.71]
+        - [Waste Isolation Pilot Plant, 32.37, -103.79]
+        - [White Sands / Trinity, 33.68, -106.48]
+        - [Malmstrom AFB (ICBM), 47.51, -111.19]
+        - [Minot AFB (ICBM), 48.42, -101.36]
+        - [F.E. Warren AFB (ICBM), 41.13, -104.87]
+        - [Whiteman AFB (B-2), 38.73, -93.55]
+        - [Barksdale AFB (B-52), 32.50, -93.66]
+        - [Naval Submarine Base Kings Bay, 30.80, -81.56]
+        - [Naval Base Kitsap-Bangor, 47.72, -122.71]
   cloud_cover:
     urls:
       - https://data.earthenv.org/cloud/MODCF_meanannual.tif

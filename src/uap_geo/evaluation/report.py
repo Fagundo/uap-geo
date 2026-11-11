@@ -81,7 +81,7 @@ class ReportWriter:
                 f"| {fit.spec.name} | {fit.spec.label} | {fit.aic:.1f} | {fit.aic - base.aic:+.1f} "
                 f"| {fit.alpha:.3f} | {moran_text} |"
             )
-        lines += ["", "Rate ratios are per +1 SD. Shift p = share of randomly rotated/shifted copies of that",
+        lines += ["", "Rate ratios are per +1 SD (0/1 indicators: inside vs outside the band). Shift p = share of randomly rotated/shifted copies of that",
                   "layer with an effect at least as large; small = the effect is tied to the layer's real location.",
                   "BH = Benjamini–Hochberg adjustment across the layers tested in that model."]
         for fit in fits:
