@@ -32,7 +32,7 @@ class FeatureExtractor:
     def params(self, text: str, duration_s: float | None) -> dict:
         return {
             "model": self.model, "max_tokens": self.max_tokens, "system": SYSTEM, "tools": [TOOL],
-            "tool_choice": {"type": "tool", "name": TOOL["name"]}, "temperature": 0,
+            "tool_choice": {"type": "tool", "name": TOOL["name"]},
             "messages": [{"role": "user", "content": user_message(text, duration_s)}],
         }
 
