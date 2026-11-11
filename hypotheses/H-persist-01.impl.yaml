@@ -6,6 +6,11 @@ notes:
     Prior excess = log((y + 1/a) / (mu + 1/a)), the posterior mean of a gamma frailty with the model's
     dispersion a, so counties with few expected events are pulled toward no excess. Explained-report
     excess uses the same formula on the events the primary tier drops (filtered out or on removed nights).
+  tourism: >
+    seasonal_housing_share = ACS 2017-2021 B25004_E006 (vacant, for seasonal, recreational or occasional
+    use) / B25001_E001 (housing units). Added after the first explore run, whose top counties were
+    almost all beach and vacation counties: visitors are outdoors at night but absent from the
+    resident-population exposure.
   neighbours: 8 nearest county centroids (equal-area projection), excluding the county itself.
   exposure: >
     population x nights kept, scaled per decade. Removed launch county-nights that fall on holiday
@@ -30,8 +35,10 @@ parameters:
     launch_radius_km: 1200
     launch_min_apogee_km: 100
     covariates: [light_pollution, airports_per_km2, places_per_km2, primary_road_length_per_km2,
-                 rail_length_per_km2, elevation_relief_m, dist_to_coast_km, river_length_per_km2]
-    covariate_sources: [light_pollution, airports, gazetteer_places, primary_roads, rail, elevation, coastline, rivers]
+                 rail_length_per_km2, elevation_relief_m, dist_to_coast_km, river_length_per_km2,
+                 seasonal_housing_share]
+    covariate_sources: [light_pollution, airports, gazetteer_places, primary_roads, rail, elevation, coastline, rivers,
+                        acs_housing]
     fixed_effects: [state_fips]
     cluster: state_fips
     neighbours: 8

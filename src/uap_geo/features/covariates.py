@@ -267,3 +267,18 @@ class PopulationDensityBuilder(CovariateBuilder):
         area = counties.set_index(COUNTY_ID)["area_km2"].reindex(out.index)
         out["log_pop_density"] = np.log1p(self._population.reindex(out.index) / area)
         return out
+
+
+class TableColumnBuilder(CovariateBuilder):
+    """Copies columns from a county-keyed table (e.g. a Census table) into the county table."""
+
+    def __init__(self, table: pd.DataFrame, columns: tuple[str, ...]) -> None:
+        self._table = table.set_index(COUNTY_ID)
+        self._columns = columns
+
+    @property
+    def columns(self) -> tuple[str, ...]:
+        return self._columns
+
+    def build(self, counties: gpd.GeoDataFrame) -> pd.DataFrame:
+        return self._table[list(self._columns)].reindex(counties[COUNTY_ID].to_numpy()).rename_axis(COUNTY_ID)

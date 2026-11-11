@@ -116,6 +116,10 @@ sources:
   kp:                         # GFZ Potsdam 3-hourly Kp since 1932 (nowcast + definitive)
     urls:
       - https://kp.gfz.de/fileadmin/files_for_gfz_cms/Kp_ap_since_1932.txt
+  acs_housing:                # ACS 2017-2021 5-year, table-based summary files: B25004 vacancy status, B25001 housing units
+    urls:
+      - https://www2.census.gov/programs-surveys/acs/summary_file/2021/table-based-SF/data/5YRData/acsdt5y2021-b25004.dat
+      - https://www2.census.gov/programs-surveys/acs/summary_file/2021/table-based-SF/data/5YRData/acsdt5y2021-b25001.dat
   gcat_launches:              # Jonathan McDowell's GCAT (CC-BY): every launch attempt, and launch-site coordinates
     urls:
       - https://planet4589.org/space/gcat/tsv/launch/launch.tsv

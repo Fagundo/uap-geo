@@ -44,3 +44,12 @@ def test_persistence_recovered_by_two_period_design():
         a.assign(report_count=yb0, excess_prior=excess))
     c = fit_0.coefficients.loc["excess_prior"]
     assert c["ci_low"] < 1.06 and c["ci_high"] > 0.94
+
+
+def test_acs_table_reads_county_rows_only():
+    from uap_geo.data.scraping.acs import read_acs_counties
+
+    text = ("GEO_ID|B25004_E006|B25004_M006\n0100000US|5092152|40323\n0400000US53|90000|1000\n"
+            "0500000US53055|7000|300\n0500000US37055|30000|900\n")
+    out = read_acs_counties(text, ["B25004_E006"])
+    assert out.iloc[:, 0].tolist() == ["53055", "37055"] and out["B25004_E006"].tolist() == [7000, 30000]

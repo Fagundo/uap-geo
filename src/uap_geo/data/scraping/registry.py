@@ -11,6 +11,7 @@ from uap_geo.data.scraping.census import (
     MilitarySource,
     PopulationSource,
 )
+from uap_geo.data.scraping.acs import SeasonalHousingSource
 from uap_geo.data.scraping.gcat import GcatLaunchSource
 from uap_geo.data.scraping.nuforc import JsonNuforcSource, TidyTuesdayNuforcSource
 from uap_geo.data.scraping.other import (
@@ -134,6 +135,9 @@ class SourceRegistry:
 
     def weapons_sites(self) -> ConfiguredSitesSource:
         return ConfiguredSitesSource(self._config.source("weapons_sites"), self._dl)
+
+    def seasonal_housing(self) -> SeasonalHousingSource:
+        return SeasonalHousingSource(self._config.source("acs_housing"), self._dl)
 
     def launches(self, min_apogee_km: float = 100.0) -> GcatLaunchSource:
         return GcatLaunchSource(self._config.source("gcat_launches"), self._dl, min_apogee_km)
