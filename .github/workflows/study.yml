@@ -25,7 +25,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: data/raw
-          key: raw-${{ hashFiles('configs/v1.yaml') }}-v1
+          key: raw-${{ hashFiles('configs/v1.yaml') }}-v2
           restore-keys: raw-
       - name: Run
         env:
