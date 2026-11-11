@@ -51,6 +51,8 @@ def parse_launches(text: str) -> pd.DataFrame:
         "site": raw["Launch_Site"],
         "apogee_km": pd.to_numeric(raw["Apogee"], errors="coerce"),
         "launch_code": raw["LaunchCode"].fillna(""),
+        "mission": (raw.get("Mission", pd.Series(pd.NA, index=raw.index)).fillna("").astype(str) + " "
+                    + raw.get("Flight", pd.Series(pd.NA, index=raw.index)).fillna("").astype(str)).str.strip(),
     })
     out["orbital"] = out["launch_code"].str.startswith("O")
     return out

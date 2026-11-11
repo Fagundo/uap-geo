@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from uap_geo.classify.rules import contains_any
+from uap_geo.classify.wording import lantern_like
 from uap_geo.common.config import Config
 from uap_geo.common.geo import COUNTY_ID, WGS84
 from uap_geo.data.preprocessing.mainshocks import haversine_km
@@ -27,16 +27,6 @@ from uap_geo.hypotheses.designs.night_exposure import NightExposure, NightSettin
 from uap_geo.hypotheses.event_table import EventTable
 
 log = logging.getLogger(__name__)
-
-
-def lantern_like(text: pd.Series, filters: dict, colour_words: tuple[str, ...] = ()) -> pd.Series:
-    """Lantern, fireworks or fire-coloured-light wording, judged the same way on every night (no date condition)."""
-    groups = filters["rules"]["sky_lantern"]["text_all_groups"]
-    lantern = pd.Series(True, index=text.index)
-    for words in groups:
-        lantern &= contains_any(text, words)
-    out = lantern | contains_any(text, filters["rules"]["fireworks"]["text_any"])
-    return out | contains_any(text, colour_words) if colour_words else out
 
 
 class CelebrationStudy(EventStudy):

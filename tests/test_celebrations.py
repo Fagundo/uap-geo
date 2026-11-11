@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from uap_geo.hypotheses.celebrations import lantern_like
+from uap_geo.classify.wording import lantern_like
 from uap_geo.hypotheses.designs.conditional_poisson import ConditionalPoissonTest
 from uap_geo.hypotheses.designs.night_exposure import NightExposure, NightSettings, in_window
 

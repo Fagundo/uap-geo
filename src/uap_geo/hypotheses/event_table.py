@@ -55,6 +55,7 @@ class EventTable:
         )
         self.tiers = OutcomeTiers(build_rules(self.filters, self.disabled), QualitySettings(**self.impl["parameters"]["quality"]))
         labels = self.tiers.label_reports(ctx)
+        self.labels = labels
         return tagged, labels, events, cleaning
 
     def build(self, kp_daily: pd.Series | None, counties: gpd.GeoDataFrame) -> pd.DataFrame:

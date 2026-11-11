@@ -81,6 +81,10 @@ def main(argv: list[str] | None = None) -> None:
     flt.add_argument("--random", type=int, default=100)
     flt.add_argument("--labels", type=Path, default=Path("configs/labels/filter_validation_v1.csv"))
     flt.add_argument("--config", type=Path, default=Path("configs/v1.yaml"))
+    res = sub.add_parser("residual", help="Residual set: reports left after known explanations")
+    res.add_argument("action", choices=["build"])
+    res.add_argument("--settings", type=Path, default=Path("configs/residual.yaml"))
+    res.add_argument("--config", type=Path, default=Path("configs/v1.yaml"))
     args = parser.parse_args(argv)
 
     configure()
@@ -91,6 +95,8 @@ def main(argv: list[str] | None = None) -> None:
         _hypothesis(args)
     elif args.command == "filters":
         _filters(args)
+    elif args.command == "residual":
+        _residual(args)
 
 
 STUDIES = {"H-geo-01": "uap_geo.hypotheses.geo_triggers:GeoTriggerStudy",
@@ -159,6 +165,15 @@ def _filters(args: argparse.Namespace) -> None:
     lines += ["", f"Explainable reports the rules missed, in the random part of the sample: {missed or 'none'}."]
     report.write_text("\n".join(lines) + "\n")
     print(report.read_text())
+
+
+def _residual(args: argparse.Namespace) -> None:
+    from uap_geo.residual.builder import ResidualSetBuilder
+    from uap_geo.residual.report import write_residual
+
+    root = Path.cwd()
+    result = ResidualSetBuilder(Config.from_yaml(args.config), root, root / args.settings).build()
+    print(write_residual(result, root / "results" / "residual", args.settings.stem).read_text())
 
 
 if __name__ == "__main__":
