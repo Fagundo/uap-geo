@@ -11,8 +11,9 @@ notes:
     it by up to 400 km in x and y (uniform), recompute closeness, refit; 200 copies, seed 42. One-sided p =
     (1 + copies with log rate ratio >= observed) / (1 + copies).
   power: >
-    Wald approximation from this split's total primary-tier events (totals only) and the dispersion of
-    the controls-only model on the explore period.
+    From the explore-period standard error of the closeness term (state-clustered), scaled by
+    sqrt(explore events / this split's events); this split contributes only its event total. The simpler
+    dispersion-based approximation overstated power because it ignores clustering and collinearity.
   verdict: >
     Confirmed: p < 0.05 and rate ratio > 1 in the filtered tier, and the shift test holds.
     Underpowered: power < 0.50. Refuted: power >= 0.80 and upper 95% limit < 1.10. Otherwise

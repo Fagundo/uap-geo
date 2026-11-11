@@ -16,7 +16,6 @@ import numpy as np
 import pandas as pd
 
 from uap_geo.common.geo import COUNTY_ID, M_PER_KM
-from uap_geo.evaluation.power import nb_regression_power
 from uap_geo.hypotheses.base import TestOutcome
 from uap_geo.hypotheses.county_period import CountyPeriodStudy
 from uap_geo.hypotheses.designs.conditional_poisson import TestResult
@@ -125,12 +124,21 @@ class SiteProximityStudy(CountyPeriodStudy):
         return events_table, [o]
 
     def _power_from_explore(self, table, events, removed, total_events: int) -> float:
-        """Dispersion from the controls-only model on the explore period; total events in this split."""
+        """Power for the smallest effect of interest from the explore-period standard error of the closeness
+        term, scaled to this split's event total: se = se_explore * sqrt(events_explore / events_split).
+        Uses explore-period data and this split's total only, never the split's exposure-outcome relation."""
+        from statistics import NormalDist
+
         start, end = (int(y) for y in self.spec["splits"]["explore"])
         counts, _, nights = self._period_counts(events, removed, (start, end), table.index, self.PRIMARY)
-        alpha = self._fit(table, counts, nights).alpha
+        c = self._fit(table, counts, nights, (TERM,)).coefficients.loc[TERM]
+        se_explore = (np.log(c["ci_high"]) - np.log(c["ci_low"])) / (2 * 1.959964)
+        se = se_explore * np.sqrt(float(counts.sum()) / max(total_events, 1))
         p = self.impl["parameters"]["power"]
-        return nb_regression_power(float(total_events), int(len(table)), alpha, p["rate_ratio"], p["alpha"])
+        z = NormalDist().inv_cdf(1 - p["alpha"] / 2)
+        self.power_inputs = {"se_explore": float(se_explore), "events_explore": int(counts.sum()),
+                             "events_split": int(total_events), "se_split": float(se)}
+        return float(NormalDist().cdf(np.log(p["rate_ratio"]) / se - z))
 
     def extra_report_lines(self) -> list[str]:
         rows = getattr(self, "band_rows", None)
