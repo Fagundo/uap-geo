@@ -39,6 +39,8 @@ def feature_table(raw: pd.DataFrame) -> pd.DataFrame:
                      "top_conventional_p": lk.get(top) if top else None, "detail": f.get("detail"),
                      **{f"p_{k}": v for k, v in lk.items()}})
     out = pd.DataFrame(rows)
+    if "schema" in raw and raw["schema"].notna().any():
+        out.attrs["schema"] = str(raw["schema"].dropna().iloc[0])
     if len(out):
         out["high_strangeness"] = out["strangeness"] >= HIGH_THRESHOLD
     return out

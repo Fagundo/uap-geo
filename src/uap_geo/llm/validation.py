@@ -31,7 +31,10 @@ def group_masks(residual: pd.DataFrame) -> dict[str, pd.Series]:
     return masks
 
 
-def stratified_sample(residual: pd.DataFrame, per_group: int, residual_n: int, seed: int = 7) -> pd.DataFrame:
+def stratified_sample(residual: pd.DataFrame, per_group: int, residual_n: int, seed: int = 7,
+                      exclude: set[str] | None = None) -> pd.DataFrame:
+    if exclude:
+        residual = residual.loc[~residual["report_id"].isin(exclude)]
     masks = group_masks(residual)
     picks = []
     for name, mask in masks.items():
@@ -44,7 +47,8 @@ def stratified_sample(residual: pd.DataFrame, per_group: int, residual_n: int, s
 def validation_report(features: pd.DataFrame, residual: pd.DataFrame, out: Path, label: str) -> Path:
     data = residual.merge(features, on="report_id", how="inner")
     masks = group_masks(data)
-    lines = [f"# LLM feature validation ({label})", "",
+    schema = features.attrs.get("schema", "")
+    lines = [f"# LLM feature validation ({label}{', ' + schema if schema else ''})", "",
              f"Score {SCORE_VERSION}; high strangeness = score >= {HIGH_THRESHOLD} of 7. The extractor saw only the "
              "report text (NUFORC notes removed) and duration, never the date or place.", "",
              "| Group | Reports | Mean strangeness | High strangeness | Expected cause named top | Mean likelihood of expected cause |",

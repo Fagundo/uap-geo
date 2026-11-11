@@ -92,6 +92,8 @@ def main(argv: list[str] | None = None) -> None:
     llm.add_argument("--residual", type=int, default=120)
     llm.add_argument("--limit", type=int, default=None, help="extract: only the first N reports (smoke test)")
     llm.add_argument("--name", default="sample", help="file stem for sample/extract/validate outputs")
+    llm.add_argument("--seed", type=int, default=7)
+    llm.add_argument("--exclude", nargs="*", default=[], help="sample: names of earlier samples whose reports to leave out")
     args = parser.parse_args(argv)
 
     configure()
@@ -200,9 +202,12 @@ def _llm(args: argparse.Namespace) -> None:
     out = root / s["out_dir"]
     out.mkdir(parents=True, exist_ok=True)
     residual = pd.read_parquet(root / s["residual_reports"])
-    extractor = FeatureExtractor(s["model"], s["max_tokens"])
+    extractor = FeatureExtractor(s["model"], s["max_tokens"], schema=s.get("schema", "features-v1"))
     if args.action == "sample":
-        sample = stratified_sample(residual, args.per_group, args.residual)
+        exclude = set()
+        for name in args.exclude:
+            exclude |= set(pd.read_parquet(out / f"{name}_reports.parquet")["report_id"])
+        sample = stratified_sample(residual, args.per_group, args.residual, args.seed, exclude)
         sample.to_parquet(out / f"{args.name}_reports.parquet", index=False)
         print(sample["group"].value_counts().to_string())
     elif args.action == "extract":
@@ -218,7 +223,8 @@ def _llm(args: argparse.Namespace) -> None:
     elif args.action == "submit":
         rows = residual.loc[residual["text"].str.len() > 0, ["report_id", "text", "duration_s"]]
         ids = extractor.submit(rows)
-        (out / "batches.json").write_text(json.dumps({"model": s["model"], "batches": ids, "requests": len(rows)}, indent=2))
+        (out / "batches.json").write_text(json.dumps({"model": s["model"], "schema": extractor.schema, "batches": ids,
+                                                      "requests": len(rows)}, indent=2))
         print(f"submitted {len(rows)} requests in {len(ids)} batches: {ids}")
     elif args.action == "collect":
         info = json.loads((out / "batches.json").read_text())

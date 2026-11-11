@@ -1,5 +1,6 @@
 # LLM feature extraction settings. Changing the model, schema or prompt makes a new feature version.
 model: claude-haiku-5-5
 max_tokens: 700
+schema: features-v2      # features-v1 failed its gate (2026-11-11); v2 adds how common causes are described
 residual_reports: results/residual/residual_reports.parquet
 out_dir: results/llm

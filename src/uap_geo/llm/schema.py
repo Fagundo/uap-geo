@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-SCHEMA_VERSION = "features-v1"
+SCHEMA_VERSION = "features-v1"   # default; see PROMPTS for other versions
 
 SHAPES = ["point_of_light", "orb_or_sphere", "disc", "triangle", "cylinder_or_cigar", "rectangle", "chevron_or_boomerang",
           "diamond", "oval_or_egg", "fireball", "formation_of_lights", "changing_shape", "other", "not_stated"]
@@ -51,6 +51,29 @@ SYSTEM = (
     "someone seeing that cause would have written this summary; the numbers need not sum to one. Treat claims of "
     "unusual motion as reported, without judging whether they are true."
 )
+
+
+# features-v2: same tool, plus how common causes tend to be described. Written after the features-v1 gate
+# failed (rocket launches recognised 4% of the time); checked on a fresh sample, not the one that failed.
+GUIDE_V2 = (
+    "\n\nHow common causes tend to be described in these reports, to inform conventional_likelihood:\n"
+    "- rocket_launch: a glowing, expanding cloud, plume, spiral, cone, jellyfish or comet-like shape, often with a "
+    "bright point at its head, rising or crossing slowly soon after dusk or before dawn, fading over a few minutes; "
+    "seen far from any launch site.\n"
+    "- starlink_train: a string of evenly spaced lights in a line moving together, one after another.\n"
+    "- satellite: a steady point of light moving smoothly across the sky in a few minutes, sometimes fading out.\n"
+    "- sky_lantern: orange or red flickering orbs drifting slowly or rising, often several, fading out one by one.\n"
+    "- fireworks: bursts, flashes or coloured lights on holiday nights or near celebrations.\n"
+    "- planet_or_star: a very bright light low in the sky that seems to hover or move slightly for a long time, "
+    "twinkling or changing colour.\n"
+    "- aircraft: blinking red, green or white lights on a steady path, sometimes silent at a distance, sometimes several.\n"
+    "- helicopter: hovering or slow lights with a searchlight or rotor sound.\n"
+    "- drone: small hovering or darting lights, often blinking, sometimes buzzing, low.\n"
+    "- meteor: a brief streak or fireball lasting seconds, sometimes green, sometimes breaking up.\n"
+    "- balloon: a slow drifting object, often reflective or white in daylight.\n"
+    "Shapes and motions are still recorded as described, even when an ordinary cause seems likely."
+)
+PROMPTS = {"features-v1": SYSTEM, "features-v2": SYSTEM + GUIDE_V2}
 
 
 def user_message(text: str, duration_s: float | None) -> str:

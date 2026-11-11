@@ -53,3 +53,9 @@ def test_groups_and_sample():
     assert masks["NUFORC-identified"].sum() == 1 and masks["holiday night"].sum() == 1
     assert masks["residual (no match)"].sum() == 2
     assert len(stratified_sample(residual, per_group=1, residual_n=2)) == 6
+
+
+def test_v2_prompt_adds_cause_guide():
+    v1 = FeatureExtractor("m", schema="features-v1").params("x", 1.0)["system"][0]["text"]
+    v2 = FeatureExtractor("m", schema="features-v2").params("x", 1.0)["system"][0]["text"]
+    assert v2.startswith(v1) and "jellyfish" in v2 and "jellyfish" not in v1

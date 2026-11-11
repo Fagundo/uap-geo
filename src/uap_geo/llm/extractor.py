@@ -10,14 +10,16 @@ from collections.abc import Iterable
 
 import pandas as pd
 
-from uap_geo.llm.schema import SCHEMA_VERSION, SYSTEM, TOOL, user_message
+from uap_geo.llm.schema import PROMPTS, SCHEMA_VERSION, TOOL, user_message
 
 log = logging.getLogger(__name__)
 
 
 class FeatureExtractor:
-    def __init__(self, model: str, max_tokens: int = 700, client=None) -> None:
+    def __init__(self, model: str, max_tokens: int = 700, client=None, schema: str = SCHEMA_VERSION) -> None:
         self.model = model
+        self.schema = schema
+        self.system = PROMPTS[schema]
         self.max_tokens = max_tokens
         self._client = client
 
@@ -31,7 +33,9 @@ class FeatureExtractor:
 
     def params(self, text: str, duration_s: float | None) -> dict:
         return {
-            "model": self.model, "max_tokens": self.max_tokens, "system": SYSTEM, "tools": [TOOL],
+            "model": self.model, "max_tokens": self.max_tokens, "tools": [TOOL],
+            # identical prefix on every request; cached when long enough for the model's minimum
+            "system": [{"type": "text", "text": self.system, "cache_control": {"type": "ephemeral"}}],
             "tool_choice": {"type": "tool", "name": TOOL["name"]},
             "messages": [{"role": "user", "content": user_message(text, duration_s)}],
         }
@@ -44,7 +48,7 @@ class FeatureExtractor:
         return None
 
     def _row(self, report_id: str, features: dict | None, error: str | None = None) -> dict:
-        return {"report_id": report_id, "schema": SCHEMA_VERSION, "model": self.model,
+        return {"report_id": report_id, "schema": self.schema, "model": self.model,
                 "features": json.dumps(features) if features is not None else None, "error": error}
 
     # ------------------------------------------------------------------------------ synchronous
