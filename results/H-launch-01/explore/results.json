@@ -6,13 +6,13 @@
     2010
   ],
   "manifest": {
-    "run_id": "H-launch-01-explore-20261111T034427Z",
-    "started_utc": "2026-11-11T03:44:27+00:00",
-    "git_commit": "649c2cedfe1e50733bb3f738ce5fd995ba3b8614",
+    "run_id": "H-launch-01-explore-20261111T114934Z",
+    "started_utc": "2026-11-11T11:49:34+00:00",
+    "git_commit": "df6b6be6165595592d7f82e13a80f6bed6c9acad",
     "git_dirty": false,
     "python": "3.12.16",
     "specs": {
-      "spec": "a308e96ab56d1a10f1f907fc0ba23d1b328cd1ac7acfb4babcd15ed906fa12be",
+      "spec": "0e6fe26b4d6a946ee73644f62cbb7c607d2a5f54a49fd0f32dedbae9195be8ed",
       "impl": "e2a5c5165395b465397e385a049db139145585e51ab8eb5883f8eea968142ae7",
       "filters": "8b2d4002b6f7fc9b75bc09a2f2b7179b72d7d7a42239921c5ddd2d694f6eeae9"
     },
